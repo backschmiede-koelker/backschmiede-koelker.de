@@ -1,31 +1,63 @@
-'use client'
-import { Link, Snippet, Code, Image } from "@nextui-org/react";
+'use client';
+import { useEffect, useState } from "react";
+import NewsBlock from "./components/news-block";
+
+
+type NewsData = {
+  title: string
+  content: string
+  imageUrl: string
+  date: Date
+}
+
+function getNews(): NewsData[] {
+  const data: NewsData[] = [
+    {
+      title: 'Test 4',
+      content: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et',        imageUrl: 'https://dfrnt.coffee/cdn/shop/articles/cafe-con-miel-y-canela-735112.png?crop=center&height=2048&v=1733918361&width=2048',
+      date: new Date('2023-05-19')
+    },
+    {
+      title: 'Test 2',
+      content: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et',
+      imageUrl: 'https://dfrnt.coffee/cdn/shop/articles/cafe-con-miel-y-canela-735112.png?crop=center&height=2048&v=1733918361&width=2048',
+      date: new Date('2024-11-12')
+    },
+    {
+      title: 'Test 1',
+      content: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et',        imageUrl: 'https://dfrnt.coffee/cdn/shop/articles/cafe-con-miel-y-canela-735112.png?crop=center&height=2048&v=1733918361&width=2048',
+      date: new Date('2024-12-11')
+    },
+    {
+      title: 'Test 3',
+      content: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et',        imageUrl: 'https://dfrnt.coffee/cdn/shop/articles/cafe-con-miel-y-canela-735112.png?crop=center&height=2048&v=1733918361&width=2048',
+      date: new Date('2023-12-11')
+    },
+  ]
+
+  data.sort((a,b) => b.date.getTime() - a.date.getTime())
+  
+  return data;
+}
 
 export default function Home() {
+
+  const [news, setNews] = useState<NewsData[]>([])
+
+  useEffect(() => {
+    setNews(getNews)
+  },[])
+
   return (
-    <section className="h-full w-full bg-cover flex justify-center items-center" style={{backgroundImage: 'url("https://images.pexels.com/photos/1307698/pexels-photo-1307698.jpeg?cs=srgb&dl=pexels-igor-starkov-233202-1307698.jpg&fm=jpg")'}}>
-      <div className="bg-white rounded flex items-center flex-col" style={{height: '80vh', width: '30vw'}}>
-        <div style={{width: '70%', height: '30%'}}>Logo</div>
-        <div>
-          <p className="font-semibold text-xl text-center">Öffnungszeiten</p>
-          <ul className="text-center">
-            <li>
-              <p>Montag - Freitag</p>
-              <p>07:00 - 12:00 Uhr</p>
-              <p>14:00 - 18:00 Uhr</p>
-            </li>
-            <li>
-              <p>Samstag</p>
-              <p>07:00 - 14:00</p>
-            </li>
-            <li>
-              <p>Sonntag</p>
-              <p>Geschlossen</p>
-            </li>
-          </ul>
-        </div>
-        <div>Kontakt</div>
+    <>
+    <div className={"homepage-logo"}>
+      <div className="banner">
+        <p className="banner-header">Backschmiede Koelker</p>
       </div>
-    </section>
+    </div>
+    <div className="news">
+      {news.map((data, index) => <NewsBlock key={index} {...data} imageLeft={index % 2 === 0}/>)}
+    </div>
+    </>
   );
 }

@@ -1,65 +1,63 @@
-import "@/styles/globals.css";
-import { Metadata, Viewport } from "next";
-import { Link } from "@nextui-org/link";
-import clsx from "clsx";
+'client'
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.scss";
+import AddressLink from "./components/address-link";
+import Footer from "./components/footer";
 
-import { Providers } from "./providers";
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
 
-import { siteConfig } from "@/config/site";
-import { fontSans } from "@/config/fonts";
-import { Navbar } from "@/components/navbar";
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
-  title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  icons: {
-    icon: "/favicon.ico",
-  },
-};
-
-export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
-  ],
+  title: "Backschmiede Kölker",
+  description: "",
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html suppressHydrationWarning lang="en">
-      <head />
+    <html lang="en">
       <body
-        className={clsx(
-          "min-h-screen bg-background font-sans antialiased",
-          fontSans.variable,
-        )}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers themeProps={{ attribute: "class", defaultTheme: "light" }}>
-          <div className="relative flex flex-col h-screen">
-            <Navbar />
-            <main className="h-full w-full">
-              {children}
-            </main>
-            <footer className="w-full flex items-center justify-center py-3">
-              <Link
-                isExternal
-                className="flex items-center gap-1 text-current"
-                href="https://nextui-docs-v2.vercel.app?utm_source=next-app-template"
-                title="nextui.org homepage"
-              >
-                <span className="text-default-600">Powered by</span>
-                <p className="text-primary">NextUI</p>
-              </Link>
-            </footer>
+        <div className={'app'}>
+          <div className={'sidebar'}>
+            <a href="/" className={'sidebar-logo'}>
+
+            </a>
+            <div>
+              <ul>
+                <li>
+                  <a href="#ABOUT_US">ÜBER UNS</a>
+                </li>
+                <li>
+                  <a href="#CALENDAR">WAS STEHT AN</a>
+                </li>
+                <li>
+                  <a href="#WARES">UNSERE WARE</a>
+                </li>
+                <li>
+                  <a href="#CONTACT">SO EREICHST DU UNS</a>
+                </li>
+              </ul>
+            </div>
+            <AddressLink />
           </div>
-        </Providers>
+          <main className="content">
+            {children}
+            <Footer/>
+          </main>
+        </div>
       </body>
     </html>
   );
