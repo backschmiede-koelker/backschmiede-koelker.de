@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import NewsBlock from "./components/news-block";
 import Image from "next/image";
 
@@ -10,14 +10,14 @@ type NewsData = {
   date: Date
 }
 
-function getNews(): NewsData[] {
+//function getNews(): NewsData[] {
   // Hier werden später die Daten für Aktuelle Events etc geladen
-  const data: NewsData[] = []
+//  const data: NewsData[] = []
 
-  data.sort((a,b) => b.date.getTime() - a.date.getTime())
+//  data.sort((a,b) => b.date.getTime() - a.date.getTime())
   
-  return data;
-}
+//  return data;
+//}
 
 export default function Home() {
 

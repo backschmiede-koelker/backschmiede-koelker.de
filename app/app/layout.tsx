@@ -1,9 +1,7 @@
 'client'
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.scss";
-import AddressLink from "./components/address-link";
-import Footer from "./components/footer";
+import "../public/globals.css";
 import Image from 'next/image';
 import Link from 'next/link'
 import { FaInstagram, FaLocationDot } from "react-icons/fa6";

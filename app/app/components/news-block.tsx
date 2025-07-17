@@ -1,3 +1,4 @@
+import Image from "next/image";
 
 interface NewsBlockProps {
     title: string
@@ -12,7 +13,7 @@ export default function NewsBlock(props: NewsBlockProps) {
 
     return (
         <div className="news-block" style={{flexDirection: imageLeft ? 'row' : 'row-reverse'}}>
-            <img src={imageUrl} alt={title}/>
+            <Image width={150} height={150} src={imageUrl} alt={title}/>
             <span>
                 <p className="news-title">{title}</p>
                 <p className="news-text">{content}</p>
