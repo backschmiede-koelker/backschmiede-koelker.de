@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-$primary: #7cfc00;
+$primary: #33ff00;
+$accent: #000080;
 $on-primary: #171717;
 $secondary: #6a93b0;
 
@@ -41,14 +42,15 @@ body {
 
 .sidebar {
   height: 100%;
-  width: 8%;
-  background-color: $primary;
+  width: 15%;
+  background-color: $accent;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: fixed;
   left: 0;
   top: 0;
+  z-index: 1;
 
   &> div {
     margin-top: 20%;
@@ -63,69 +65,85 @@ body {
       width: 100%;
 
       & > li {
-
-        & > a {
-          width: 100%;
-        }
-
-        color: #171717a3;
+        color: #ffffff;
         margin-top: 10%;
         width: 80%;
-        cursor: pointer;
-
-        &:hover {
-          color: $on-primary;
+        
+        & > a {
+          display: flex;
+          flex-direction: row;
+          & > p {
+            margin-left: 16px;
+          }
         }
       }
+
+      & > li:hover {
+          color: $primary;
+        }
     }
   }
 }
 
 .sidebar-logo {
   width: 80%;
-  aspect-ratio: 1;
-  background-color: white;
+  background-color: transparent;
   margin-top: 10%;
 }
 
+ .sidebar-logo2 {
+    display: none;
+  }
+
 .content {
-  overflow-y: scroll;
+  overflow-y: auto;
   min-height: 100%;
   max-height: 100%;
-  width: 92%;
+  width: 85%;
   position: fixed;
   right: 0;
   top: 0;
   scrollbar-color: grey darkgrey;
+  z-index: 0;
 }
 
 .homepage-logo {
   width: 100%;
-  height: 50vh;
-  background-image: url('https://speicherstadt-kaffee.de/wp-content/uploads/2024/01/speicherstadt-kaffeeroesterei-Gastraum.jpg');
-  background-size: cover;
+  height: 70vh;
+
+  & > logo {
+    position: absolute;
+  }
 }
 
 .banner {
+  position: relative;
   height: 100%;
-  width: 35vw;
+  width: 40vw;
   float: right;
   margin-right: 5%;
-  background-color: #6a93b0bc
+  background-color: #33ff00bc;
+  font-weight: 600;
+  z-index: 1;
 }
 
 .banner-header {
   margin-top: 5%;
   margin-left: 8%;
-  color: white;
-  font-size: 3rem;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
 .news {
+  position: relative;
   height: fit-content;
   padding-left: 20%;
   width: 100%;
-  margin-top: 3%;
+  z-index: 1;
+  min-height: 30vh;
+  background-color: white;
 }
 
 .news-block {
@@ -151,4 +169,77 @@ body {
 .news-date {
   opacity: 50%;
   margin-top: 10%;
+}
+
+.opening {
+  & > div {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    justify-content: space-evenly;
+  }
+  & > p {
+      font-size: 1.7rem;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+}
+
+@media (width <= 1250px) {
+  .sidebar-logo {
+    display: none;
+  }
+
+  .sidebar-logo2 {
+    display: block;
+  }
+
+  .sidebar {
+    width: 100vw;
+    height: 10vh;
+
+    & > div {
+      margin: 0;
+      & > ul {
+        margin-top: 7%;
+        flex-direction: row;
+        & > li {
+          margin: 0;
+          & > a {
+            display: flex;
+            justify-content: center;
+            & > p {
+              display: none;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .content {
+    width: 100%;
+    top: 10%;
+  }
+
+  .banner {
+    width: 90%;
+    display: block;
+  }
+
+  .banner-header {
+    font-size: 1.6rem;
+    flex-direction: column;
+  }
+
+
+  .opening {
+    & > div {
+      flex-direction: column;
+    }
+    & > p {
+      font-size: 1.5rem;
+    }
+  }
 }

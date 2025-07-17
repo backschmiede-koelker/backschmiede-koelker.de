@@ -4,6 +4,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.scss";
 import AddressLink from "./components/address-link";
 import Footer from "./components/footer";
+import Image from 'next/image';
+import Link from 'next/link'
+import { FaInstagram, FaLocationDot } from "react-icons/fa6";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,30 +35,38 @@ export default function RootLayout({
       >
         <div className={'app'}>
           <div className={'sidebar'}>
-            <a href="/" className={'sidebar-logo'}>
-
-            </a>
+             <Image
+               className="sidebar-logo"
+                src="/Logo1.jpg"
+                width={500}
+                height={500}
+                alt="Sidebar Logo"
+              />
             <div>
               <ul>
                 <li>
-                  <a href="#ABOUT_US">ÜBER UNS</a>
+                  <Link href={"https://www.instagram.com/backschmiede_koelker?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="}>
+                    <FaInstagram size={24}/>
+                    <p>@Backschmiede Koelker</p>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#CALENDAR">WAS STEHT AN</a>
+                  <Link href={"https://maps.app.goo.gl/gyHqK9nJXGHv4oxX6"}>
+                    <FaLocationDot size={24}/>
+                    <p>Landrat-Schultz-Straße 1<br/> 49497 Mettingen</p>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#WARES">UNSERE WARE</a>
-                </li>
-                <li>
-                  <a href="#CONTACT">SO EREICHST DU UNS</a>
+                  <Link href={"https://maps.app.goo.gl/v7fAobfiUPDe8xTV6"}>
+                    <FaLocationDot size={24}/>
+                    <p>Hauptstraße 12<br/>49509 Recke</p>
+                  </Link>
                 </li>
               </ul>
             </div>
-            <AddressLink />
           </div>
           <main className="content">
             {children}
-            <Footer/>
           </main>
         </div>
       </body>

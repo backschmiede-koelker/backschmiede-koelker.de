@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from "react";
 import NewsBlock from "./components/news-block";
-
+import Image from "next/image";
 
 type NewsData = {
   title: string
@@ -11,29 +11,8 @@ type NewsData = {
 }
 
 function getNews(): NewsData[] {
-  const data: NewsData[] = [
-    {
-      title: 'Test 4',
-      content: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et',        imageUrl: 'https://dfrnt.coffee/cdn/shop/articles/cafe-con-miel-y-canela-735112.png?crop=center&height=2048&v=1733918361&width=2048',
-      date: new Date('2023-05-19')
-    },
-    {
-      title: 'Test 2',
-      content: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et',
-      imageUrl: 'https://dfrnt.coffee/cdn/shop/articles/cafe-con-miel-y-canela-735112.png?crop=center&height=2048&v=1733918361&width=2048',
-      date: new Date('2024-11-12')
-    },
-    {
-      title: 'Test 1',
-      content: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et',        imageUrl: 'https://dfrnt.coffee/cdn/shop/articles/cafe-con-miel-y-canela-735112.png?crop=center&height=2048&v=1733918361&width=2048',
-      date: new Date('2024-12-11')
-    },
-    {
-      title: 'Test 3',
-      content: 'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et',        imageUrl: 'https://dfrnt.coffee/cdn/shop/articles/cafe-con-miel-y-canela-735112.png?crop=center&height=2048&v=1733918361&width=2048',
-      date: new Date('2023-12-11')
-    },
-  ]
+  // Hier werden später die Daten für Aktuelle Events etc geladen
+  const data: NewsData[] = []
 
   data.sort((a,b) => b.date.getTime() - a.date.getTime())
   
@@ -42,17 +21,47 @@ function getNews(): NewsData[] {
 
 export default function Home() {
 
-  const [news, setNews] = useState<NewsData[]>([])
-
-  useEffect(() => {
-    setNews(getNews)
-  },[])
+  const [news] = useState<NewsData[]>([])
 
   return (
     <>
     <div className={"homepage-logo"}>
+      <Image
+        src="/Cafe.jpg"
+        fill={true}
+        alt="Cafe"
+      />
       <div className="banner">
-        <p className="banner-header">Backschmiede Koelker</p>
+        <p className="banner-header">
+          <Image
+          src="/Logo3-2.png"
+          width={100}
+          height={400}
+          alt="Sidebar Logo"
+        />
+        <span>Backschmiede Koelker</span>
+        </p>
+        <div className="opening">
+          <p>Öffnungszeiten</p>
+          <div style={{marginLeft: '16px', display: 'flex'}}>
+            <div>
+              <p style={{fontSize: '1.5rem'}}>Mettingen</p>
+              <ul>
+                <li>Mo. 7:00 - 12:30 Uhr</li>
+                <li>Di. - Fr. 7:00 - 12:30 Uhr <br/> 14:30 - 18:00 Uhr</li>
+                <li>Sa. 7:00 - 12:30 Uhr</li>
+                <li>So. 8:00 - 11:00 Uhr</li>
+              </ul>
+            </div>
+            <div>
+              <p style={{fontSize: '1.5rem'}}>Recke</p>
+              <ul>
+                <li>Di. - Sa. 6:00 - 18:00 Uhr</li>
+                <li>So. 7:00 - 17:00 Uhr</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <div className="news">
