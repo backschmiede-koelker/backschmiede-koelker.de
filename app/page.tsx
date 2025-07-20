@@ -1,4 +1,4 @@
-'use client';
+/*'use client';
 import { useState } from "react";
 import NewsBlock from "./components/news-block";
 import Image from "next/image";
@@ -68,5 +68,31 @@ export default function Home() {
       {news.map((data, index) => <NewsBlock key={index} {...data} imageLeft={index % 2 === 0}/>)}
     </div>
     </>
+  );
+}*/
+
+export default function HomePage() {
+  return (
+    <main
+      style={{
+        display: 'flex',
+        height: '100vh',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: '#1f1f1f',
+        color: '#f2f2f2',
+        flexDirection: 'column',
+        fontFamily: 'sans-serif',
+        textAlign: 'center',
+        padding: '1rem',
+      }}
+    >
+      <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
+        🛠️ Webseite im Aufbau
+      </h1>
+      <p style={{ fontSize: '1.2rem', maxWidth: '600px', color: '#ccc' }}>
+        Diese Seite ist noch in Arbeit. Wir freuen uns, dich bald hier begrüßen zu dürfen!
+      </p>
+    </main>
   );
 }

@@ -1,4 +1,4 @@
-'client'
+/*'client'
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../public/globals.css";
@@ -70,4 +70,50 @@ export default function RootLayout({
       </body>
     </html>
   );
+}*/
+
+'client'
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Backschmiede Kölker",
+  description: "",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            style={{
+              margin: 0,
+              padding: 0,
+              backgroundColor: '#1f1f1f',
+              minHeight: '100vh',
+              overflow: 'hidden',
+            }}
+        >
+          <div className={'app'}>
+            <main className="content">
+              {children}
+            </main>
+          </div>
+        </body>
+      </html>
+    );
 }

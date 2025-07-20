@@ -24,10 +24,37 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ## Deployment
 
+Start Website:
+
 ```bash
 npm install
 
 npm run build
 
 npm start
+```
+
+Build docker image:
+
+```bash
+# First Start Docker Desktop and set "output" to "standalone" in next.config.ts then:
+docker build -t backschmiede-koelker .
+# check build
+docker images
+# export image
+docker save backschmiede-koelker -o backschmiede-koelker.tar
+# upload image and docker-compose.yml
+scp backschmiede-koelker.tar user@server:/var/www/backschmiede-koelker/
+scp docker-compose.yml user@server-ip:/var/www/backschmiede-koelker/
+# login to server
+ssh user@server-ip
+# import image on server
+cd /var/www/backschmiede-koelker
+docker compose down
+docker image rm backschmiede-koelker
+docker load -i backschmiede-koelker.tar
+# check image
+docker images
+# start container
+docker compose up -d
 ```

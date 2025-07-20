@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# docker image
+*.tar
+*.tar.gz
+*.img
+*.qcow2
