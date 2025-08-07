@@ -1,98 +1,72 @@
-/*'use client';
+'use client';
 import { useState } from "react";
-import NewsBlock from "./components/news-block";
 import Image from "next/image";
+import NewsBlock from "./components/news-block";
 
 type NewsData = {
-  title: string
-  content: string
-  imageUrl: string
-  date: Date
-}
-
-//function getNews(): NewsData[] {
-  // Hier werden später die Daten für Aktuelle Events etc geladen
-//  const data: NewsData[] = []
-
-//  data.sort((a,b) => b.date.getTime() - a.date.getTime())
-  
-//  return data;
-//}
+  title: string;
+  content: string;
+  imageUrl: string;
+  date: Date;
+};
 
 export default function Home() {
-
-  const [news] = useState<NewsData[]>([])
+  const [news] = useState<NewsData[]>([
+    {
+      title: "Neues Frühstücksangebot",
+      content: "Wir haben ab sofort ein erweitertes Frühstücksmenü mit frischen Brötchen und hausgemachter Marmelade.",
+      imageUrl: "/Logo1.jpg",
+      date: new Date("2025-07-20"),
+    },
+    {
+      title: "Sommeraktion im Juli",
+      content: "Kuchenstücke zum halben Preis an jedem Sonntag im Juli!",
+      imageUrl: "/Logo2.jpg",
+      date: new Date("2025-07-10"),
+    },
+  ]);
 
   return (
-    <>
-    <div className={"homepage-logo"}>
-      <Image
-        src="/Cafe.jpg"
-        fill={true}
-        alt="Cafe"
-      />
-      <div className="banner">
-        <p className="banner-header">
-          <Image
-          src="/Logo3-2.png"
-          width={100}
-          height={400}
-          alt="Sidebar Logo"
-        />
-        <span>Backschmiede Koelker</span>
-        </p>
-        <div className="opening">
-          <p>Öffnungszeiten</p>
-          <div style={{marginLeft: '16px', display: 'flex'}}>
-            <div>
-              <p style={{fontSize: '1.5rem'}}>Mettingen</p>
-              <ul>
-                <li>Mo. 7:00 - 12:30 Uhr</li>
-                <li>Di. - Fr. 7:00 - 12:30 Uhr <br/> 14:30 - 18:00 Uhr</li>
-                <li>Sa. 7:00 - 12:30 Uhr</li>
-                <li>So. 8:00 - 11:00 Uhr</li>
-              </ul>
-            </div>
-            <div>
-              <p style={{fontSize: '1.5rem'}}>Recke</p>
-              <ul>
-                <li>Di. - Sa. 6:00 - 18:00 Uhr</li>
-                <li>So. 7:00 - 17:00 Uhr</li>
-              </ul>
+    <div className="space-y-16">
+      <section className="relative h-[70vh] w-full">
+        <Image src="/Cafe.jpg" alt="Cafe" fill className="object-cover" />
+        <div className="absolute inset-0 bg-green-300/80 dark:bg-green-900/80 p-8 flex flex-col justify-center max-w-xl ml-auto animate-slide-in">
+          <div className="flex items-center gap-4 mb-4">
+            <Image src="/Logo3-2.png" alt="Logo" width={80} height={80} />
+            <h1 className="text-2xl font-bold">Backschmiede Kölker</h1>
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold mb-2">Öffnungszeiten</h2>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <h3 className="font-bold">Mettingen</h3>
+                <ul>
+                  <li>Mo. 7:00 - 12:30 Uhr</li>
+                  <li>Di. - Fr. 7:00 - 12:30, 14:30 - 18:00</li>
+                  <li>Sa. 7:00 - 12:30</li>
+                  <li>So. 8:00 - 11:00</li>
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-bold">Recke</h3>
+                <ul>
+                  <li>Di. - Sa. 6:00 - 18:00</li>
+                  <li>So. 7:00 - 17:00</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    <div className="news">
-      {news.map((data, index) => <NewsBlock key={index} {...data} imageLeft={index % 2 === 0}/>)}
-    </div>
-    </>
-  );
-}*/
+      </section>
 
-export default function HomePage() {
-  return (
-    <main
-      style={{
-        display: 'flex',
-        height: '100vh',
-        justifyContent: 'center',
-        alignItems: 'center',
-        background: '#1f1f1f',
-        color: '#f2f2f2',
-        flexDirection: 'column',
-        fontFamily: 'sans-serif',
-        textAlign: 'center',
-        padding: '1rem',
-      }}
-    >
-      <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
-        🛠️ Webseite im Aufbau
-      </h1>
-      <p style={{ fontSize: '1.2rem', maxWidth: '600px', color: '#ccc' }}>
-        Diese Seite ist noch in Arbeit. Wir freuen uns, dich bald hier begrüßen zu dürfen!
-      </p>
-    </main>
+      <section className="max-w-5xl mx-auto">
+        <h2 className="text-3xl font-bold mb-8 text-center">Aktuelles</h2>
+        <div className="space-y-8">
+          {news.map((data, index) => (
+            <NewsBlock key={index} {...data} imageLeft={index % 2 === 0} />
+          ))}
+        </div>
+      </section>
+    </div>
   );
 }
