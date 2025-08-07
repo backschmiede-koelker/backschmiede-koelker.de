@@ -1,0 +1,21 @@
+services:
+  backschmiede:
+    image: backschmiede-koelker
+    container_name: backschmiede-koelker
+    restart: always
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backschmiede.rule=Host(`backschmiede-koelker.de`)"
+      - "traefik.http.routers.backschmiede.entrypoints=web,websecure"
+      - "traefik.http.routers.backschmiede.tls.certresolver=le"
+      - "traefik.http.services.backschmiede.loadbalancer.server.port=3000"
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
