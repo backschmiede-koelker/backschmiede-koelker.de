@@ -60,7 +60,7 @@ export default function Home() {
       </section>
 
       <section className="max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold mb-8 text-center">Aktuelles</h2>
+        <h2 className="text-3xl font-bold mb-8 text-center">Aktuelles TEST</h2>
         <div className="space-y-8">
           {news.map((data, index) => (
             <NewsBlock key={index} {...data} imageLeft={index % 2 === 0} />
