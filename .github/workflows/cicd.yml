@@ -66,7 +66,7 @@ jobs:
             echo "GHCR_PAT not set; skipping GHCR login (image assumed public)."
           fi
 
-      - name: Pull & restart via compose (fixed path)
+      - name: Pull & restart via compose
         env:
           COMPOSE_FILE_PATH: ${{ '/srv/backschmiede-koelker.de/compose.yml' }}
         run: |
