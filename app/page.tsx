@@ -91,7 +91,7 @@ export default function HomePage() {
         🛠️ Webseite im Aufbau
       </h1>
       <p style={{ fontSize: '1.2rem', maxWidth: '600px', color: '#ccc' }}>
-        Diese Seite ist noch in Arbeit. Wir freuen uns, dich bald hier begrüßen zu dürfen!
+        Diese Seite ist noch in Arbeit. Wir freuen uns, dich bald hier begrüßen zu dürfen! Bis bald!
       </p>
     </main>
   );
