@@ -34,6 +34,10 @@ npm run build
 npm start
 ```
 
+
+
+
+obsolete:
 Build docker image:
 
 ```bash

@@ -1,6 +1,6 @@
 services:
   backschmiede:
-    image: backschmiede-koelker
+    image: ghcr.io/backschmiede-koelker/backschmiede-koelker.de:latest
     container_name: backschmiede-koelker
     restart: always
     expose:
@@ -15,6 +15,7 @@ services:
       - "traefik.http.services.backschmiede.loadbalancer.server.port=3000"
     networks:
       - web
+    pull_policy: always
 
 networks:
   web:
