@@ -55,12 +55,17 @@ jobs:
     needs: build-and-push
     runs-on: [self-hosted, github-deploy-01-web-01]
     steps:
-      - name: Login to GHCR
-        if: ${{ secrets.GHCR_PAT != '' }}
+      - name: Login to GHCR (private images)
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT }}
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
         run: |
-          echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME || github.actor }}" --password-stdin
+          if [ -n "$GHCR_PAT" ]; then
+            echo "$GHCR_PAT" | docker login ghcr.io -u "${GHCR_USERNAME:-$GITHUB_ACTOR}" --password-stdin
+          else
+            echo "GHCR_PAT not set; skipping GHCR login (image assumed public)."
+          fi
 
-      # Variante A: Compose-Datei liegt fest auf dem Server (empfohlen für Stabilität)
       - name: Pull & restart via compose (fixed path)
         env:
           COMPOSE_FILE_PATH: ${{ '/srv/backschmiede-koelker.de/compose.yml' }}
