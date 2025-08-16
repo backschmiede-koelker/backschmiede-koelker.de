@@ -45,3 +45,5 @@ next-env.d.ts
 *.tar.gz
 *.img
 *.qcow2
+
+server.txt
