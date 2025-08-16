@@ -1,4 +1,9 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🥨 Backschmiede Kölker – Website
+
+Willkommen im Ofen unserer digitalen Backstube!  
+Hier entsteht der frische Quellcode für [Backschmiede Kölker](https://backschmiede-koelker.de) – von Hand geknetet, mit Liebe gebacken und direkt heiß aus dem GitHub-Ofen serviert.  
+
+---
 
 ## Getting Started
 
@@ -17,14 +22,9 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-
 ## Deployment
 
-Start Website:
+Start Local-Website:
 
 ```bash
 npm install
@@ -34,31 +34,6 @@ npm run build
 npm start
 ```
 
+Update Prod-Website:
 
-
-
-obsolete:
-Build docker image:
-
-```bash
-# First Start Docker Desktop and set "output" to "standalone" in next.config.ts then:
-docker build -t backschmiede-koelker .
-# check build
-docker images
-# export image
-docker save backschmiede-koelker -o backschmiede-koelker.tar
-# upload image and docker-compose.yml
-scp backschmiede-koelker.tar user@server:/var/www/backschmiede-koelker/
-scp docker-compose.yml user@server-ip:/var/www/backschmiede-koelker/
-# login to server
-ssh user@server-ip
-# import image on server
-cd /var/www/backschmiede-koelker
-docker compose down
-docker image rm backschmiede-koelker
-docker load -i backschmiede-koelker.tar
-# check image
-docker images
-# start container
-docker compose up -d
-```
+merge changes into main -> github actions updates website
