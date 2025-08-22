@@ -1,71 +1,72 @@
-'use client';
-import { useState } from "react";
-import Image from "next/image";
-import NewsBlock from "./components/news-block";
-
-type NewsData = {
-  title: string;
-  content: string;
-  imageUrl: string;
-  date: Date;
-};
+import Image from 'next/image';
+import DailyDeal from './components/daily-deal';
+import WeeklyDeals from './components/weekly-deals';
+import Hours from './components/hours';
+import TgtgCta from './components/tgtg-cta';
 
 export default function Home() {
-  const [news] = useState<NewsData[]>([
-    {
-      title: "Neues Frühstücksangebot",
-      content: "Wir haben ab sofort ein erweitertes Frühstücksmenü mit frischen Brötchen und hausgemachter Marmelade.",
-      imageUrl: "/Logo1.jpg",
-      date: new Date("2025-07-20"),
-    },
-    {
-      title: "Sommeraktion im Juli",
-      content: "Kuchenstücke zum halben Preis an jedem Sonntag im Juli!",
-      imageUrl: "/Logo2.jpg",
-      date: new Date("2025-07-10"),
-    },
-  ]);
-
   return (
-    <div className="space-y-16">
-      <section className="relative h-[70vh] w-full">
-        <Image src="/Cafe.jpg" alt="Cafe" fill className="object-cover" />
-        <div className="absolute inset-0 bg-green-300/80 dark:bg-green-900/80 p-8 flex flex-col justify-center max-w-xl ml-auto animate-slide-in">
-          <div className="flex items-center gap-4 mb-4">
-            <Image src="/Logo3-2.png" alt="Logo" width={80} height={80} />
-            <h1 className="text-2xl font-bold">Backschmiede Kölker</h1>
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold mb-2">Öffnungszeiten</h2>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <h3 className="font-bold">Mettingen</h3>
-                <ul>
-                  <li>Mo. 7:00 - 12:30 Uhr</li>
-                  <li>Di. - Fr. 7:00 - 12:30, 14:30 - 18:00</li>
-                  <li>Sa. 7:00 - 12:30</li>
-                  <li>So. 8:00 - 11:00</li>
-                </ul>
+    <div className="space-y-20">
+      {/* HERO – links sauber am Seitenraster ausgerichtet */}
+      <section className="relative isolate h-[66svh] md:h-[72vh] w-full overflow-hidden rounded-3xl">
+        <Image
+          src="/mettingen-und-recke.png"
+          alt="Backschmiede Kölker – Standorte Mettingen & Recke"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
+        />
+
+        {/* dezente Lesbarkeits-Scrims, nur am linken unteren Bereich */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/25 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/35 to-transparent" />
+
+        {/* Inhalt strikt im gleichen Content-Frame wie die Sections */}
+        <div className="absolute inset-0 flex items-end">
+          <div className="mx-auto w-full max-w-5xl px-4 pb-6 md:pb-8">
+            {/* Headline + Sub */}
+            <div className="mb-4">
+              <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-white">
+                Backschmiede Kölker
+              </h1>
+              <p className="mt-1 text-white/85 text-sm md:text-base">
+                Handwerkliche Backwaren aus&nbsp;Mettingen&nbsp;&amp;&nbsp;Recke – täglich frisch.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/30 backdrop-blur">
+                  Mettingen
+                </span>
+                <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white ring-1 ring-white/30 backdrop-blur">
+                  Recke
+                </span>
               </div>
-              <div>
-                <h3 className="font-bold">Recke</h3>
-                <ul>
-                  <li>Di. - Sa. 6:00 - 18:00</li>
-                  <li>So. 7:00 - 17:00</li>
-                </ul>
+            </div>
+
+            {/* Tagesangebot – kompakte, ruhige Karte; bleibt im Raster */}
+            <div className="max-w-lg">
+              <div className="rounded-2xl bg-white/85 p-4 shadow-md ring-1 ring-black/10 backdrop-blur-sm dark:bg-zinc-900/75 dark:ring-white/10">
+                <DailyDeal />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold mb-8 text-center">Aktuelles</h2>
-        <div className="space-y-8">
-          {news.map((data, index) => (
-            <NewsBlock key={index} {...data} imageLeft={index % 2 === 0} />
-          ))}
+      {/* Aktuelles & Angebote */}
+      <section className="mx-auto max-w-5xl px-4">
+        <h2 className="mb-4 text-center text-3xl font-bold">Aktuelles &amp; Angebote</h2>
+        <WeeklyDeals />
+        <div className="mt-8 grid gap-8 md:grid-cols-2">
+          <TgtgCta />
+          {/* evtl. weitere Cards */}
         </div>
+      </section>
+
+      {/* Öffnungszeiten */}
+      <section className="mx-auto max-w-5xl px-4" id="oeffnungszeiten">
+        <h2 className="mb-4 text-center text-3xl font-bold">Öffnungszeiten</h2>
+        <Hours />
       </section>
     </div>
   );

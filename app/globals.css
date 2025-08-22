@@ -23,3 +23,11 @@
     animation: slideIn 0.9s ease-out forwards;
   }
 }
+
+.no-scrollbar {
+  scrollbar-width: none;              /* Firefox */
+  -ms-overflow-style: none;           /* IE/Edge Legacy */
+}
+.no-scrollbar::-webkit-scrollbar {    /* Chromium/WebKit */
+  display: none;
+}
