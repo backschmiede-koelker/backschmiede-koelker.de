@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Product {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  priceCents Int
+  unit       String   // z.B. "pro Stück", "kg", "100g"
+  imageUrl   String?
+  tags       String[] // Postgres text[]
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Offer {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  priceCents  Int?
+  unit        String?
+  imageUrl    String?
+  tags        String[]
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Optional: zentrale Textbausteine (falls du *nicht* inline auf der Seite editierst)
+model ContentBlock {
+  id        String   @id @default(cuid())
+  slug      String   @unique // z.B. "startseite.hero"
+  content   String   // Markdown/HTML/Plain
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}

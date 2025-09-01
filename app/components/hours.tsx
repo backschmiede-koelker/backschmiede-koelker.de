@@ -14,7 +14,7 @@ export default async function Hours() {
   const recke = data.recke;
 
   const toLines = (obj: any, fallback: string[]) =>
-    obj?.opening_hours?.weekdayDescriptions || obj?.current_opening_hours?.weekdayDescriptions || fallback;
+    obj?.opening_ours?.weekdayDescriptions || obj?.current_opening_hours?.weekdayDescriptions || fallback;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

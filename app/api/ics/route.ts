@@ -1,3 +1,6 @@
+// maybe create ics file
+
+/*
 import { NextResponse } from 'next/server';
 import { events } from '../../data/events';
 
@@ -37,3 +40,4 @@ function toICS(d: Date) {
 function escapeText(s: string) {
   return s.replace(/[\\;,\n]/g, (m) => ({'\\':'\\\\',';':'\\;',',':'\\,','\n':'\\n'} as any)[m]);
 }
+*/

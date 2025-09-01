@@ -72,4 +72,13 @@ jobs:
         run: |
           docker compose -f "$COMPOSE_FILE_PATH" pull
           docker compose -f "$COMPOSE_FILE_PATH" up -d
-          docker image prune -f
+      
+      - name: Run Prisma migrations
+        env:
+          COMPOSE_FILE_PATH: ${{ '/srv/backschmiede-koelker.de/compose.yml' }}
+        run: |
+          # führt im laufenden Web-Container die Migrations gegen DATABASE_URL aus
+          docker compose -f "$COMPOSE_FILE_PATH" exec -T backschmiede npx prisma migrate deploy
+
+      - name: Cleanup old images
+        run: docker image prune -f

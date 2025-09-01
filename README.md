@@ -11,13 +11,23 @@ First, run the development server:
 
 ```bash
 # (only works if you set "output and images" in next.config.ts)
+
+# first time:
+docker volume create pg_local_data
+docker run -d --name pg-local -p 5432:5432 -e POSTGRES_USER=backschmiede_koelker -e POSTGRES_PASSWORD=devpass -e POSTGRES_DB=backschmiede_koelker -v pg_local_data:/var/lib/postgresql/data postgres:16-alpine
+docker exec -it pg-local psql -U backschmiede_koelker -d backschmiede_koelker -c "CREATE SCHEMA IF NOT EXISTS backschmiede_koelker AUTHORIZATION backschmiede_koelker;"
+npx prisma migrate dev --name init
+
+# restart
+docker start pg-local
+npx prisma migrate dev
+docker compose -f docker-compose.cdn.local.yml up -d
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# stop
+docker compose -f docker-compose.cdn.local.yml down
+docker stop pg-local
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

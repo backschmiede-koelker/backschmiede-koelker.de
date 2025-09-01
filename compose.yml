@@ -2,21 +2,51 @@ services:
   backschmiede:
     image: ghcr.io/backschmiede-koelker/backschmiede-koelker.de:latest
     container_name: backschmiede-koelker
-    restart: always
+    restart: unless-stopped
     expose:
       - "3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV}
+      - DATABASE_URL=${DATABASE_URL}
+      - UPLOAD_DIR=${UPLOAD_DIR}
+      - BASE_ASSET_URL=${BASE_ASSET_URL}
+      - PORT=${PORT}
+    volumes:
+      - ./uploads:${UPLOAD_DIR}
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=web"
       - "traefik.http.routers.backschmiede.rule=Host(`backschmiede-koelker.de`)"
       - "traefik.http.routers.backschmiede.entrypoints=web,websecure"
       - "traefik.http.routers.backschmiede.tls.certresolver=le"
       - "traefik.http.services.backschmiede.loadbalancer.server.port=3000"
     networks:
       - web
+      - db
     pull_policy: always
+
+  # backschmiede-content-delivery-network
+  backschmiede-cdn:
+    image: nginx:alpine
+    container_name: backschmiede-koelker-cdn
+    restart: unless-stopped    
+    expose:
+      - "80"
+    volumes:
+      - ./uploads:/usr/share/nginx/html:ro
+      - ./nginx/cdn.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.backschmiede_cdn.rule=Host(`cdn.backschmiede-koelker.de`)"
+      - "traefik.http.routers.backschmiede_cdn.entrypoints=web,websecure"
+      - "traefik.http.routers.backschmiede_cdn.tls.certresolver=le"
+      - "traefik.http.services.backschmiede_cdn.loadbalancer.server.port=80"
+    networks:
+      - web
 
 networks:
   web:
+    external: true
+  db:
     external: true

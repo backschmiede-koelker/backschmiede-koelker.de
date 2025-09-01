@@ -13,7 +13,7 @@ export function fmtDate(date: Date | string, opts: Intl.DateTimeFormatOptions = 
 
 export function startOfISOWeek(date = new Date()) {
   const d = new Date(date);
-  const day = (d.getDay() + 6) % 7; // Mo=0
+  const day = (d.getDay() + 6) % 7;
   d.setDate(d.getDate() - day);
   d.setHours(0,0,0,0);
   return d;

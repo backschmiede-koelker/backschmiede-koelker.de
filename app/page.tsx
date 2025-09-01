@@ -11,7 +11,7 @@ export default function Home() {
       <section className="relative isolate h-[66svh] md:h-[72vh] w-full overflow-hidden rounded-3xl">
         <Image
           src="/mettingen-und-recke.png"
-          alt="Backschmiede Kölker – Standorte Mettingen & Recke"
+          alt="Backschmiede Kölker - Standorte Mettingen & Recke"
           fill
           priority
           sizes="100vw"

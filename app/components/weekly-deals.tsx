@@ -2,7 +2,7 @@ import { headers } from 'next/headers';
 import { formatEUR } from '../lib/offers';
 
 async function fetchOffers() {
-  const h = headers() as unknown as Headers;
+  const h = await headers() as unknown as Headers;
   
   const host =
     h.get('x-forwarded-host') ??
