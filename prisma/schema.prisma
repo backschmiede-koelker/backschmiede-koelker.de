@@ -11,6 +11,27 @@ enum Role {
   ADMIN
 }
 
+enum OfferKind {
+  RECURRING_WEEKDAY
+  ONE_DAY
+  DATE_RANGE
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum Location {
+  RECKE
+  METTINGEN
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -31,21 +52,44 @@ model Product {
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  offers     Offer[]  @relation("ProductOffers")
+
+  @@index([isActive, createdAt])     // Listenansichten „nur aktive, neueste zuerst“
+  @@index([name])                    // einfache Textsuche (LIKE/ILIKE)
 }
 
 model Offer {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
+  slug        String    @unique
   title       String
   description String?
   priceCents  Int?
   unit        String?
   imageUrl    String?
   tags        String[]
-  startDate   DateTime
-  endDate     DateTime
-  isActive    Boolean  @default(true)
+  isActive    Boolean   @default(true)
+  
+  // Gültigkeit
+  kind        OfferKind
+  weekday     Weekday?   // nur für RECURRING_WEEKDAY
+  date        DateTime?  // nur für ONE_DAY (ganzer Tag)
+  startDate   DateTime?  // nur für DATE_RANGE
+  endDate     DateTime?  // nur für DATE_RANGE
+
+  locations   Location[]
+  priority    Int        @default(0)
+
+  productId   String?
+  product     Product?   @relation("ProductOffers", fields: [productId], references: [id])
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([isActive, kind])
+  @@index([date])
+  @@index([weekday])
+  @@index([startDate, endDate])
+  @@index([priority, createdAt]) 
 }
 
 // Optional: zentrale Textbausteine (falls du *nicht* inline auf der Seite editierst)

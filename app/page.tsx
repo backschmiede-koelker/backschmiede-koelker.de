@@ -178,8 +178,8 @@ export default function Page() {
             <WeeklyDeals />
           </Suspense>
 
-          <div className="mt-8 grid gap-8 md:grid-cols-2">
-            <TgtgCta />
+          <div className="mt-8">
+            <TgtgCta locations={[{ key:'RECKE', label:'Recke', mapsUrl:'...', windows:[{day:'Mo-Fr', time:'17:00-18:00'}]}]} />
           </div>
         </div>
       </section>
