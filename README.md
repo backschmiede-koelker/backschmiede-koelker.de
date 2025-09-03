@@ -30,7 +30,8 @@ docker compose -f docker-compose.cdn.local.yml down
 docker stop pg-local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Change IP to ur local IP (remeber to do it in .env aswell):
+Open [http://192.168.178.163:3000](http://192.168.178.163:3000) with your browser to see the result.
 
 ## Deployment
 

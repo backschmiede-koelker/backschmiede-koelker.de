@@ -9,6 +9,7 @@ import Sidebar from './sidebar';
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const isHome = pathname === '/';
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -25,10 +26,16 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           onCloseSidebar={() => setSidebarOpen(false)}
         />
 
-        <main className="flex-1 p-6">
-          <div className="w-full max-w-4xl mx-auto">
-            {children}
-          </div>
+        {/* Auf der Startseite KEIN zentrierender Max-Width-Wrapper,
+           damit Hero & Header-Gradient vollflächig funktionieren */}
+        <main className={isHome ? 'flex-1' : 'flex-1 p-6'}>
+          {isHome ? (
+            children
+          ) : (
+            <div className="w-full max-w-4xl mx-auto">
+              {children}
+            </div>
+          )}
         </main>
 
         <Footer />

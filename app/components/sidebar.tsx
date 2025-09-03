@@ -107,16 +107,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       >
         {/* --- NEU: Flex-Column, damit unten sauber andockt --- */}
         <div className="flex h-full flex-col">
-          {/* Close nur mobil */}
-          <div className="md:hidden flex justify-end mb-2">
-            <button
-              onClick={onClose}
-              className="text-black dark:text-white text-2xl font-bold px-3 py-1 rounded transition-transform duration-300 hover:rotate-90 active:scale-90 focus:outline-none"
-              aria-label="Seitenleiste schließen"
-            >
-              ✕
-            </button>
-          </div>
+        <div className="md:hidden flex justify-end mb-2 px-3 py-1">
+          {/* Platzhalter exakt in Button-Größe */}
+          <span
+            aria-hidden="true"
+            className="inline-flex h-10 w-10 items-center justify-center text-2xl font-bold rounded opacity-0"
+          >
+          </span>
+        </div>
 
           {/* Logo */}
           <div className="mb-6 2xl:mb-8 mx-auto w-[180px] 2xl:w-[200px]">

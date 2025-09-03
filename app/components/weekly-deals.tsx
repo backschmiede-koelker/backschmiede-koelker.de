@@ -8,7 +8,7 @@ async function fetchOffers() {
     h.get('x-forwarded-host') ??
     h.get('host') ??
     process.env.VERCEL_URL ??
-    'localhost:3000';
+    '192.168.178.163:3000';
 
   const proto =
     h.get('x-forwarded-proto') ??

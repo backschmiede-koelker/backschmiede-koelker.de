@@ -4,6 +4,7 @@ import Link from 'next/link';
 import ThemeToggle from './theme-toggle';
 import { FaBars, FaXmark } from 'react-icons/fa6';
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 type HeaderProps = {
   isSidebarOpen: boolean;
@@ -21,34 +22,32 @@ const iconBtn =
 
 export default function Header({ isSidebarOpen, onToggleSidebar, onCloseSidebar }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const isHome = pathname === '/';
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll(); // initial
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const solidHeader =
+    'border-b border-emerald-800/15 dark:border-emerald-300/15 ' +
+    'bg-white/70 dark:bg-zinc-900/50 backdrop-blur supports-[backdrop-filter]:bg-white/40 ' +
+    'shadow-[0_1px_12px_rgb(0_0_0/0.08)]';
+
+  const transparentHeader =
+    'border-b-0 bg-transparent shadow-none';
+
   return (
     <header
       className={[
-        // Immer sticky – kein snapping
-        'sticky top-0 z-50 w-full',
-        // Konstante Border-Breite; nur Farbe/Deckkraft ändert sich
-        'border-b',
-        scrolled
-          ? 'border-emerald-800/15 dark:border-emerald-300/15'
-          : 'border-transparent',
-        // Konstante Höhe innen -> kein Zucken
-        'bg-white/70 dark:bg-zinc-900/50 backdrop-blur supports-[backdrop-filter]:bg-white/40',
-        // Nur visuelle Transition (kein Layout)
-        'transition-colors'
+        'sticky top-0 z-50 w-full transition-colors transform-gpu',
+        isHome && !scrolled ? transparentHeader : solidHeader
       ].join(' ')}
-      style={{ willChange: 'box-shadow, background-color' }}
     >
-      {/* feste Höhe = kein Layout-Shift */}
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 h-14">
-        {/* Sidebar Toggle (mobil) */}
         <button
           type="button"
           aria-label={isSidebarOpen ? 'Menü schließen' : 'Menü öffnen'}
@@ -56,17 +55,10 @@ export default function Header({ isSidebarOpen, onToggleSidebar, onCloseSidebar 
           onClick={onToggleSidebar}
           className={`${iconBtn} md:hidden relative`}
         >
-          <FaBars
-            className={`text-[18px] transition-opacity ${isSidebarOpen ? 'opacity-0 absolute' : 'opacity-100'}`}
-            aria-hidden
-          />
-          <FaXmark
-            className={`text-[18px] transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 absolute'}`}
-            aria-hidden
-          />
+          <FaBars className={`text-[18px] transition-opacity ${isSidebarOpen ? 'opacity-0 absolute' : 'opacity-100'}`} aria-hidden />
+          <FaXmark className={`text-[18px] transition-opacity ${isSidebarOpen ? 'opacity-100' : 'opacity-0 absolute'}`} aria-hidden />
         </button>
 
-        {/* Titel – neutraler, maximaler Kontrast */}
         <div className="flex min-w-0 flex-1 items-center justify-center md:justify-start">
           <Link
             href="/"
@@ -83,15 +75,6 @@ export default function Header({ isSidebarOpen, onToggleSidebar, onCloseSidebar 
           <ThemeToggle />
         </div>
       </div>
-
-      {/* Schatten nur als optische Tiefe, ohne Höhe zu ändern */}
-      <div
-        className={[
-          'pointer-events-none h-0',
-          scrolled ? 'shadow-[0_1px_12px_rgb(0_0_0/0.08)]' : 'shadow-none',
-          'transition-shadow'
-        ].join(' ')}
-      />
     </header>
   );
 }
