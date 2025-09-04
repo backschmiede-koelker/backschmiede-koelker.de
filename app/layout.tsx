@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Providers } from './providers/theme-provider';
 import LayoutWrapper from "./components/layout-wrapper";
+import Footer from "./components/footer"; 
 import { localBusinessJsonLd } from "./lib/seo";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -13,6 +14,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         { /* delete for auto theme*/ }
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>
+          <div className="ml-0 md:ml-72">
+            <Footer />
+          </div>
         { /* delete for auto theme*/ }
         </Providers>
       </body>

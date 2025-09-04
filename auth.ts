@@ -4,30 +4,29 @@ import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  session: { 
+  session: {
     strategy: "jwt",
-    maxAge: 60 * 60 * 8
+    maxAge: 60 * 60 * 8, // 8h
   },
   providers: [
     Credentials({
-      name: "Email & Passwort",
+      name: "Login",
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Benutzername", type: "text" },
         password: { label: "Passwort", type: "password" },
       },
       async authorize(c) {
-        const email = String(c?.email ?? "").trim()
+        const username = String(c?.username ?? "").trim()
         const password = String(c?.password ?? "")
+        if (!username || !password) return null
 
-        if (!email || !password) return null
-
-        const user = await prisma.user.findUnique({ where: { email } })
+        const user = await prisma.user.findUnique({ where: { username } })
         if (!user) return null
 
         const ok = await bcrypt.compare(password, user.passwordHash)
         if (!ok) return null
 
-        return { id: user.id, email: user.email, name: user.email, role: user.role }
+        return { id: user.id, name: user.username, role: user.role }
       },
     }),
   ],

@@ -48,3 +48,10 @@ npm start
 Update Prod-Website:
 
 merge changes into main -> github actions updates website
+
+## How to change admin password:
+
+```bash
+# Set ADMIN_PASSWORD in .env
+npx prisma db seed
+```

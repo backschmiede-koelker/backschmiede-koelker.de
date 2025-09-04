@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { FaListUl, FaTag, FaChevronRight, FaShieldHalved } from "react-icons/fa6";
+import { FaListUl, FaTag, FaChevronRight, FaShieldHalved, FaRightFromBracket  } from "react-icons/fa6";
+import { signOut } from "@/auth"
 
 function AdminTile({
   href,
@@ -67,20 +68,37 @@ function AdminTile({
 }
 
 export default function AdminHome() {
+  async function logout() {
+    "use server"
+    await signOut({ redirectTo: "/" })
+  }
+
   return (
     <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-      {/* Header */}
       <header className="mb-6 md:mb-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 dark:border-emerald-300/15 bg-white/70 dark:bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
-          <FaShieldHalved aria-hidden />
-          Backschmiede · Admin-Bereich
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 dark:border-emerald-300/15 bg-white/70 dark:bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
+              <FaShieldHalved aria-hidden />
+              Backschmiede · Admin-Bereich
+            </div>
+            <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">Verwaltung</h1>
+            <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
+              Produkte und Angebote pflegen - schnell und übersichtlich.
+            </p>
+          </div>
+
+          {/* Logout als Server Action */}
+          <form action={logout}>
+            <button
+              className="inline-flex items-center gap-2 rounded-xl border border-emerald-800/10 dark:border-emerald-300/15 bg-white/80 dark:bg-white/10 px-3 py-2 text-sm shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition"
+              title="Abmelden"
+            >
+              <FaRightFromBracket className="opacity-80" />
+              Abmelden
+            </button>
+          </form>
         </div>
-        <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
-          Verwaltung
-        </h1>
-        <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
-          Produkte und Angebote pflegen - schnell und übersichtlich.
-        </p>
       </header>
 
       {/* Kachel-Grid */}

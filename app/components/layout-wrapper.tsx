@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Header from './header';
-import Footer from './footer';
 import Sidebar from './sidebar';
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -37,8 +36,6 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
             </div>
           )}
         </main>
-
-        <Footer />
       </div>
     </div>
   );

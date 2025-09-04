@@ -1,18 +1,29 @@
-import { PrismaClient } from "@prisma/client"
-import bcrypt from "bcryptjs"
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
-const db = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
-  const email = "admin@backschmiede.de"
-  const passwordHash = await bcrypt.hash("admin123", 10)
+  // delete all users -> only one admin is allowed
+  await prisma.user.deleteMany();
 
-  await db.user.upsert({
-    where: { email },
-    update: {},
-    create: { email, passwordHash, role: "ADMIN" },
-  })
-  console.log("Admin:", email, "Passwort: admin123")
+  const USERNAME = process.env.ADMIN_USERNAME?.trim() || null;
+  const PASS     = process.env.ADMIN_PASSWORD;
+  if (!PASS) throw new Error("ADMIN_PASSWORD missing in .env");
+
+  const passwordHash = await bcrypt.hash(PASS, 12);
+
+  await prisma.user.create({
+    data: {
+      username: USERNAME || "admin",
+      passwordHash,
+      role: "ADMIN",
+    },
+  });
+
+  console.log("Admin neu angelegt");
 }
 
-main().finally(() => db.$disconnect())
+main()
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(async () => { await prisma.$disconnect(); });

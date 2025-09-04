@@ -1,6 +1,11 @@
 export const metadata = { title: "Admin | Backschmiede" };
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") redirect("/login");
+  
   return (
     <section
       className={[
