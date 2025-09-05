@@ -32,6 +32,15 @@ enum Location {
   METTINGEN
 }
 
+enum OfferProductRole {
+  QUALIFIER           // Muss gekauft werden, um das Angebot auszulösen
+  REWARD_FREE         // Gratis-Position (Stückzahl > 0, Preis = 0)
+  REWARD_DISCOUNTED   // Vergünstigte Position (perItemPriceCents festgelegt)
+  BUNDLE_COMPONENT    // Bestandteil eines Sets mit Gesamtpreis (Offer.priceCents)
+  CHOICE_QUALIFIER    // Qualifizierer: „eins/mehrere zur Wahl“ (aus einer Liste)
+  CHOICE_REWARD       // Belohnung: „eins/mehrere zur Wahl“ (aus einer Liste)
+}
+
 model User {
   id           String   @id @default(cuid())
   username     String   @unique
@@ -52,7 +61,8 @@ model Product {
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  offers     Offer[]  @relation("ProductOffers")
+
+  offerLinks OfferProduct[]
 
   @@index([isActive, createdAt])     // Listenansichten „nur aktive, neueste zuerst“
   @@index([name])                    // einfache Textsuche (LIKE/ILIKE)
@@ -64,6 +74,7 @@ model Offer {
   title       String
   description String?
   priceCents  Int?
+  originalPriceCents Int?  
   unit        String?
   imageUrl    String?
   tags        String[]
@@ -79,8 +90,7 @@ model Offer {
   locations   Location[]
   priority    Int        @default(0)
 
-  productId   String?
-  product     Product?   @relation("ProductOffers", fields: [productId], references: [id])
+  products    OfferProduct[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -92,6 +102,19 @@ model Offer {
   @@index([priority, createdAt]) 
 }
 
+model OfferProduct {
+  offerId   String
+  productId String
+  role      OfferProductRole
+  quantity  Int                 @default(1)
+  perItemPriceCents Int?
+
+  offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@id([offerId, productId, role])
+}
+
 // Optional: zentrale Textbausteine (falls du *nicht* inline auf der Seite editierst)
 model ContentBlock {
   id        String   @id @default(cuid())
@@ -99,4 +122,33 @@ model ContentBlock {
   content   String   // Markdown/HTML/Plain
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+}
+
+model Pageview {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+
+  path         String
+  referrerHost String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+
+  lang         String?  // z.B. "de"
+  device       String?  // "desktop" | "mobile" | "tablet"
+  browser      String?  // z.B. "Chrome 126" | "Safari"
+  country      String?  // ISO-CC, z.B. "DE"
+
+  sessionId    String?  // kurzlebige, anonyme Session-ID (Cookie)
+  ipHash       String?  // tagesbasierter Hash (ohne echte IP)
+  isBot        Boolean  @default(false)
+  isAdmin      Boolean  @default(false)
+
+  @@index([createdAt])
+  @@index([path, createdAt])
+  @@index([referrerHost])
+  @@index([utmSource, utmMedium, utmCampaign])
+  @@index([device])
+  @@index([browser])
+  @@index([lang])
 }

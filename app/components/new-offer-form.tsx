@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { OfferKind, Weekday, Location } from "@prisma/client";
 import SelectBox from "./select-box";
 import ImageUploader from "./image-uploader";
+import OfferProductsEditor from "./offer-products-editor";
 import { PRICE_RE, parseEuroToCents } from "../lib/format";
 import { parseTags } from "../lib/tags";
 
@@ -27,6 +28,7 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDesc] = useState("");
   const [priceEuro, setPriceEuro] = useState("");
+  const [originalPriceEuro, setOriginalPriceEuro] = useState("");
   const [unit, setUnit] = useState("pro Stück");
   const [customUnitMode, setCustomUnitMode] = useState(false);
   const [customUnit, setCustomUnit] = useState("");
@@ -43,8 +45,13 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
   const [saving, setSaving] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
 
+  const [linked, setLinked] = useState<any[]>([]); // OfferProductsEditor: {product, role, quantity, perItemPriceCents}
+
   const priceCentsNew = parseEuroToCents(priceEuro);
+  const origCents = parseEuroToCents(originalPriceEuro || "");
   const priceInvalidNew = Number.isNaN(priceCentsNew);
+  const origInvalid = originalPriceEuro !== "" && Number.isNaN(origCents);
+
   const hasTitle = !!title.trim();
   const hasImage = !!imageUrl;
   const unitOk = customUnitMode ? !!customUnit.trim() : !!unit.trim();
@@ -52,7 +59,7 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
     (kind === OfferKind.DATE_RANGE && !!startDate && !!endDate) ||
     (kind === OfferKind.ONE_DAY && !!date) ||
     (kind === OfferKind.RECURRING_WEEKDAY && !!weekday);
-  const formValid = hasTitle && !priceInvalidNew && unitOk && hasImage && kindOk;
+  const formValid = hasTitle && !priceInvalidNew && !origInvalid && unitOk && hasImage && kindOk;
 
   function addTagFromInput() {
     const parts = parseTags(tagInput);
@@ -82,7 +89,8 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
       const payload: any = {
         title: title.trim(),
         description: description.trim() || null,
-        priceCents: priceCentsNew,
+        priceCents: priceCentsNew, // JETZT-Preis
+        originalPriceCents: originalPriceEuro === "" ? null : origCents, // STATT-Preis
         unit: unitFinal,
         imageUrl: imageUrl || null,
         tags: chosenTags,
@@ -90,6 +98,12 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
         kind,
         locations,
         priority: priority === "" ? 0 : Number(priority),
+        products: linked.map((l: any) => ({
+          productId: l.product.id,
+          role: l.role,
+          quantity: l.quantity,
+          perItemPriceCents: l.perItemPriceCents ?? null
+        })),
       };
       if (kind === OfferKind.RECURRING_WEEKDAY) payload.weekday = weekday;
       if (kind === OfferKind.ONE_DAY) payload.date = date;
@@ -107,11 +121,12 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
       }
 
       // reset
-      setTitle(""); setDesc(""); setPriceEuro("");
+      setTitle(""); setDesc(""); setPriceEuro(""); setOriginalPriceEuro("");
       setUnit("pro Stück"); setCustomUnitMode(false); setCustomUnit("");
       setImageUrl(""); setTagInput(""); setChosenTags([]);
       setWeekday(""); setDate(""); setStart(""); setEnd("");
       setLocations([]); setPriority(""); setActive(true); setKind(OfferKind.DATE_RANGE);
+      setLinked([]);
       setShowErrors(false);
       onCreated?.();
     } finally {
@@ -134,10 +149,11 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
         />
       </div>
 
-      {/* Preis + Einheit */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      {/* Preise + Einheit */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        {/* Jetzt-Preis */}
         <div className="space-y-1">
-          <label className="text-sm font-medium">Preis</label>
+          <label className="text-sm font-medium">Jetzt-Preis</label>
           <div className="relative">
             <input
               inputMode="decimal"
@@ -156,7 +172,29 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
           </div>
         </div>
 
+        {/* Statt-Preis (optional) */}
         <div className="space-y-1">
+          <label className="text-sm font-medium">Statt-Preis (optional)</label>
+          <div className="relative">
+            <input
+              inputMode="decimal"
+              className={`w-full rounded-md border px-3 py-2 pr-10 bg-white dark:bg-zinc-800 ${showErrors && origInvalid ? "ring-1 ring-red-400" : ""}`}
+              placeholder="0,00"
+              value={originalPriceEuro}
+              onChange={e => {
+                const v = e.target.value.replace(/\./g, ",");
+                if (v === "" || PRICE_RE.test(v)) {
+                  setOriginalPriceEuro(v);
+                  if (showErrors) setShowErrors(false);
+                }
+              }}
+            />
+            <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-sm text-zinc-500">€</span>
+          </div>
+        </div>
+
+        {/* Einheit */}
+        <div className="space-y-1 lg:col-span-2">
           <label className="text-sm font-medium">Einheit</label>
 
           {!customUnitMode ? (
@@ -202,24 +240,6 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Priorität + Aktiv */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Status & Priorität</label>
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={isActive} onChange={e => setActive(e.target.checked)} />
-              Aktiv
-            </label>
-            <input
-              className="w-28 rounded-md border px-3 py-2 bg-white dark:bg-zinc-800"
-              type="number"
-              placeholder="Priorität"
-              value={priority}
-              onChange={e => setPriority(e.target.value === "" ? "" : Number(e.target.value))}
-            />
-          </div>
         </div>
       </div>
 
@@ -347,6 +367,11 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
         )}
       </div>
 
+      {/* Verknüpfte Produkte */}
+      <div className="mt-2">
+        <OfferProductsEditor value={linked} onChange={setLinked} />
+      </div>
+
       {/* Filialen */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm opacity-70">Filialen:</span>
@@ -370,15 +395,31 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
         })}
       </div>
 
-      {/* Speichern */}
-      <div className="flex items-center justify-end">
-        <button
-          className="rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-60"
-          onClick={create}
-          disabled={saving || !formValid}
-        >
-          {saving ? "Speichere…" : "Anlegen"}
-        </button>
+      {/* Status & Priorität + Speichern */}
+      <div className="grid gap-3 sm:grid-cols-[1fr,auto] items-center">
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={isActive} onChange={e => setActive(e.target.checked)} />
+            Aktiv
+          </label>
+          <input
+            className="w-28 rounded-md border px-3 py-2 bg-white dark:bg-zinc-800"
+            type="number"
+            placeholder="Priorität"
+            value={priority}
+            onChange={e => setPriority(e.target.value === "" ? "" : Number(e.target.value))}
+          />
+        </div>
+
+        <div className="flex items-center justify-end">
+          <button
+            className="rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-60"
+            onClick={create}
+            disabled={saving || !formValid}
+          >
+            {saving ? "Speichere…" : "Anlegen"}
+          </button>
+        </div>
       </div>
     </section>
   );

@@ -57,7 +57,7 @@ export default function AdminOffers() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl p-4 sm:p-6 space-y-8">
+    <main className="mx-auto w-full max-w-6xl p-4 sm:p-6 space-y-8">
       <header>
         <h1 className="text-2xl font-semibold">Angebote</h1>
       </header>
@@ -70,15 +70,15 @@ export default function AdminOffers() {
 
       {/* Filterzeile */}
       <section className="space-y-4">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between min-w-0">
           <input
-            className="w-full sm:w-80 rounded-md border px-3 py-2 bg-white dark:bg-zinc-800"
+            className="w-full sm:max-w-xs rounded-md border px-3 py-2 bg-white dark:bg-zinc-800"
             placeholder="Suche (Titel oder Tag)…"
             value={q}
             onChange={e => setQ(e.target.value)}
           />
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 min-w-0">
             {/* Standort-Filter */}
             {([Location.RECKE, Location.METTINGEN] as const).map(l => {
               const active = locFilter.includes(l);

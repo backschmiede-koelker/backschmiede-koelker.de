@@ -51,7 +51,7 @@ export default function SelectBox({ value, onChange, options, placeholder, disab
       {open && (
         <div
           role="listbox"
-          className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md border bg-white ring-1 ring-zinc-200 shadow-lg dark:border-zinc-700 dark:bg-zinc-800 dark:ring-zinc-700"
+          className="absolute z-20 mt-1 max-h-56 w-full max-w-full overflow-auto rounded-md border bg-white ring-1 ring-zinc-200 shadow-lg dark:border-zinc-700 dark:bg-zinc-800 dark:ring-zinc-700"
         >
           {options.map(opt => {
             const active = opt === value
