@@ -1,3 +1,4 @@
+// app/components/layout-wrapper.tsx
 'use client';
 
 import { useState, useEffect } from 'react';

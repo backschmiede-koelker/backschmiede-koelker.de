@@ -1,7 +1,7 @@
-# 🥨 Backschmiede Kölker – Website
+# 🥨 Backschmiede Kölker - Website
 
 Willkommen im Ofen unserer digitalen Backstube!  
-Hier entsteht der frische Quellcode für [Backschmiede Kölker](https://backschmiede-koelker.de) – von Hand geknetet, mit Liebe gebacken und direkt heiß aus dem GitHub-Ofen serviert.  
+Hier entsteht der frische Quellcode für [Backschmiede Kölker](https://backschmiede-koelker.de) - von Hand geknetet, mit Liebe gebacken und direkt heiß aus dem GitHub-Ofen serviert.  
 
 ---
 

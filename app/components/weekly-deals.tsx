@@ -51,7 +51,7 @@ function rangeLabel(fromISO: string, toISO: string) {
   const from = new Date(fromISO), to = new Date(toISO);
   const f = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit' }).format(from);
   const t = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(to);
-  return `${f} – ${t}`;
+  return `${f} - ${t}`;
 }
 function roleChipText(link: OfferProductLink) {
   const q = `${link.quantity}×`;
@@ -196,7 +196,7 @@ function KindRow({ item, className = "" }: { item: OfferDetail; className?: stri
   let label = "";
   if (item.kind === "ONE_DAY") label = `Nur am ${dm(item.date)}`;
   else if (item.kind === "RECURRING_WEEKDAY" && item.weekday) label = `Jeden ${weekdayMap[item.weekday]}`;
-  else label = `Gültig ${dd(item.startDate)} – ${dd(item.endDate)}`;
+  else label = `Gültig ${dd(item.startDate)} - ${dd(item.endDate)}`;
 
   return (
     <div className={`flex flex-wrap items-center gap-2 ${className}`}>

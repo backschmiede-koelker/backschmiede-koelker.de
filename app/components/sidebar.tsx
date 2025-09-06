@@ -163,7 +163,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           {/* ---- Spacer füllt die Mitte; bleibt unsichtbar klein, nimmt nur Resthöhe ein ---- */}
           <div className="flex-1" />
 
-          {/* Standorte & Social – unten andocken, durch Border optisch abgeschlossen */}
+          {/* Standorte & Social - unten andocken, durch Border optisch abgeschlossen */}
           <div className="mt-auto space-y-3 pb-4 pt-5 xl:space-y-4 2xl:space-y-5 2xl:pt-6 2xl:pb-6 border-t border-emerald-800/10 dark:border-emerald-300/10">
             <p className="text-xs uppercase tracking-wider opacity-60">Standorte & Social</p>
 

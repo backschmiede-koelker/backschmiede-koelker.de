@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { FaListUl, FaTag, FaChevronRight, FaShieldHalved, FaRightFromBracket  } from "react-icons/fa6";
-import { signOut } from "@/auth"
+import { FaListUl, FaTag, FaChevronRight, FaShieldHalved, FaRightFromBracket, FaChartLine } from "react-icons/fa6";
+import { signOut } from "@/auth";
 
 function AdminTile({
   href,
@@ -69,8 +69,8 @@ function AdminTile({
 
 export default function AdminHome() {
   async function logout() {
-    "use server"
-    await signOut({ redirectTo: "/" })
+    "use server";
+    await signOut({ redirectTo: "/" });
   }
 
   return (
@@ -116,6 +116,13 @@ export default function AdminHome() {
           subtitle="Tages-/Wochen-Deals, Zeiträume & Filialen steuern"
           Icon={FaTag}
           accent="amber"
+        />
+        <AdminTile
+          href="/admin/analytics"
+          title="Analytics"
+          subtitle="Besucher, Seiten, Quellen & Geräte"
+          Icon={FaChartLine}
+          accent="emerald"
         />
       </section>
 

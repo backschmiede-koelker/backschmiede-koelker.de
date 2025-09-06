@@ -41,7 +41,7 @@ export default function Footer() {
         <div>
           <h2 className="text-base font-semibold">Backschmiede Kölker</h2>
           <p className="mt-1 text-sm opacity-80">
-            Handwerkliche Backwaren aus Mettingen &amp; Recke – täglich frisch, mit Zeit, Herz und guten Zutaten.
+            Handwerkliche Backwaren aus Mettingen &amp; Recke - täglich frisch, mit Zeit, Herz und guten Zutaten.
           </p>
         </div>
 

@@ -45,10 +45,10 @@ export default function Page() {
 
               <p className="mt-4 text-base leading-7 text-zinc-700 dark:text-zinc-300">
                 Brote, Brötchen und Kuchen mit langer Teigführung, eigenem Sauerteig und viel Liebe.
-                Komm vorbei – wir freuen uns auf dich!
+                Komm vorbei - wir freuen uns auf dich!
               </p>
 
-              {/* CTAs: 300px zentriert, Abstand – KEIN ml-3 */}
+              {/* CTAs: 300px zentriert, Abstand - KEIN ml-3 */}
               <HeroScrollCta
                 angebotId="angebote"
                 zeitenId="oeffnungszeiten"
@@ -99,7 +99,7 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Mobile/Tablet Karten – überlappend, aber softer */}
+            {/* Mobile/Tablet Karten - überlappend, aber softer */}
             <div className="xl:hidden mt-8">
               <div className="relative mx-auto h-[300px] sm:h-[330px] md:h-[360px] w-full max-w-[420px]">
                 {/* Mettingen */}
@@ -141,7 +141,7 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Waves – schwächer auf kleinen Screens (kein Rand, kein Overflow) */}
+        {/* Waves - schwächer auf kleinen Screens (kein Rand, kein Overflow) */}
         <div className="relative">
           <svg aria-hidden viewBox="0 0 1440 140" className="block h-[56px] sm:h-[84px] lg:h-[110px] w-full" preserveAspectRatio="none">
             <path

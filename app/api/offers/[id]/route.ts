@@ -17,9 +17,10 @@ function isValidRole(v: any): v is OfferProductRole {
  * GET /api/offers/:id
  * (optional, nützlich fürs Debuggen; liefert die Links mit)
  */
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
   const item = await prisma.offer.findUnique({
-    where: { id: params.id },
+    where: { id: id },
     include: {
       products: {
         include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } },
@@ -38,7 +39,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
  *   - kind / Datumskonsistenz
  *   - falls BUNDLE_COMPONENT vorkommt -> priceCents muss gesetzt sein (Set-Preis)
  */
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
   try {
     const b = await req.json() as Partial<{
       title: string;
@@ -99,16 +101,16 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     };
 
     await prisma.$transaction(async (tx) => {
-      await tx.offer.update({ where: { id: params.id }, data });
+      await tx.offer.update({ where: { id: id }, data });
 
       // Links neu setzen
-      await tx.offerProduct.deleteMany({ where: { offerId: params.id } });
+      await tx.offerProduct.deleteMany({ where: { offerId: id } });
       if (products.length > 0) {
         await tx.offerProduct.createMany({
           data: products
             .filter(p => p && p.productId && isValidRole(p.role))
             .map((p) => ({
-              offerId: params.id,
+              offerId: id,
               productId: String(p.productId),
               role: p.role,
               quantity: Math.max(1, Number(p.quantity ?? 1)),
@@ -119,7 +121,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     });
 
     const updated = await prisma.offer.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         products: {
           include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } },
@@ -138,9 +140,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
  * DELETE /api/offers/:id
  * (OfferProduct wird durch onDelete: Cascade automatisch entfernt)
  */
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
   try {
-    await prisma.offer.delete({ where: { id: params.id } });
+    await prisma.offer.delete({ where: { id: id } });
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     if (e?.code === "P2025") return NextResponse.json({ error: "Not found" }, { status: 404 });

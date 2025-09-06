@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Datenschutz – Backschmiede Kölker',
+  title: 'Datenschutz - Backschmiede Kölker',
   description: 'Datenschutzerklärung der Backschmiede Kölker.',
 };
 
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
         <h2>7. Ihre Rechte</h2>
         <p>
           Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Widerspruch
-          gegen die Verarbeitung sowie auf Datenübertragbarkeit gemäß Art.&nbsp;15–21 DSGVO. Zudem haben Sie das
+          gegen die Verarbeitung sowie auf Datenübertragbarkeit gemäß Art.&nbsp;15-21 DSGVO. Zudem haben Sie das
           Recht, erteilte Einwilligungen jederzeit für die Zukunft zu widerrufen (Art.&nbsp;7 Abs.&nbsp;3 DSGVO).
           Sie haben ferner das Recht auf Beschwerde bei einer Aufsichtsbehörde (Art.&nbsp;77 DSGVO).
         </p>

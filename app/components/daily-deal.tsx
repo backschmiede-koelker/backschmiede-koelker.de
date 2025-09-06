@@ -74,7 +74,7 @@ function weekdayLabel(w?: Weekday | null) {
 function kindBadge(o: Pick<OfferDetail, "kind"|"weekday"|"date"|"startDate"|"endDate">) {
   if (o.kind === "ONE_DAY") return `Nur am ${formatDay(o.date)}`;
   if (o.kind === "RECURRING_WEEKDAY") return `Jeden ${weekdayLabel(o.weekday!)}`;
-  return `Gültig ${formatDateISO(o.startDate)} – ${formatDateISO(o.endDate)}`;
+  return `Gültig ${formatDateISO(o.startDate)} - ${formatDateISO(o.endDate)}`;
 }
 function qtyLabel(q: number) { return `${q}×`; }
 function groupsByRole(links: OfferProductLink[]) {

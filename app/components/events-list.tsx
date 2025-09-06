@@ -10,7 +10,7 @@ export default function EventsList() {
           <h3 className="font-semibold">{e.title}</h3>
           <p className="text-sm opacity-80">
             {fmtDate(e.start, { weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-            {e.end && ` – ${fmtDate(e.end, { hour: '2-digit', minute: '2-digit' })}`}
+            {e.end && ` - ${fmtDate(e.end, { hour: '2-digit', minute: '2-digit' })}`}
           </p>
           {e.location && <p className="text-sm">📍 {e.location}</p>}
           {e.description && <p className="text-sm mt-1">{e.description}</p>}

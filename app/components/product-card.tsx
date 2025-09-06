@@ -169,7 +169,7 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
         </div>
         </div>
 
-        {/* Row 2: Aktiv/Inaktiv – volle Breite */}
+        {/* Row 2: Aktiv/Inaktiv - volle Breite */}
         <div className="col-span-2">
         <div className="mt-4 grid grid-cols-1 gap-2 lg:grid-cols-3">
             <div>
@@ -191,7 +191,7 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
         </div>
         </div>
 
-        {/* Row 3: Aktionen – volle Breite */}
+        {/* Row 3: Aktionen - volle Breite */}
         <div className="col-span-2">
             <div className="mt-4 flex flex-col gap-5 sm:flex-row">
                 <button

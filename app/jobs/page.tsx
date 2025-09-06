@@ -5,7 +5,7 @@ export default function Page() {
       <h1 className="text-3xl font-bold">Stellenangebote</h1>
       <div className="space-y-4">
         <div className="rounded-xl p-4 bg-white dark:bg-zinc-800 shadow">
-          <h3 className="font-semibold">Bäckereifachverkäufer/in (m/w/d) – Teilzeit</h3>
+          <h3 className="font-semibold">Bäckereifachverkäufer/in (m/w/d) - Teilzeit</h3>
           <p className="text-sm opacity-80">Standorte: Mettingen & Recke · ab sofort</p>
           <ul className="list-disc list-inside text-sm mt-2">
             <li>Kundenberatung, Thekenverkauf, Kasse</li>
@@ -13,7 +13,7 @@ export default function Page() {
           </ul>
         </div>
         <div className="rounded-xl p-4 bg-white dark:bg-zinc-800 shadow">
-          <h3 className="font-semibold">Bäcker/in (m/w/d) – Vollzeit</h3>
+          <h3 className="font-semibold">Bäcker/in (m/w/d) - Vollzeit</h3>
           <p className="text-sm opacity-80">Backstube Mettingen · ab Q4</p>
         </div>
       </div>

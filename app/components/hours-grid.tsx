@@ -201,7 +201,7 @@ function WeekTable({
                 </span>
               </div>
 
-              {/* Zeiten – Zeilenumbrüche nach Komma */}
+              {/* Zeiten - Zeilenumbrüche nach Komma */}
               <div className="px-2 py-1">
                 <span
                   className={isToday ? "text-emerald-900/90 dark:text-emerald-100" : "text-zinc-700 dark:text-zinc-300"}

@@ -153,9 +153,9 @@ export default function ProductGrid() {
             {/* Sortierung */}
             <div className="min-w-0">
               <SelectBox
-                value={sort === "name_asc" ? "Name A–Z" : "Neueste"}
+                value={sort === "name_asc" ? "Name A-Z" : "Neueste"}
                 onChange={(v) => setSort(v === "Neueste" ? "newest" : "name_asc")}
-                options={["Name A–Z", "Neueste"]}
+                options={["Name A-Z", "Neueste"]}
                 ariaLabel="Sortierung"
               />
             </div>
