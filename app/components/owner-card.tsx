@@ -1,3 +1,4 @@
+// /app/components/owner-card.tsx
 export default function OwnerCard() {
   return (
     <div className="rounded-2xl overflow-hidden bg-white dark:bg-zinc-800 shadow grid md:grid-cols-3">

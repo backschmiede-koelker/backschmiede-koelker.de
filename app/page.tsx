@@ -1,3 +1,4 @@
+// /app/page.tsx
 import Image from "next/image";
 import { Suspense } from "react";
 import { FaWheatAwn, FaLeaf, FaHeart } from "react-icons/fa6";
@@ -7,25 +8,22 @@ import DailyDeal from "./components/daily-deal";
 import WeeklyDeals from "./components/weekly-deals";
 import Hours from "./components/hours";
 import TgtgCta from "./components/tgtg-cta";
+import News from "./components/news";
 
 export default function Page() {
   return (
     <>
-      {/* HERO: keine w-screen/translate Hacks nötig, volle Breite kommt vom Layout */}
+      {/* HERO */}
       <section
         aria-labelledby="hero-title"
         className={[
-          'relative',
-          '-mt-14 pt-14',
-          'isolate overflow-hidden',
-          'bg-gradient-to-b from-emerald-100 via-amber-100/50 to-emerald-200/70',
-          'dark:from-green-950 dark:via-zinc-900/80 dark:to-green-900',
-        ].join(' ')}
+          "relative",
+          "-mt-14 pt-14",
+          "isolate overflow-hidden",
+          "bg-gradient-to-b from-emerald-100 via-amber-100/50 to-emerald-200/70",
+          "dark:from-green-950 dark:via-zinc-900/80 dark:to-green-900",
+        ].join(" ")}
       >
-        {/* weiche Blobs */}
-        <div className="pointer-events-none absolute -top-40 -left-40 h-[22rem] w-[22rem] rounded-full bg-amber-300/30 blur-[110px] dark:bg-amber-400/15" />
-        <div className="pointer-events-none absolute -bottom-44 -right-44 h-[26rem] w-[26rem] rounded-full bg-emerald-300/30 blur-[120px] dark:bg-teal-700/15" />
-
         <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="grid min-h-[68vh] grid-cols-1 items-center gap-8 py-10 sm:py-14 xl:min-h-[72vh] xl:grid-cols-[1fr,0.95fr]">
             {/* Text */}
@@ -48,7 +46,7 @@ export default function Page() {
                 Komm vorbei - wir freuen uns auf dich!
               </p>
 
-              {/* CTAs: 300px zentriert, Abstand - KEIN ml-3 */}
+              {/* CTA: scrollt zu #angebote */}
               <HeroScrollCta
                 angebotId="angebote"
                 zeitenId="oeffnungszeiten"
@@ -71,7 +69,7 @@ export default function Page() {
               </ul>
             </div>
 
-            {/* Postkarten: md HIDDEN (verhindert Rechts-Überlauf), xl sichtbar */}
+            {/* Postkarten (xl sichtbar) */}
             <div className="relative hidden xl:block">
               <div className="relative h-[440px] w-full">
                 {/* Mettingen */}
@@ -99,16 +97,18 @@ export default function Page() {
               </div>
             </div>
 
-            {/* Mobile/Tablet Karten - überlappend, aber softer */}
+            {/* Mobile/Tablet Karten */}
             <div className="xl:hidden mt-8">
               <div className="relative mx-auto h-[300px] sm:h-[330px] md:h-[360px] w-full max-w-[420px]">
                 {/* Mettingen */}
-                <div className="
+                <div
+                  className="
                   absolute left-0
                   top-8 md:top-10
                   w-[70%] sm:w-[72%] md:w-[74%]
                   rotate-[-3deg] sm:rotate-[-3.5deg] lg:rotate-[-4deg]
-                ">
+                "
+                >
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-800/10 bg-white/60 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5">
                     <div className="relative aspect-[4/3] w-full">
                       <Image src="/mettingen-draussen-alt.png" alt="Mettingen" fill className="object-cover" priority />
@@ -120,12 +120,14 @@ export default function Page() {
                 </div>
 
                 {/* Recke */}
-                <div className="
+                <div
+                  className="
                   absolute right-0
                   top-0
                   w-[70%] sm:w-[72%] md:w-[74%]
                   rotate-[3deg] sm:rotate-[3.5deg] lg:rotate-[4.5deg]
-                ">
+                "
+                >
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-800/10 bg-white/60 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5">
                     <div className="relative aspect-[4/3] w-full">
                       <Image src="/recke-tuer-ballons.jpg" alt="Recke" fill className="object-cover" priority />
@@ -141,7 +143,7 @@ export default function Page() {
           </div>
         </div>
 
-        {/* Waves - schwächer auf kleinen Screens (kein Rand, kein Overflow) */}
+        {/* Waves */}
         <div className="relative">
           <svg aria-hidden viewBox="0 0 1440 140" className="block h-[56px] sm:h-[84px] lg:h-[110px] w-full" preserveAspectRatio="none">
             <path
@@ -159,14 +161,25 @@ export default function Page() {
         </div>
       </section>
 
-      <section id="angebote" className="mx-auto mt-0 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="angebote-title">
-        <h2 className="mb-4 text-center text-3xl font-bold" id="angebote-title">
-          Aktuelles &amp; Angebote
+      {/* AKTUELLES */}
+      <section id="aktuelles" className="mx-auto mt-0 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="aktuelles-title">
+        <h2 className="mb-4 text-center text-3xl font-bold" id="aktuelles-title">
+          Aktuelles
         </h2>
 
-        {/* Tagesangebote (DailyDeal) */}
+        <div className="rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
+          <News />
+        </div>
+      </section>
+
+      {/* ANGEBOTE */}
+      <section id="angebote" className="mx-auto mt-10 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="angebote-title">
+        <h2 className="mb-4 text-center text-3xl font-bold" id="angebote-title">
+          Angebote
+        </h2>
+
+        {/* Tagesangebote */}
         <div className="relative overflow-hidden rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
-          <div className="pointer-events-none absolute -top-6 -right-6 h-24 w-24 rounded-full bg-amber-300/18 blur-[42px] dark:bg-amber-400/15" />
           <Suspense fallback={<div className="text-sm opacity-70">Lade Tagesangebote…</div>}>
             <DailyDeal />
           </Suspense>
@@ -179,13 +192,29 @@ export default function Page() {
           </Suspense>
 
           <div className="mt-8">
-            <TgtgCta locations={[{ key:'RECKE', label:'Recke', mapsUrl:'...', windows:[{day:'Mo-Fr', time:'17:00-18:00'}]}]} />
+            <TgtgCta
+              locations={[
+                {
+                  key: "RECKE",
+                  label: "Recke",
+                  mapsUrl: "...",
+                  windows: [{ day: "Mo-Fr", time: "17:00-18:00" }],
+                },
+              ]}
+            />
           </div>
         </div>
       </section>
 
-      <section id="oeffnungszeiten" className="mx-auto mt-12 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="oeffnungszeiten-title">
-        <h2 className="mb-4 text-center text-3xl font-bold" id="oeffnungszeiten-title">Öffnungszeiten</h2>
+      {/* ÖFFNUNGSZEITEN */}
+      <section
+        id="oeffnungszeiten"
+        className="mx-auto mt-12 w-full max-w-5xl px-4 scroll-mt-20"
+        aria-labelledby="oeffnungszeiten-title"
+      >
+        <h2 className="mb-4 text-center text-3xl font-bold" id="oeffnungszeiten-title">
+          Öffnungszeiten
+        </h2>
         <div className="rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
           <Hours />
         </div>

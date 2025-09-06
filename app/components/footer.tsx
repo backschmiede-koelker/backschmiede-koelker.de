@@ -1,3 +1,4 @@
+// /app/components/footer.tsx
 import Link from "next/link";
 import { FaEnvelope, FaLock } from "react-icons/fa6";
 

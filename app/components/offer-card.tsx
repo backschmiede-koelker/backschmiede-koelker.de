@@ -1,3 +1,4 @@
+// /app/components/offer-card.tsx
 "use client";
 import { useMemo, useState } from "react";
 import { Offer, OfferKind, Weekday, Location } from "@prisma/client";

@@ -1,3 +1,4 @@
+// /app/hooks/use-products.tsx
 "use client"
 import { useEffect, useState } from "react"
 import { Product } from "../types/product"

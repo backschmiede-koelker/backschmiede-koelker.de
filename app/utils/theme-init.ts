@@ -1,3 +1,4 @@
+// /app/utils/theme-init.ts
 export function setInitialTheme() {
   try {
     const stored = localStorage.getItem('theme');

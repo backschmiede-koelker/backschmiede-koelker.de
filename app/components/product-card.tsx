@@ -1,3 +1,4 @@
+// /app/components/product-card.tsx
 "use client"
 import { useMemo, useState } from "react"
 import { Product } from "../types/product"

@@ -1,3 +1,4 @@
+// /app/components/instagram-embed.tsx
 'use client';
 import Script from 'next/script';
 

@@ -1,3 +1,4 @@
+// /app/components/offer-products-editor.tsx
 "use client";
 import { useEffect, useState } from "react";
 import { OfferProductRole } from "@prisma/client";

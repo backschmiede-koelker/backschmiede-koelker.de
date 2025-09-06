@@ -1,5 +1,5 @@
+// /app/components/hours-grid.tsx
 'use client';
-
 import * as React from 'react';
 
 type Place = { title: string; lines: string[]; source?: string };

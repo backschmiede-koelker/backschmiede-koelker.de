@@ -1,3 +1,4 @@
+// /app/owner/page.tsx
 import OwnerCard from '../components/owner-card';
 
 export default function Page() {

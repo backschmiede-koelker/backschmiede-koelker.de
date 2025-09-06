@@ -1,5 +1,5 @@
+// /app/components/hero-scroll-cta.tsx
 'use client';
-
 type Props = {
   angebotId: string;
   zeitenId: string;
@@ -18,7 +18,7 @@ export default function HeroScrollCta({ angebotId, zeitenId, className }: Props)
         onClick={() => scrollToId(angebotId)}
         className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-emerald-700 hover:shadow-md active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50"
       >
-        Aktuelles &amp; Angebote
+        Angebote
       </button>
 
       <button

@@ -1,3 +1,4 @@
+// /app/lib/places.ts
 import { locations } from '../data/locations'
 
 export const PLACES_REVALIDATE = 60 * 60 * 6 // 6h

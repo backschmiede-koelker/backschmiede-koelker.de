@@ -1,3 +1,4 @@
+// /app/products/page.tsx
 import ProductGrid from "../components/product-grid"
 
 export default function Page() {

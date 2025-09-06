@@ -1,3 +1,4 @@
+// /app/components/daily-deal.tsx
 import { headers } from "next/headers";
 import { euro } from "../lib/format";
 

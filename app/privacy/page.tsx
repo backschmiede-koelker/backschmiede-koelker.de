@@ -1,3 +1,4 @@
+// /app/privacy/page.tsx
 export const metadata = {
   title: 'Datenschutz - Backschmiede Kölker',
   description: 'Datenschutzerklärung der Backschmiede Kölker.',

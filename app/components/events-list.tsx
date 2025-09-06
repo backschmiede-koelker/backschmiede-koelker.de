@@ -1,3 +1,4 @@
+// /app/components/events-list.tsx
 import { events } from '../data/events';
 import { fmtDate } from '../lib/time';
 

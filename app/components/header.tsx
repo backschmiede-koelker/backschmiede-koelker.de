@@ -1,5 +1,5 @@
+// /app/components/header.tsx
 'use client';
-
 import Link from 'next/link';
 import ThemeToggle from './theme-toggle';
 import { FaBars, FaXmark } from 'react-icons/fa6';

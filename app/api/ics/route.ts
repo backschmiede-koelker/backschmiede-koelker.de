@@ -1,6 +1,7 @@
 // maybe create ics file
 
 /*
+// /app/api/ics/route.ts
 import { NextResponse } from 'next/server';
 import { events } from '../../data/events';
 

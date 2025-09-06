@@ -1,3 +1,4 @@
+// /app/lib/seo.ts
 const SITE_URL = "https://backschmiede-koelker.de";
 
 export function localBusinessJsonLd() {

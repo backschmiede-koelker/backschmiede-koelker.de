@@ -1,3 +1,4 @@
+// /app/lib/time.ts
 export function getISOWeek(date = new Date()) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const day = d.getUTCDay() || 7;

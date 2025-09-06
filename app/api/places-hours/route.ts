@@ -1,3 +1,4 @@
+// /app/api/places-hours/route.ts
 import { NextResponse } from 'next/server';
 import { readPlacesHours, PLACES_REVALIDATE } from '../../lib/places';
 

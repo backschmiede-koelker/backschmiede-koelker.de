@@ -1,3 +1,4 @@
+// /app/data/events.ts
 export type Event = {
   id: string;
   title: string;

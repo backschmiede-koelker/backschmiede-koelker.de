@@ -1,3 +1,4 @@
+// /app/components/weekly-deals.tsx
 import { headers } from "next/headers";
 import { formatEUR } from "../lib/format";
 

@@ -1,3 +1,4 @@
+// /app/components/hours.tsx
 import HoursGrid from './hours-grid';
 import { readPlacesHours } from '../lib/places';
 

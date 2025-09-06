@@ -1,3 +1,4 @@
+// /app/admin/page.tsx
 import Link from "next/link";
 import { FaListUl, FaTag, FaChevronRight, FaShieldHalved, FaRightFromBracket, FaChartLine } from "react-icons/fa6";
 import { signOut } from "@/auth";

@@ -1,3 +1,4 @@
+// /app/jobs/page.tsx
 export default function Page() {
   const mail = process.env.MAIL_TO || 'info@deine-domain.de';
   return (

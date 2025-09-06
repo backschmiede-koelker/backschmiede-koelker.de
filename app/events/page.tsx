@@ -1,3 +1,4 @@
+// /app/events/page.tsx
 import EventsList from '../components/events-list';
 
 export default function Page() {

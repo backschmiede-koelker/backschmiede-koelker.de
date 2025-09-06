@@ -1,3 +1,4 @@
+// /app/lib/format.ts
 export const PRICE_RE = /^[0-9]*([,.][0-9]{0,2})?$/;
 
 export function euro(nCents: number) {

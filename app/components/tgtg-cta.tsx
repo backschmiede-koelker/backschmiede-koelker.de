@@ -1,5 +1,5 @@
+// /app/components/tgtg-cta.tsx
 'use client';
-
 import * as React from 'react';
 
 type PickupWindow = { day: string; time: string };

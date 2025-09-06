@@ -1,3 +1,4 @@
+// /app/imprint/page.tsx
 export const metadata = {
   title: 'Impressum - Backschmiede Kölker',
   description: 'Impressum der Backschmiede Kölker mit Anbieterkennzeichnung und Kontakt.',

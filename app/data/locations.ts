@@ -1,3 +1,4 @@
+// /app/data/locations.ts
 import type { Location } from "@prisma/client";
 
 export type FallbackHours = {

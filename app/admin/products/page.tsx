@@ -1,3 +1,4 @@
+// /app/admin/products/page.tsx
 "use client"
 import { useMemo, useState } from "react"
 import { useProducts } from "../../hooks/use-products"

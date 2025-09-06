@@ -1,3 +1,4 @@
+// /app/components/product-grid.tsx
 "use client"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"

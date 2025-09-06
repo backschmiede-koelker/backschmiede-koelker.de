@@ -1,3 +1,4 @@
+// /app/hooks/use-offers.ts
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { Offer, Location, OfferKind, Weekday } from "@prisma/client";

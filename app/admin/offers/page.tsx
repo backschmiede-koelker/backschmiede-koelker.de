@@ -1,3 +1,4 @@
+// /app/admin/offers/page.tsx
 "use client";
 import { useMemo, useState } from "react";
 import { useOffers } from "@/app/hooks/use-offers";

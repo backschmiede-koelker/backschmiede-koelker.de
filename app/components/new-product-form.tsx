@@ -1,3 +1,4 @@
+// /app/components/new-product-form.tsx
 "use client"
 import { useState } from "react"
 import SelectBox from "./select-box"

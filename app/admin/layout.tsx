@@ -1,4 +1,4 @@
-// app/admin/layout.tsx
+// /app/admin/layout.tsx
 export const metadata = { title: "Admin | Backschmiede" };
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
