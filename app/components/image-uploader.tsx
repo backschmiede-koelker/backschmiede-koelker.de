@@ -1,50 +1,51 @@
 // /app/components/image-uploader.tsx
-"use client"
-import { useRef, useState } from "react"
+"use client";
+import { useRef, useState } from "react";
 
 type Props = {
-  imageUrl: string
-  onChange: (url: string) => void
-}
+  folder: string;
+  imageUrl: string;
+  onChange: (url: string) => void;
+};
 
-export default function ImageUploader({ imageUrl, onChange }: Props) {
-  const [uploading, setUploading] = useState(false)
-  const [dragOver, setDragOver] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
+export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   async function uploadFile(file: File) {
-    setUploading(true)
+    setUploading(true);
     try {
-      const fd = new FormData()
-      fd.append("file", file)
-      fd.append("folder", "products")
-      fd.append("nameBase", file.name.replace(/\.[^.]+$/, ""))
-      const res = await fetch("/api/upload", { method: "POST", body: fd })
-      if (!res.ok) throw new Error("Upload failed")
-      const { url } = await res.json()
-      onChange(url)
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("folder", folder); 
+      fd.append("nameBase", file.name.replace(/\.[^.]+$/, ""));
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      if (!res.ok) throw new Error("Upload failed");
+      const { url } = await res.json();
+      onChange(url);
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
   }
 
   function onDrop(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault()
-    setDragOver(false)
-    const f = e.dataTransfer.files?.[0]
-    if (f) uploadFile(f)
+    e.preventDefault();
+    setDragOver(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) uploadFile(f);
   }
 
   return (
     <div
-      onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
       onDragLeave={() => setDragOver(false)}
       onDrop={onDrop}
       className={[
         "rounded-xl border-2 border-dashed p-5 transition-colors",
         dragOver
           ? "border-amber-500 bg-amber-50/70 dark:bg-amber-900/20"
-          : `border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900`
+          : "border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900",
       ].join(" ")}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -66,7 +67,10 @@ export default function ImageUploader({ imageUrl, onChange }: Props) {
             type="file"
             accept="image/*"
             className="hidden"
-            onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f) }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) uploadFile(f);
+            }}
           />
         </div>
       </div>
@@ -95,5 +99,5 @@ export default function ImageUploader({ imageUrl, onChange }: Props) {
         </div>
       )}
     </div>
-  )
+  );
 }

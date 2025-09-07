@@ -58,7 +58,7 @@ export default function AdminOffers() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl p-4 sm:p-6 space-y-8">
+    <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0">
       <header>
         <h1 className="text-2xl font-semibold">Angebote</h1>
       </header>

@@ -10,9 +10,21 @@ type Props = {
   yLabel?: string;
   xLabel?: string;
   className?: string;
+  /** Linieninterpolation: "linear" (wie vorher) oder "smooth" (Spline) */
+  curve?: "linear" | "smooth";
+  /** Glättungsgrad für "smooth" (0..1). 0.5–0.7 ist meist ideal. */
+  tension?: number;
 };
 
-export default function LineChart({ data, maxPoints = 60, yLabel, xLabel, className }: Props) {
+export default function LineChart({
+  data,
+  maxPoints = 60,
+  yLabel,
+  xLabel,
+  className,
+  curve = "smooth",
+  tension = 0.6,
+}: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [width, setWidth] = useState(360);
@@ -69,10 +81,36 @@ export default function LineChart({ data, maxPoints = 60, yLabel, xLabel, classN
     return { maxY: step * steps, yTicks, xTicks, pts, innerW, innerH };
   }, [sampled, width, height, padding, isNarrow]);
 
-  const path = useMemo(
-    () => (pts.length ? pts.map((p, i) => `${i ? "L" : "M"} ${p.px} ${p.py}`).join(" ") : ""),
-    [pts]
-  );
+  // --- Smooth-Helper: Catmull-Rom → Bézier ---
+  function smoothPathFromPts(pts: { px: number; py: number }[], t = 0.6) {
+    const n = pts.length;
+    if (n < 2) return "";
+    const p = pts.map((q) => [q.px, q.py] as const);
+
+    const seg = (i: number) => {
+      const p0 = i === 0 ? ([2 * p[0][0] - p[1][0], 2 * p[0][1] - p[1][1]] as const) : p[i - 1];
+      const p1 = p[i];
+      const p2 = p[i + 1];
+      const p3 = i + 2 < n ? p[i + 2] : ([2 * p2[0] - p1[0], 2 * p2[1] - p1[1]] as const);
+
+      const c1x = p1[0] + (p2[0] - p0[0]) * (t / 6);
+      const c1y = p1[1] + (p2[1] - p0[1]) * (t / 6);
+      const c2x = p2[0] - (p3[0] - p1[0]) * (t / 6);
+      const c2y = p2[1] - (p3[1] - p1[1]) * (t / 6);
+      return `C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2[0]} ${p2[1]}`;
+    };
+
+    let d = `M ${p[0][0]} ${p[0][1]}`;
+    for (let i = 0; i < n - 1; i++) d += " " + seg(i);
+    return d;
+  }
+
+  const path = useMemo(() => {
+    if (!pts.length) return "";
+    if (curve === "smooth" && pts.length >= 2) return smoothPathFromPts(pts, tension);
+    // linear fallback
+    return pts.map((p, i) => `${i ? "L" : "M"} ${p.px} ${p.py}`).join(" ");
+  }, [pts, curve, tension]);
 
   const [hover, setHover] = useState<number | null>(null);
 
@@ -89,7 +127,9 @@ export default function LineChart({ data, maxPoints = 60, yLabel, xLabel, classN
   );
 
   const onMouseMove = (e: React.MouseEvent<SVGSVGElement>) => pickIndexByClientX(e.clientX);
-  const onTouchMove  = (e: React.TouchEvent<SVGSVGElement>) => { if (e.touches?.length) pickIndexByClientX(e.touches[0].clientX); };
+  const onTouchMove = (e: React.TouchEvent<SVGSVGElement>) => {
+    if (e.touches?.length) pickIndexByClientX(e.touches[0].clientX);
+  };
   const onLeave = () => setHover(null);
 
   const fmtTooltipDate = (s: string) =>
@@ -159,9 +199,9 @@ export default function LineChart({ data, maxPoints = 60, yLabel, xLabel, classN
           const x = padding.left + ((sampled.length <= 1 ? 0 : t.i / (sampled.length - 1)) * innerW);
           const y = height - padding.bottom;
           const isFirst = idx === 0;
-          const isLast  = idx === xTicks.length - 1;
-          const anchor  = isFirst ? "start" : isLast ? "end" : "middle";
-          const dx      = isFirst ? 2 : isLast ? -2 : 0;
+          const isLast = idx === xTicks.length - 1;
+          const anchor = isFirst ? "start" : isLast ? "end" : "middle";
+          const dx = isFirst ? 2 : isLast ? -2 : 0;
           return (
             <g key={`x-${t.i}`}>
               <line x1={x} x2={x} y1={padding.top} y2={y} className="stroke-zinc-100 dark:stroke-zinc-800" />
@@ -202,7 +242,15 @@ export default function LineChart({ data, maxPoints = 60, yLabel, xLabel, classN
         )}
 
         {/* Kurve */}
-        <path d={path} fill="none" stroke="currentColor" strokeWidth={2} />
+        <path
+          d={path}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          shapeRendering="geometricPrecision"
+        />
 
         {/* Hover-Linie & Tooltip */}
         {hover !== null && sampled[hover] && (
@@ -255,7 +303,8 @@ function downsampleMinMax(input: Point[], maxPoints: number): Point[] {
   const size = Math.ceil((n - 2) / buckets);
   for (let start = 1; start < n - 1; start += size) {
     const end = Math.min(n - 1, start + size);
-    let minI = start, maxI = start;
+    let minI = start,
+      maxI = start;
     for (let i = start; i < end; i++) {
       if (input[i].y < input[minI].y) minI = i;
       if (input[i].y > input[maxI].y) maxI = i;

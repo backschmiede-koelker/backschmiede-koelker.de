@@ -185,7 +185,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   const capDevice = (d: string | null) => (d ? d[0].toUpperCase() + d.slice(1) : "unknown");
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-3 sm:px-4 lg:px-8 py-6 md:py-10 overflow-x-hidden">
+    <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0 overflow-x-hidden">
       <header className="mb-4">
         <h1 className="text-xl font-bold tracking-tight sm:text-3xl">Analytics</h1>
         <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">

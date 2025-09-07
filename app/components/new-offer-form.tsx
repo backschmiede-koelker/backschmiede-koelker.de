@@ -246,7 +246,7 @@ export default function NewOfferForm({ allUnits, allTags, onCreated }: Props) {
 
       {/* Bild */}
       <div className={`${showErrors && !hasImage ? "ring-1 ring-red-400 rounded-md p-2" : ""}`}>
-        <ImageUploader imageUrl={imageUrl} onChange={setImageUrl} />
+        <ImageUploader folder="offers" imageUrl={imageUrl} onChange={setImageUrl} />
       </div>
 
       {/* Tags */}

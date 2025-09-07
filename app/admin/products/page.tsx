@@ -37,7 +37,7 @@ export default function AdminProducts() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl p-4 sm:p-6 space-y-8">
+    <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0 overflow-x-clip">
       <h1 className="text-2xl font-semibold">Produkte</h1>
 
       {/* Neues Produkt */}

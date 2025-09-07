@@ -8,7 +8,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (session?.user?.role !== "ADMIN") redirect("/login");
 
   return (
-    <section className="relative min-h-dvh">
+    <section className="relative min-h-dvh min-w-0 overflow-x-hidden">
       {children}
     </section>
   );
