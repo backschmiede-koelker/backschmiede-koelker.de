@@ -1,4 +1,4 @@
-// /prisma/shema.prisma
+// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
@@ -33,13 +33,12 @@ enum Location {
   METTINGEN
 }
 
-enum OfferProductRole {
-  QUALIFIER           // Muss gekauft werden, um das Angebot auszulösen
-  REWARD_FREE         // Gratis-Position (Stückzahl > 0, Preis = 0)
-  REWARD_DISCOUNTED   // Vergünstigte Position (perItemPriceCents festgelegt)
-  BUNDLE_COMPONENT    // Bestandteil eines Sets mit Gesamtpreis (Offer.priceCents)
-  CHOICE_QUALIFIER    // Qualifizierer: „eins/mehrere zur Wahl“ (aus einer Liste)
-  CHOICE_REWARD       // Belohnung: „eins/mehrere zur Wahl“ (aus einer Liste)
+// NEU: klare Typen – genau ein Detail-Datensatz je Offer.type
+enum OfferType {
+  GENERIC // freier Text/CTA
+  PRODUCT_NEW // „Jetzt neu: <Produkt>“
+  PRODUCT_DISCOUNT // Produkt jetzt für X € (optional statt Y €)
+  MULTIBUY_PRICE // N Stück für X € (optional: früher M für X €)
 }
 
 model User {
@@ -56,78 +55,127 @@ model Product {
   name       String
   slug       String   @unique
   priceCents Int
-  unit       String   // z.B. "pro Stück", "kg", "100g"
+  unit       String
   imageUrl   String?
-  tags       String[] // Postgres text[]
+  tags       String[]
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  offerLinks OfferProduct[]
+  // ← Gegenseiten + benannte Relationen:
+  offersNew      OfferProductNew[]      @relation("ProductToOfferProductNew")
+  offersDiscount OfferProductDiscount[] @relation("ProductToOfferProductDiscount")
+  offersMultibuy OfferMultibuyPrice[]   @relation("ProductToOfferMultibuyPrice")
 
-  @@index([isActive, createdAt])     // Listenansichten „nur aktive, neueste zuerst“
-  @@index([name])                    // einfache Textsuche (LIKE/ILIKE)
+  @@index([isActive, createdAt])
+  @@index([name])
 }
 
+// Basistabelle: Zeitraum/Standort/Priorität + grobe Infos
 model Offer {
-  id          String    @id @default(cuid())
-  slug        String    @unique
-  title       String
-  description String?
-  priceCents  Int?
-  originalPriceCents Int?  
-  unit        String?
-  imageUrl    String?
-  tags        String[]
-  isActive    Boolean   @default(true)
-  
+  id   String    @id @default(cuid())
+  slug String    @unique
+  type OfferType @default(GENERIC)
+
+  title    String
+  subtitle String?
+  imageUrl String?
+  tags     String[]
+  isActive Boolean  @default(true)
+
+  // Anzeige-Preisfelder (optional; für Produktkarten oft in Detail-Model)
+  priceCents         Int?
+  originalPriceCents Int?
+  unit               String?
+
   // Gültigkeit
-  kind        OfferKind
-  weekday     Weekday?   // nur für RECURRING_WEEKDAY
-  date        DateTime?  // nur für ONE_DAY (ganzer Tag)
-  startDate   DateTime?  // nur für DATE_RANGE
-  endDate     DateTime?  // nur für DATE_RANGE
+  kind      OfferKind
+  weekday   Weekday?
+  date      DateTime?
+  startDate DateTime?
+  endDate   DateTime?
 
-  locations   Location[]
-  priority    Int        @default(0)
+  locations Location[]
+  priority  Int        @default(0)
 
-  products    OfferProduct[]
+  // Optional: universelle Schwelle (z. B. „ab 10 € Einkaufswert“)
+  minBasketCents Int?
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  // 1:1 Detail-Relationen (genau eins davon je type)
+  generic         OfferGeneric?
+  productNew      OfferProductNew?
+  productDiscount OfferProductDiscount?
+  multibuyPrice   OfferMultibuyPrice?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([isActive, kind])
   @@index([date])
   @@index([weekday])
   @@index([startDate, endDate])
-  @@index([priority, createdAt]) 
+  @@index([priority, createdAt])
 }
 
-model OfferProduct {
-  offerId   String
-  productId String
-  role      OfferProductRole
-  quantity  Int                 @default(1)
-  perItemPriceCents Int?
+// --- Detail-Modelle je Typ ---
 
+model OfferGeneric {
+  offerId  String  @id
+  body     String?
+  ctaLabel String?
+  ctaHref  String?
+
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+}
+
+model OfferProductNew {
+  offerId        String  @id
+  productId      String
+  highlightLabel String?
+
+  // ← benannte Relation:
+  product Product @relation("ProductToOfferProductNew", fields: [productId], references: [id], onDelete: Restrict)
   offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
-
-  @@id([offerId, productId, role])
 }
 
-// Optional: zentrale Textbausteine (falls du *nicht* inline auf der Seite editierst)
+model OfferProductDiscount {
+  offerId            String  @id
+  productId          String
+  priceCents         Int
+  originalPriceCents Int?
+  unit               String?
+
+  // ← benannte Relation:
+  product Product @relation("ProductToOfferProductDiscount", fields: [productId], references: [id], onDelete: Restrict)
+  offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+}
+
+model OfferMultibuyPrice {
+  offerId           String  @id
+  productId         String
+  packQty           Int
+  packPriceCents    Int
+  comparePackQty    Int?
+  comparePriceCents Int?
+  unit              String?
+
+  // ← benannte Relation:
+  product Product @relation("ProductToOfferMultibuyPrice", fields: [productId], references: [id], onDelete: Restrict)
+  offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+}
+
+// Unverändert aus deinem Projekt (falls genutzt)
 model ContentBlock {
   id        String   @id @default(cuid())
-  slug      String   @unique // z.B. "startseite.hero"
-  content   String   // Markdown/HTML/Plain
+  slug      String   @unique
+  content   String
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 }
 
 model Pageview {
-  id           String   @id @default(cuid())
-  createdAt    DateTime @default(now())
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
 
   path         String
   referrerHost String?
@@ -135,15 +183,15 @@ model Pageview {
   utmMedium    String?
   utmCampaign  String?
 
-  lang         String?  // z.B. "de"
-  device       String?  // "desktop" | "mobile" | "tablet"
-  browser      String?  // z.B. "Chrome 126" | "Safari"
-  country      String?  // ISO-CC, z.B. "DE"
+  lang    String?
+  device  String?
+  browser String?
+  country String?
 
-  sessionId    String?  // kurzlebige, anonyme Session-ID (Cookie)
-  ipHash       String?  // tagesbasierter Hash (ohne echte IP)
-  isBot        Boolean  @default(false)
-  isAdmin      Boolean  @default(false)
+  sessionId String?
+  ipHash    String?
+  isBot     Boolean @default(false)
+  isAdmin   Boolean @default(false)
 
   @@index([createdAt])
   @@index([path, createdAt])
@@ -155,19 +203,19 @@ model Pageview {
 }
 
 model News {
-  id         String   @id @default(cuid())
-  slug       String   @unique
-  title      String
-  body       String
-  imageUrl   String?
-  tag        String?          // z. B. "Jobs", "Aktion", "Info"
-  ctaLabel   String?
-  ctaHref    String?
-  isActive   Boolean  @default(true)
-  publishedAt DateTime        // Anzeige-Datum im Frontend
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  body        String
+  imageUrl    String?
+  tag         String?
+  ctaLabel    String?
+  ctaHref     String?
+  isActive    Boolean  @default(true)
+  publishedAt DateTime
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([isActive, publishedAt])
   @@index([tag])

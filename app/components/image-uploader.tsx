@@ -10,19 +10,46 @@ type Props = {
 
 export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  async function removeCurrentImage() {
+    if (!imageUrl) return onChange("");
+    setDeleting(true);
+    try {
+      await fetch("/api/upload", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: imageUrl }),
+      }).catch(() => {});
+    } finally {
+      setDeleting(false);
+      onChange("");
+    }
+  }
 
   async function uploadFile(file: File) {
     setUploading(true);
     try {
       const fd = new FormData();
       fd.append("file", file);
-      fd.append("folder", folder); 
+      fd.append("folder", folder);
       fd.append("nameBase", file.name.replace(/\.[^.]+$/, ""));
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       if (!res.ok) throw new Error("Upload failed");
       const { url } = await res.json();
+
+      // Optional: altes Bild aufräumen (falls direkt ersetzt wird)
+      // Hinweis: Wenn der Datensatz das alte Bild noch referenziert, löscht der Server es NICHT (inUse=true).
+      if (imageUrl && imageUrl !== url) {
+        fetch("/api/upload", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: imageUrl }),
+        }).catch(() => {});
+      }
+
       onChange(url);
     } finally {
       setUploading(false);
@@ -91,8 +118,13 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
               <button type="button" onClick={() => navigator.clipboard.writeText(imageUrl)} className="text-xs underline">
                 Link kopieren
               </button>
-              <button type="button" onClick={() => onChange("")} className="text-xs underline text-red-600">
-                Bild entfernen
+              <button
+                type="button"
+                onClick={removeCurrentImage}
+                className="text-xs underline text-red-600 disabled:opacity-60"
+                disabled={deleting}
+              >
+                {deleting ? "Löscht…" : "Bild entfernen"}
               </button>
             </div>
           </div>

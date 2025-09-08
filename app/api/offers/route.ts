@@ -1,7 +1,7 @@
-// /app/api/offers/route.ts
+// app/api/offers/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { Prisma, OfferKind, Weekday, Location, OfferProductRole } from "@prisma/client";
+import { Prisma, OfferKind, Weekday, Location, OfferType } from "@prisma/client";
 
 // ====== Zeitzone Berlin ======
 const TZ = "Europe/Berlin";
@@ -29,26 +29,82 @@ function slugify(s: string) {
     .normalize("NFKD").replace(/[^\w\s-]/g,"")
     .toLowerCase().trim().replace(/\s+/g,"-").replace(/-+/g,"-");
 }
-
 async function uniqueOfferSlug(base: string) {
   const root = slugify(base) || "angebot";
-  let slug = root;
-  let i = 1;
+  let slug = root; let i = 1;
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const exists = await prisma.offer.findUnique({ where: { slug } });
     if (!exists) return slug;
-    i += 1;
-    slug = `${root}-${i}`;
+    i += 1; slug = `${root}-${i}`;
   }
 }
 
-// ==== GET /api/offers?type=daily|weekly|all&date=YYYY-MM-DD&week=YYYY-MM-DD&location=RECKE&locations=RECKE,METTINGEN
+// ====== Mapping → DTO ======
+function toDTO(item: any) {
+  const common = {
+    id: item.id,
+    type: item.type,
+    title: item.title,
+    subtitle: item.subtitle,
+    imageUrl: item.imageUrl,
+    tags: item.tags,
+    isActive: item.isActive,
+    kind: item.kind,
+    weekday: item.weekday,
+    date: item.date?.toISOString?.() ?? null,
+    startDate: item.startDate?.toISOString?.() ?? null,
+    endDate: item.endDate?.toISOString?.() ?? null,
+    locations: item.locations,
+    priority: item.priority,
+    minBasketCents: item.minBasketCents ?? null,
+  };
+
+  if (item.type === "GENERIC") {
+    return { ...common, generic: { body: item.generic?.body ?? null, ctaLabel: item.generic?.ctaLabel ?? null, ctaHref: item.generic?.ctaHref ?? null } };
+  }
+  if (item.type === "PRODUCT_NEW") {
+    return {
+      ...common,
+      productNew: item.productNew ? {
+        product: item.productNew.product,
+        highlightLabel: item.productNew.highlightLabel ?? null,
+      } : undefined
+    };
+  }
+  if (item.type === "PRODUCT_DISCOUNT") {
+    return {
+      ...common,
+      productDiscount: item.productDiscount ? {
+        product: item.productDiscount.product,
+        priceCents: item.productDiscount.priceCents,
+        originalPriceCents: item.productDiscount.originalPriceCents ?? null,
+        unit: item.productDiscount.unit ?? null,
+      } : undefined
+    };
+  }
+  if (item.type === "MULTIBUY_PRICE") {
+    return {
+      ...common,
+      multibuyPrice: item.multibuyPrice ? {
+        product: item.multibuyPrice.product,
+        packQty: item.multibuyPrice.packQty,
+        packPriceCents: item.multibuyPrice.packPriceCents,
+        comparePackQty: item.multibuyPrice.comparePackQty ?? null,
+        comparePriceCents: item.multibuyPrice.comparePriceCents ?? null,
+        unit: item.multibuyPrice.unit ?? null,
+      } : undefined
+    };
+  }
+  return common;
+}
+
+// ====== GET: Listen (daily/weekly/all) ======
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const t = (url.searchParams.get("type") || "weekly").toLowerCase();
-    const type: "daily" | "weekly" | "all" = t === "daily" ? "daily" : t === "all" ? "all" : "weekly";
+    const listType: "daily" | "weekly" | "all" = t === "daily" ? "daily" : t === "all" ? "all" : "weekly";
     const dateParam = parseDateParam(url.searchParams.get("date"));
     const weekParam = parseDateParam(url.searchParams.get("week"));
 
@@ -68,7 +124,6 @@ export async function GET(req: Request) {
     const locationWhere: Prisma.OfferWhereInput =
       locations.length > 0 ? { locations: { hasSome: locations } } : {};
 
-    // Öffentliche Filter (isActive: true)
     const dailyWhere: Prisma.OfferWhereInput = {
       isActive: true,
       OR: [
@@ -87,65 +142,54 @@ export async function GET(req: Request) {
       ...locationWhere,
     };
 
-    // Admin „all“: KEIN isActive-Filter (damit inaktive bearbeitbar bleiben)
-    const allWhere: Prisma.OfferWhereInput = {
-      OR: [
-        { kind: OfferKind.ONE_DAY,           date: { gte: dayStart, lte: dayEnd } },
-        { kind: OfferKind.RECURRING_WEEKDAY, weekday: weekdayToday },
-        { kind: OfferKind.DATE_RANGE, AND: [{ startDate: { lte: weekEnd } }, { endDate: { gte: weekStart } }] },
-      ],
-      ...locationWhere,
+    const allWhere: Prisma.OfferWhereInput = listType === "all"
+      ? { ...locationWhere } // Admin: alles
+      : {};
+
+    const includeDetails = {
+      generic: true,
+      productNew: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
+      productDiscount: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
+      multibuyPrice: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
     };
 
-    if (type === "daily") {
-      const items = await prisma.offer.findMany({
+    if (listType === "daily") {
+      const rows = await prisma.offer.findMany({
         where: dailyWhere,
         orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
-        select: {
-          id: true, title: true, description: true, priceCents: true, originalPriceCents: true, unit: true,
-        },
+        include: includeDetails,
       });
       return NextResponse.json({
-        type,
+        type: "daily",
         from: dayStart.toISOString(),
         to:   dayEnd.toISOString(),
-        items,
+        items: rows.map(toDTO),
       });
     }
 
-    if (type === "weekly") {
-      const items = await prisma.offer.findMany({
+    if (listType === "weekly") {
+      const rows = await prisma.offer.findMany({
         where: weeklyWhere,
         orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
-        select: {
-          id: true, title: true, description: true, priceCents: true, originalPriceCents: true, unit: true, imageUrl: true, tags: true,
-        },
+        include: includeDetails,
       });
       return NextResponse.json({
-        type,
+        type: "weekly",
         from: weekStart.toISOString(),
         to:   weekEnd.toISOString(),
-        items,
+        items: rows.map(toDTO),
       });
     }
 
-    // type === "all" (Admin): komplette Datensätze + Verknüpfungen
-    const items = await prisma.offer.findMany({
+    // listType === "all"
+    const rows = await prisma.offer.findMany({
       where: allWhere,
-      orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
-      include: {
-        products: {
-          include: {
-            product: { select: { id: true, name: true, priceCents: true, unit: true } },
-          },
-        },
-      },
+      orderBy: [{ createdAt: "desc" }],
+      include: includeDetails,
     });
     return NextResponse.json({
-      type,
-      from: dayStart.toISOString(), // „all“ mischt Tages- und Wochenfilter; Datum nur informativ
-      to:   dayEnd.toISOString(),
-      items,
+      type: "all",
+      items: rows.map(toDTO),
     });
   } catch (e) {
     console.error(e);
@@ -153,93 +197,141 @@ export async function GET(req: Request) {
   }
 }
 
-/**
- * POST /api/offers
- * Body:
- * {
- *   title, description?, priceCents?, originalPriceCents?, unit?, imageUrl, tags?, isActive?,
- *   kind, weekday?, date?, startDate?, endDate?, locations?, priority?,
- *   products?: [{ productId, role, quantity?, perItemPriceCents? }, ...]
- * }
- * - Bild (imageUrl) Pflicht (Angebote nutzen kein Produktbild)
- * - Wenn BUNDLE_COMPONENT vorkommt -> priceCents muss gesetzt sein (Set-Preis)
- * - Slug wird automatisch (eindeutig) vergeben
- */
+// ====== POST: Neues Angebot je Typ ======
+//
+// Body-Form:
+// {
+//   type: "PRODUCT_DISCOUNT" | "GENERIC" | "PRODUCT_NEW" | "MULTIBUY_PRICE",
+//   base: {
+//     title, subtitle?, imageUrl?, tags?, isActive?, kind, weekday?/date?/startDate&endDate,
+//     locations?: Location[], priority?: number, minBasketCents?: number|null
+//   },
+//   payload: { ... je nach type ... }
+// }
+//
 export async function POST(req: Request) {
   try {
     const b = await req.json() as {
-      title: string; description?: string | null; priceCents?: number | null; originalPriceCents?: number | null; unit?: string | null;
-      imageUrl?: string | null; tags?: string[]; isActive?: boolean;
-      kind: OfferKind; weekday?: Weekday | null; date?: string | null; startDate?: string | null; endDate?: string | null;
-      locations?: Location[]; priority?: number;
-      products?: Array<{ productId: string; role: OfferProductRole; quantity?: number; perItemPriceCents?: number | null; }>;
+      type: OfferType;
+      base: {
+        title: string;
+        subtitle?: string | null;
+        imageUrl?: string | null;
+        tags?: string[];
+        isActive?: boolean;
+        kind: OfferKind;
+        weekday?: Weekday | null;
+        date?: string | null;
+        startDate?: string | null;
+        endDate?: string | null;
+        locations?: Location[];
+        priority?: number;
+        minBasketCents?: number | null;
+        priceCents?: number | null;           // optional Anzeige auf Basiskarte
+        originalPriceCents?: number | null;   // optional
+        unit?: string | null;                 // optional
+      };
+      payload: any;
     };
 
-    if (!b?.title?.trim()) return NextResponse.json({ error: "Titel ist erforderlich." }, { status: 400 });
-    if (!b?.imageUrl) return NextResponse.json({ error: "imageUrl ist erforderlich (Angebote haben ein eigenes Bild)." }, { status: 400 });
-    if (!b?.kind || !Object.values(OfferKind).includes(b.kind)) {
+    if (!b?.type || !Object.values(OfferType).includes(b.type)) {
+      return NextResponse.json({ error: "Ungültiger Angebots-Typ" }, { status: 400 });
+    }
+    if (!b?.base?.title?.trim()) return NextResponse.json({ error: "Titel ist erforderlich." }, { status: 400 });
+    if (!b?.base?.kind || !Object.values(OfferKind).includes(b.base.kind)) {
       return NextResponse.json({ error: "Ungültige Angebots-Art (kind)." }, { status: 400 });
     }
-    if (b.kind === "RECURRING_WEEKDAY" && b.weekday == null) {
+    if (b.base.kind === "RECURRING_WEEKDAY" && b.base.weekday == null) {
       return NextResponse.json({ error: "weekday fehlt für wöchentliches Angebot." }, { status: 400 });
     }
-    if (b.kind === "ONE_DAY" && !b.date) {
+    if (b.base.kind === "ONE_DAY" && !b.base.date) {
       return NextResponse.json({ error: "date fehlt für Eintages-Angebot." }, { status: 400 });
     }
-    if (b.kind === "DATE_RANGE" && (!b.startDate || !b.endDate)) {
+    if (b.base.kind === "DATE_RANGE" && (!b.base.startDate || !b.base.endDate)) {
       return NextResponse.json({ error: "startDate/endDate fehlen für Zeitraum-Angebot." }, { status: 400 });
     }
 
-    const products = Array.isArray(b.products) ? b.products : [];
-    const hasBundle = products.some((p) => p?.role === "BUNDLE_COMPONENT");
-    if (hasBundle && (b.priceCents == null || Number.isNaN(Number(b.priceCents)))) {
-      return NextResponse.json({ error: "Set-Preis (priceCents) ist erforderlich, wenn BUNDLE_COMPONENT verwendet wird." }, { status: 400 });
-    }
+    const slug = await uniqueOfferSlug(b.base.title);
 
-    const slug = await uniqueOfferSlug(b.title);
-
-    const dataOffer: any = {
+    const baseData: Prisma.OfferCreateInput = {
       slug,
-      title: b.title.trim(),
-      description: b.description ?? null,
-      priceCents: b.priceCents == null ? null : Number(b.priceCents),
-      originalPriceCents: b.originalPriceCents == null ? null : Number(b.originalPriceCents),
-      unit: b.unit ?? null,
-      imageUrl: b.imageUrl,
-      tags: b.tags ?? [],
-      isActive: b.isActive ?? true,
-      kind: b.kind,
-      weekday: b.kind === "RECURRING_WEEKDAY" ? (b.weekday as Weekday) : null,
-      date: b.kind === "ONE_DAY" ? startOfDayBerlin(new Date(`${b.date}T00:00:00.000Z`)) : null,
-      startDate: b.kind === "DATE_RANGE" ? startOfDayBerlin(new Date(`${b.startDate}T00:00:00.000Z`)) : null,
-      endDate: b.kind === "DATE_RANGE" ? endOfDayBerlin(new Date(`${b.endDate}T00:00:00.000Z`)) : null,
-      locations: Array.isArray(b.locations) ? b.locations : [],
-      priority: typeof b.priority === "number" ? b.priority : 0,
+      type: b.type,
+      title: b.base.title.trim(),
+      subtitle: b.base.subtitle ?? null,
+      imageUrl: b.base.imageUrl ?? null,
+      tags: b.base.tags ?? [],
+      isActive: b.base.isActive ?? true,
+      kind: b.base.kind,
+      weekday: b.base.kind === "RECURRING_WEEKDAY" ? (b.base.weekday as Weekday) : null,
+      date: b.base.kind === "ONE_DAY" ? startOfDayBerlin(new Date(`${b.base.date}T00:00:00.000Z`)) : null,
+      startDate: b.base.kind === "DATE_RANGE" ? startOfDayBerlin(new Date(`${b.base.startDate}T00:00:00.000Z`)) : null,
+      endDate: b.base.kind === "DATE_RANGE" ? endOfDayBerlin(new Date(`${b.base.endDate}T00:00:00.000Z`)) : null,
+      locations: Array.isArray(b.base.locations) ? b.base.locations : [],
+      priority: typeof b.base.priority === "number" ? b.base.priority : 0,
+      minBasketCents: b.base.minBasketCents == null ? null : Number(b.base.minBasketCents),
+      priceCents: b.base.priceCents == null ? null : Number(b.base.priceCents),
+      originalPriceCents: b.base.originalPriceCents == null ? null : Number(b.base.originalPriceCents),
+      unit: b.base.unit ?? null,
     };
 
+    // Transaktion: Offer + Detail
     const created = await prisma.$transaction(async (tx) => {
-      const o = await tx.offer.create({ data: dataOffer });
+      const createdOffer = await tx.offer.create({ data: baseData });
 
-      if (products.length > 0) {
-        await tx.offerProduct.createMany({
-          data: products
-            .filter(p => p && p.productId && Object.values(OfferProductRole).includes(p.role))
-            .map((p) => ({
-              offerId: o.id,
-              productId: String(p.productId),
-              role: p.role as OfferProductRole,
-              quantity: Math.max(1, Number(p.quantity ?? 1)),
-              perItemPriceCents: p.perItemPriceCents == null ? null : Number(p.perItemPriceCents),
-            })),
-        });
+      if (b.type === "GENERIC") {
+        const p = b.payload as { body?: string | null; ctaLabel?: string | null; ctaHref?: string | null };
+        await tx.offerGeneric.create({ data: { offerId: createdOffer.id, body: p?.body ?? null, ctaLabel: p?.ctaLabel ?? null, ctaHref: p?.ctaHref ?? null } });
       }
 
-      return o;
+      if (b.type === "PRODUCT_NEW") {
+        const p = b.payload as { productId: string; highlightLabel?: string | null };
+        if (!p?.productId) throw new Error("productId erforderlich für PRODUCT_NEW");
+        await tx.offerProductNew.create({ data: { offerId: createdOffer.id, productId: p.productId, highlightLabel: p.highlightLabel ?? "NEU" } });
+      }
+
+      if (b.type === "PRODUCT_DISCOUNT") {
+        const p = b.payload as { productId: string; priceCents: number; originalPriceCents?: number | null; unit?: string | null };
+        if (!p?.productId || !Number.isFinite(p?.priceCents)) throw new Error("productId/priceCents erforderlich für PRODUCT_DISCOUNT");
+        await tx.offerProductDiscount.create({ data: {
+          offerId: createdOffer.id,
+          productId: p.productId,
+          priceCents: Number(p.priceCents),
+          originalPriceCents: p.originalPriceCents == null ? null : Number(p.originalPriceCents),
+          unit: p.unit ?? null,
+        } });
+      }
+
+      if (b.type === "MULTIBUY_PRICE") {
+        const p = b.payload as { productId: string; packQty: number; packPriceCents: number; comparePackQty?: number | null; comparePriceCents?: number | null; unit?: string | null };
+        if (!p?.productId || !Number.isFinite(p?.packQty) || !Number.isFinite(p?.packPriceCents)) throw new Error("productId/packQty/packPriceCents erforderlich für MULTIBUY_PRICE");
+        await tx.offerMultibuyPrice.create({ data: {
+          offerId: createdOffer.id,
+          productId: p.productId,
+          packQty: Math.max(1, Number(p.packQty)),
+          packPriceCents: Number(p.packPriceCents),
+          comparePackQty: p.comparePackQty == null ? null : Math.max(1, Number(p.comparePackQty)),
+          comparePriceCents: p.comparePriceCents == null ? null : Number(p.comparePriceCents),
+          unit: p.unit ?? null,
+        } });
+      }
+
+      return createdOffer;
     });
 
-    return NextResponse.json(created, { status: 201 });
+    // Detail mitliefern
+    const full = await prisma.offer.findUnique({
+      where: { id: created.id },
+      include: {
+        generic: true,
+        productNew: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
+        productDiscount: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
+        multibuyPrice: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
+      },
+    });
+
+    return NextResponse.json(toDTO(full), { status: 201 });
   } catch (e: any) {
     console.error(e);
-    return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+    return NextResponse.json({ error: e?.message || "Internal Error" }, { status: 500 });
   }
 }

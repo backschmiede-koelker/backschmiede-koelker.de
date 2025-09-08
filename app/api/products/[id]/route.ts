@@ -12,6 +12,16 @@ function slugify(s: string) {
     .toLowerCase().trim().replace(/\s+/g,"-").replace(/-+/g,"-");
 }
 
+async function deleteAssetIfUnused(url: string) {
+  if (!url) return;
+  const [p, n, o] = await prisma.$transaction([
+    prisma.product.count({ where: { imageUrl: url } }),
+    prisma.news.count({ where: { imageUrl: url } }),
+    prisma.offer.count({ where: { imageUrl: url } }),
+  ]);
+  if (p + n + o === 0) await safeUnlink(pathFromAssetUrl(url));
+}
+
 export async function GET(_: Request, { params }: { params: { id: string }}) {
   const item = await prisma.product.findUnique({ where: { id: params.id } });
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -51,10 +61,7 @@ export async function PUT(req: Request, { params }: { params: { id: string }}) {
 
     // altes Bild ggf. löschen, wenn niemand es mehr nutzt
     if (body.imageUrl !== undefined && prev.imageUrl && prev.imageUrl !== updated.imageUrl) {
-      const stillUsed = await prisma.product.count({ where: { imageUrl: prev.imageUrl } });
-      if (stillUsed === 0) {
-        await safeUnlink(pathFromAssetUrl(prev.imageUrl));
-      }
+      await deleteAssetIfUnused(prev.imageUrl);
     }
 
     return NextResponse.json(updated);
@@ -86,10 +93,7 @@ export async function DELETE(_: Request, { params }: { params: { id: string }}) 
     await prisma.product.delete({ where: { id: params.id } });
 
     if (prev.imageUrl) {
-      const stillUsed = await prisma.product.count({ where: { imageUrl: prev.imageUrl } });
-      if (stillUsed === 0) {
-        await safeUnlink(pathFromAssetUrl(prev.imageUrl));
-      }
+      await deleteAssetIfUnused(prev.imageUrl);
     }
 
     return NextResponse.json({ ok: true });

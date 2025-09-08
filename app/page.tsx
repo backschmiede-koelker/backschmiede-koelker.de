@@ -1,4 +1,4 @@
-// /app/page.tsx
+// app/page.tsx
 import Image from "next/image";
 import { Suspense } from "react";
 import { FaWheatAwn, FaLeaf, FaHeart } from "react-icons/fa6";
@@ -9,8 +9,90 @@ import WeeklyDeals from "./components/weekly-deals";
 import Hours from "./components/hours";
 import TgtgCta from "./components/tgtg-cta";
 import News from "./components/news";
+import { prisma } from "@/lib/prisma";
+import { OfferKind, Weekday } from "@prisma/client";
 
-export default function Page() {
+/** ===== Berlin-Zeitzone Helpers (wie in /api/offers) ===== */
+const TZ = "Europe/Berlin";
+function toBerlinDate(d: Date) {
+  return new Date(new Date(d.toLocaleString("en-US", { timeZone: TZ })).getTime());
+}
+function startOfDayBerlin(d: Date) { const z = toBerlinDate(d); z.setHours(0,0,0,0); return z; }
+function endOfDayBerlin(d: Date)   { const z = toBerlinDate(d); z.setHours(23,59,59,999); return z; }
+function startOfWeekBerlin(d: Date) {
+  const z = toBerlinDate(d);
+  const js = z.getDay(); // 0=So … 6=Sa
+  const moOffset = (js + 6) % 7; // Montag=0
+  z.setDate(z.getDate() - moOffset);
+  z.setHours(0,0,0,0);
+  return z;
+}
+function endOfWeekBerlin(d: Date) {
+  const s = startOfWeekBerlin(d);
+  const e = new Date(s);
+  e.setDate(e.getDate() + 6);
+  e.setHours(23,59,59,999);
+  return e;
+}
+function weekdayEnumBerlin(d: Date): Weekday {
+  const js = toBerlinDate(d).getDay(); // 0..6 (So..Sa)
+  const idx = (js + 6) % 7; // Montag=0
+  return [Weekday.MONDAY,Weekday.TUESDAY,Weekday.WEDNESDAY,Weekday.THURSDAY,Weekday.FRIDAY,Weekday.SATURDAY,Weekday.SUNDAY][idx]!;
+}
+
+/** Prüft serverseitig via DB, ob *aktuelle* Tages-/Wochenangebote existieren */
+async function getOffersPresence() {
+  const baseDate = new Date();
+  const dayStart  = startOfDayBerlin(baseDate);
+  const dayEnd    = endOfDayBerlin(baseDate);
+  const weekStart = startOfWeekBerlin(baseDate);
+  const weekEnd   = endOfWeekBerlin(baseDate);
+  const weekdayToday = weekdayEnumBerlin(baseDate);
+
+  // Tagesangebote: ONE_DAY am heutigen Tag, RECURRING_WEEKDAY passend zum Wochentag,
+  // oder DATE_RANGE, das den heutigen Tag überlappt.
+  const dailyCount = await prisma.offer.count({
+    where: {
+      isActive: true,
+      OR: [
+        { kind: OfferKind.ONE_DAY,           date: { gte: dayStart, lte: dayEnd } },
+        { kind: OfferKind.RECURRING_WEEKDAY, weekday: weekdayToday },
+        { kind: OfferKind.DATE_RANGE, AND: [{ startDate: { lte: dayEnd } }, { endDate: { gte: dayStart } }] },
+      ],
+    },
+  });
+
+  // Wochenangebote: alle DATE_RANGE, die diese Woche überlappen.
+  const weeklyCount = await prisma.offer.count({
+    where: {
+      isActive: true,
+      kind: OfferKind.DATE_RANGE,
+      startDate: { lte: weekEnd },
+      endDate:   { gte: weekStart },
+    },
+  });
+
+  return { hasDaily: dailyCount > 0, hasWeekly: weeklyCount > 0 };
+}
+
+/** Prüft serverseitig via DB, ob mindestens eine aktive News existiert */
+async function getNewsPresence() {
+  try {
+    const count = await prisma.news.count({ where: { isActive: true } });
+    return count > 0;
+  } catch {
+    // Fallback: lieber anzeigen als fälschlich verstecken
+    return true;
+  }
+}
+
+export default async function Page() {
+  const [{ hasDaily, hasWeekly }, hasNews] = await Promise.all([
+    getOffersPresence(),
+    getNewsPresence(),
+  ]);
+  const hasAnyOffers = hasDaily || hasWeekly;
+
   return (
     <>
       {/* HERO */}
@@ -46,10 +128,11 @@ export default function Page() {
                 Komm vorbei - wir freuen uns auf dich!
               </p>
 
-              {/* CTA: scrollt zu #angebote */}
+              {/* CTA: Öffnungszeiten zuerst, Angebote optional (Platzhalter wenn keine) */}
               <HeroScrollCta
                 angebotId="angebote"
                 zeitenId="oeffnungszeiten"
+                showAngebote={hasAnyOffers}
                 className="mt-6 flex flex-wrap justify-center gap-3 lg:justify-start"
               />
 
@@ -161,50 +244,58 @@ export default function Page() {
         </div>
       </section>
 
-      {/* AKTUELLES */}
-      <section id="aktuelles" className="mx-auto mt-0 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="aktuelles-title">
-        <h2 className="mb-4 text-center text-3xl font-bold" id="aktuelles-title">
-          Aktuelles
-        </h2>
+      {/* AKTUELLES – unabhängig von Angeboten */}
+      {hasNews && (
+        <section id="aktuelles" className="mx-auto mt-0 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="aktuelles-title">
+          <h2 className="mb-4 text-center text-3xl font-bold" id="aktuelles-title">
+            Aktuelles
+          </h2>
 
-        <div className="rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
-          <News />
-        </div>
-      </section>
-
-      {/* ANGEBOTE */}
-      <section id="angebote" className="mx-auto mt-10 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="angebote-title">
-        <h2 className="mb-4 text-center text-3xl font-bold" id="angebote-title">
-          Angebote
-        </h2>
-
-        {/* Tagesangebote */}
-        <div className="relative overflow-hidden rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
-          <Suspense fallback={<div className="text-sm opacity-70">Lade Tagesangebote…</div>}>
-            <DailyDeal />
-          </Suspense>
-        </div>
-
-        {/* Wochenangebote + TGTG */}
-        <div className="mt-8 rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
-          <Suspense fallback={<div className="text-sm opacity-70">Lade Wochenangebote…</div>}>
-            <WeeklyDeals />
-          </Suspense>
-
-          <div className="mt-8">
-            <TgtgCta
-              locations={[
-                {
-                  key: "RECKE",
-                  label: "Recke",
-                  mapsUrl: "...",
-                  windows: [{ day: "Mo-Fr", time: "17:00-18:00" }],
-                },
-              ]}
-            />
+          <div className="rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
+            <News />
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* ANGEBOTE – unabhängig von News */}
+      {hasAnyOffers && (
+        <section id="angebote" className="mx-auto mt-10 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="angebote-title">
+          <h2 className="mb-4 text-center text-3xl font-bold" id="angebote-title">
+            Angebote
+          </h2>
+
+          {/* Tagesangebote – nur wenn vorhanden */}
+          {hasDaily && (
+            <div className="relative overflow-hidden rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
+              <Suspense fallback={<div className="text-sm opacity-70">Lade Tagesangebote…</div>}>
+                <DailyDeal />
+              </Suspense>
+            </div>
+          )}
+
+          {/* Wochenangebote + TGTG – nur wenn vorhanden */}
+          {hasWeekly && (
+            <div className="mt-8 rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
+              <Suspense fallback={<div className="text-sm opacity-70">Lade Wochenangebote…</div>}>
+                <WeeklyDeals />
+              </Suspense>
+
+              <div className="mt-8">
+                <TgtgCta
+                  locations={[
+                    {
+                      key: "RECKE",
+                      label: "Recke",
+                      mapsUrl: "...",
+                      windows: [{ day: "Mo-Fr", time: "17:00-18:00" }],
+                    },
+                  ]}
+                />
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ÖFFNUNGSZEITEN */}
       <section

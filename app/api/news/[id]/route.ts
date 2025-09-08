@@ -1,7 +1,17 @@
-// /app/api/[id]/route.ts
+// app/api/news/[id]/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { pathFromAssetUrl, safeUnlink } from "../../../lib/uploads";
+import { pathFromAssetUrl, safeUnlink } from "@/app/lib/uploads"; // <- dein Pfad ggf. anpassen
+
+async function deleteAssetIfUnused(url: string) {
+  if (!url) return;
+  const [p, n, o] = await prisma.$transaction([
+    prisma.product.count({ where: { imageUrl: url } }),
+    prisma.news.count({ where: { imageUrl: url } }),
+    prisma.offer.count({ where: { imageUrl: url } }),
+  ]);
+  if (p + n + o === 0) await safeUnlink(pathFromAssetUrl(url));
+}
 
 export async function GET(_: Request, { params }: { params: { id: string }}) {
   const item = await prisma.news.findUnique({ where: { id: params.id } });
@@ -30,10 +40,9 @@ export async function PUT(req: Request, { params }: { params: { id: string }}) {
 
   const updated = await prisma.news.update({ where: { id: params.id }, data });
 
-  // altes Bild ggf. entsorgen
+  // altes Bild ggf. entsorgen (tabellenübergreifend)
   if (body.imageUrl !== undefined && prev.imageUrl && prev.imageUrl !== updated.imageUrl) {
-    const stillUsed = await prisma.news.count({ where: { imageUrl: prev.imageUrl } });
-    if (stillUsed === 0) await safeUnlink(pathFromAssetUrl(prev.imageUrl));
+    await deleteAssetIfUnused(prev.imageUrl);
   }
 
   return NextResponse.json(updated);
@@ -45,9 +54,6 @@ export async function DELETE(_: Request, { params }: { params: { id: string }}) 
 
   await prisma.news.delete({ where: { id: params.id } });
 
-  if (prev.imageUrl) {
-    const stillUsed = await prisma.news.count({ where: { imageUrl: prev.imageUrl } });
-    if (stillUsed === 0) await safeUnlink(pathFromAssetUrl(prev.imageUrl));
-  }
+  if (prev.imageUrl) await deleteAssetIfUnused(prev.imageUrl);
   return NextResponse.json({ ok: true });
 }
