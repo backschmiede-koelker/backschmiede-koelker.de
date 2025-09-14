@@ -6,11 +6,11 @@ const nextConfig: NextConfig = {
   output: "standalone",
   images: {
     remotePatterns: [
-      { protocol: "https" as const, hostname: "cdn.backschmiede-koelker.de" as const },
-      ...(isDev ? [{ protocol: "http" as const, hostname: "localhost" as const }] : []),
-      ...(isDev ? [{ protocol: "http" as const, hostname: "192.168.178.163" as const }] : []),
+      { protocol: "https", hostname: "cdn.backschmiede-koelker.de", pathname: "/**" },
+      ...(isDev ? [{ protocol: "http" as const, hostname: "cdn.backschmiede-koelker.lan", pathname: "/**" }] : []),
     ],
   },
+  ...(isDev ? { allowedDevOrigins: ["http://backschmiede-koelker.lan"] } : {}),
 };
 
 export default nextConfig;

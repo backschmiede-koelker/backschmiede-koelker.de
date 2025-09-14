@@ -1,3 +1,4 @@
+// app/admin/offers/offer-type-selector.tsx
 import React from "react";
 import { OfferType } from "@prisma/client";
 

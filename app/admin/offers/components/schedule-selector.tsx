@@ -1,3 +1,4 @@
+// app/admin/offers/schedule-selector.tsx
 import React from "react";
 import { OfferKind, Weekday } from "@prisma/client";
 import SelectBox from "@/app/components/select-box";

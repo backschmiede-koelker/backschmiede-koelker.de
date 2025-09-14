@@ -5,8 +5,90 @@ Hier entsteht der frische Quellcode für [Backschmiede Kölker](https://backschm
 
 ---
 
+
+
 ## Getting Started
 
+
+### Start local:
+
+1. Connect with VPN -> even if already in Network, you need the VPN IP!!!
+
+2. Start traefik_local:
+```bash
+docker compose `
+  --env-file "C:\Repository\ServerSoftware\webserver-02\traefik\.env.local" `
+  -f "C:\Repository\ServerSoftware\webserver-02\traefik\compose.local.yml" `
+  up -d
+```
+3. Start postgres_local:
+```bash
+docker compose `
+  --env-file "C:\Repository\ServerSoftware\webserver-02\postgresql\.env.local" `
+  -f "C:\Repository\ServerSoftware\webserver-02\postgresql\compose.local.yml" `
+  up -d
+```
+4. Start cdn_local:
+```bash
+docker compose `
+  --env-file "C:\Repository\ServerSoftware\webserver-02\cdn\.env.local" `
+  -f "C:\Repository\ServerSoftware\webserver-02\cdn\compose.local.yml" `
+  up -d
+```
+5. Start backschmiede-koelker_local:
+```bash
+docker compose `
+  --env-file ".\.env.local" `
+  -f ".\compose.local.yml" `
+  run --rm backschmiede-koelker_local sh -lc "npm ci && npx prisma migrate dev"
+
+docker compose --env-file ".\.env.local" -f ".\compose.local.yml" up
+```
+
+
+### Stop local:
+
+1. Stop backschmiede-koelker_local:
+Strg + C 
+oder
+```bash
+docker compose `
+  --env-file ".\.env.local" `
+  -f ".\compose.local.yml" `
+  down
+```
+2. Stop cdn_local:
+```bash
+docker compose `
+  --env-file "C:\Repository\ServerSoftware\webserver-02\cdn\.env.local" `
+  -f "C:\Repository\ServerSoftware\webserver-02\cdn\compose.local.yml" `
+  down
+```
+3. Stop postgres_local:
+```bash
+docker compose `
+  --env-file "C:\Repository\ServerSoftware\webserver-02\postgresql\.env.local" `
+  -f "C:\Repository\ServerSoftware\webserver-02\postgresql\compose.local.yml" `
+  down
+```
+4. Stop traefik_local:
+```bash
+docker compose `
+  --env-file "C:\Repository\ServerSoftware\webserver-02\traefik\.env.local" `
+  -f "C:\Repository\ServerSoftware\webserver-02\traefik\compose.local.yml" `
+  down
+```
+
+
+
+### Start prod -> cicd or use:
+```bash
+docker compose --env-file .env.prod -f compose.yml up -d
+```
+
+
+
+# maybe obsolete:
 First, run the development server:
 
 ```bash

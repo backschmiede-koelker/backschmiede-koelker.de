@@ -1,6 +1,0 @@
-
-Recke:
-"dev": "next dev --turbopack --hostname 192.168.178.163 --port 3000",
-
-Münster:
-"dev": "next dev --turbopack --hostname localhost --port 3000",

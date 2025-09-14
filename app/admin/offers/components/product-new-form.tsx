@@ -1,3 +1,4 @@
+// app/admin/offers/product-new-form.tsx
 import React from "react";
 import FieldLabel from "@/app/components/ui/field-label";
 import ProductPicker from "@/app/components/product-picker";
