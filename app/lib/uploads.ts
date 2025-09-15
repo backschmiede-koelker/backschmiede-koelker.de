@@ -1,34 +1,45 @@
-// /app/lib/uploads.ts
-import { join } from "node:path"
-import { unlink } from "node:fs/promises"
+// app/lib/uploads.ts
+// CLIENT-SAFE – keine Node-APIs importieren!
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads"
-const BASE = (process.env.BASE_ASSET_URL || "").replace(/\/+$/,"")
+/**
+ * Normalisiert beliebige Eingaben (abs./rel.) auf einen DB-Speicherwert
+ * "folder/file.ext" (ohne führenden Slash, ohne "uploads/").
+ */
+export function toStoredPath(input?: string | null): string | null {
+  if (!input) return null;
+  let s = String(input).trim();
+  if (!s) return null;
 
-export function pathFromAssetUrl(url?: string | null): string | null {
-  if (!url) return null
-  try {
-    if (BASE && url.startsWith(BASE)) {
-      const rel = url.slice(BASE.length).replace(/^\/+/,"")
-      return join(UPLOAD_DIR, rel)
-    }
-    if (url.startsWith("/uploads/")) {
-      const rel = url.slice("/uploads/".length)
-      return join(UPLOAD_DIR, rel)
-    }
-    return null
-  } catch {
-    return null
+  if (/^https?:\/\//i.test(s)) {
+    try { s = new URL(s).pathname || ""; } catch { return null; }
   }
+  s = s.replace(/^\/+/, "");
+  if (s.toLowerCase().startsWith("uploads/")) s = s.slice("uploads/".length);
+  return s || null;
 }
 
-export async function safeUnlink(absPath: string | null) {
-  if (!absPath) return false
-  try {
-    await unlink(absPath)
-    return true
-  } catch (e: any) {
-    if (e?.code === "ENOENT") return false
-    throw e
-  }
+/**
+ * Öffentliche URL für ein Bild aus DB-Wert oder rohem Pfad.
+ * - Mit NEXT_PUBLIC_ASSET_BASE (CDN-Host) → `${BASE}/${stored}`
+ * - Ohne BASE → Fallback auf App-Pfad `/uploads/${stored}`
+ * - Bereits absolute/data/blob-URLs werden unverändert zurückgegeben.
+ */
+export function publicAssetUrl(u?: string | null): string | null {
+  if (!u) return null;
+  const s = String(u).trim();
+  if (!s) return null;
+  if (/^(https?:|data:|blob:)/i.test(s)) return s;
+
+  const stored = toStoredPath(s);
+  if (!stored) return null;
+
+  const base = (process.env.NEXT_PUBLIC_ASSET_BASE || "").replace(/\/+$/, "");
+  // Wichtig: CDN zeigt direkt auf den uploads-Root, daher KEIN "/uploads" hier!
+  return base ? `${base}/${stored}` : `/uploads/${stored}`;
+}
+
+/** Nur der Pfadteil mit '/uploads/' – falls du mal ohne Host rendern willst. */
+export function uploadsPath(u?: string | null): string | null {
+  const stored = toStoredPath(u);
+  return stored ? `/uploads/${stored}` : null;
 }

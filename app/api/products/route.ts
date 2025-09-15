@@ -1,19 +1,19 @@
-// /app/api/products/route.ts
+// app/api/products/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { toStoredPath } from "@/app/lib/uploads";
+import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
-  // Kompatibilitäts-Flags
   const active = searchParams.get("active");
   const isActiveParam = searchParams.get("isActive");
   const onlyActive =
     active === "1" || active?.toLowerCase() === "true" ||
     isActiveParam === "1" || isActiveParam?.toLowerCase() === "true";
 
-  // Optionale Suche
   const query = (searchParams.get("query") || "").trim();
   const limitParam = parseInt(searchParams.get("limit") || "", 10);
   const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 50) : undefined;
@@ -21,10 +21,7 @@ export async function GET(req: Request) {
   const where: Prisma.ProductWhereInput = {};
   if (onlyActive) where.isActive = true;
   if (query) {
-    where.name = {
-      contains: query,
-      mode: Prisma.QueryMode.insensitive,
-    };
+    where.name = { contains: query, mode: Prisma.QueryMode.insensitive };
   }
 
   const products = await prisma.product.findMany({
@@ -41,32 +38,21 @@ export async function GET(req: Request) {
       tags: true,
       isActive: true,
       createdAt: true,
-      updatedAt: true, // <- wichtig für product-grid
+      updatedAt: true,
     },
   });
 
-  // Rückwärtskompatible Antwortform
-  if (query.length > 0) {
-    return NextResponse.json({ items: products });
-  }
-  return NextResponse.json(products);
+  const mapped = products.map(p => ({ ...p, imageUrl: toAbsoluteAssetUrlServer(p.imageUrl) }));
+  return query ? NextResponse.json({ items: mapped }) : NextResponse.json(mapped);
 }
 
 function slugify(s: string) {
   return s
-    .replace(/ä/g, "ae")
-    .replace(/ö/g, "oe")
-    .replace(/ü/g, "ue")
-    .replace(/Ä/g, "ae")
-    .replace(/Ö/g, "oe")
-    .replace(/Ü/g, "ue")
+    .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue")
+    .replace(/Ä/g, "ae").replace(/Ö/g, "oe").replace(/Ü/g, "ue")
     .replace(/ß/g, "ss")
-    .normalize("NFKD")
-    .replace(/[^\w\s-]/g, "")
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+    .normalize("NFKD").replace(/[^\w\s-]/g, "")
+    .toLowerCase().trim().replace(/\s+/g, "-").replace(/-+/g, "-");
 }
 
 export async function POST(req: Request) {
@@ -87,7 +73,7 @@ export async function POST(req: Request) {
         slug,
         priceCents: b.priceCents,
         unit: b.unit.trim(),
-        imageUrl: b.imageUrl ?? null,
+        imageUrl: toStoredPath(b.imageUrl),
         tags: b.tags ?? [],
         isActive: b.isActive ?? true,
       },
@@ -97,7 +83,7 @@ export async function POST(req: Request) {
     if (e?.code === "P2002") {
       const alt = `${slug}-${Math.random().toString(36).slice(2, 5)}`;
       const created = await prisma.product.create({
-        data: { ...b, name: b.name.trim(), slug: alt },
+        data: { ...b, name: b.name.trim(), slug: alt, imageUrl: toStoredPath(b.imageUrl) },
       });
       return NextResponse.json(created, { status: 201 });
     }

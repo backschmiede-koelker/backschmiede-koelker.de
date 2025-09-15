@@ -1,35 +1,93 @@
-// /app/components/image-uploader.tsx
+// app/components/image-uploader.tsx
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { publicAssetUrl, toStoredPath } from "@/app/lib/uploads";
 
 type Props = {
   folder: string;
+  /** **DB-Speicherwert** ("folder/file") ODER absolute URL */
   imageUrl: string;
+  /** Erwartet **DB-Speicherwert** ("folder/file") oder "" zum Löschen */
   onChange: (url: string) => void;
 };
+
+/** Liefert die bevorzugte CDN-Basis (Env) oder errät sie aus der aktuellen Domain (→ cdn.<host>) */
+function assetBaseClient(): string | null {
+  const env = (process.env.NEXT_PUBLIC_ASSET_BASE || "").replace(/\/+$/, "");
+  if (env) return env;
+  if (typeof window !== "undefined") {
+    const { protocol, hostname } = window.location;
+    // Wenn wir bereits auf dem CDN sind, nutze es; sonst 'cdn.' davorhängen
+    const cdnHost = hostname.startsWith("cdn.") ? hostname : `cdn.${hostname.replace(/^cdn\./, "")}`;
+    return `${protocol}//${cdnHost}`;
+  }
+  return null;
+}
+
+/** Erzwingt eine absolut auflösbare CDN-URL aus DB-Wert / beliebiger Eingabe. */
+function absoluteCdnUrl(input?: string | null): string | null {
+  if (!input) return null;
+
+  // 1) Wenn bereits absolut/data/blob → direkt anzeigen
+  const direct = String(input).trim();
+  if (/^(https?:|data:|blob:)/i.test(direct)) return direct;
+
+  // 2) Versuche erst die "offizielle" Hilfsfunktion
+  const viaHelper = publicAssetUrl(direct);
+  if (viaHelper && /^https?:\/\//i.test(viaHelper)) return viaHelper;
+
+  // 3) Fallback: CDN-Basis erraten + DB-Speicherwert rekonstruieren
+  const base = assetBaseClient();
+  const stored = toStoredPath(direct);
+  if (base && stored) return `${base}/${stored}`;
+
+  // 4) Letzter Fallback: ggf. App-Relativpfad (funktioniert, wenn die App /uploads bedient)
+  return viaHelper || null;
+}
 
 export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [previewOverride, setPreviewOverride] = useState<string | null>(null); // lokale Vorschau (Blob/CDN)
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Aus Prop (DB-Wert oder absolut) eine anzeigbare URL ableiten – kann vom override übersteuert werden
+  const derivedPreview = imageUrl ? absoluteCdnUrl(imageUrl) || "" : "";
+  const previewSrc = previewOverride ?? derivedPreview;
+
+  // Wenn parent imageUrl ändert (z. B. nach Speichern), den Override zurücknehmen und neu ableiten
+  useEffect(() => {
+    setPreviewOverride(null);
+  }, [imageUrl]);
+
+  // Beim Entfernen
   async function removeCurrentImage() {
-    if (!imageUrl) return onChange("");
+    if (!imageUrl) {
+      onChange("");
+      setPreviewOverride(null);
+      return;
+    }
     setDeleting(true);
     try {
       await fetch("/api/upload", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: imageUrl }),
+        body: JSON.stringify({ url: imageUrl }), // Server wandelt in Stored-Path um
       }).catch(() => {});
     } finally {
       setDeleting(false);
       onChange("");
+      setPreviewOverride(null);
     }
   }
 
+  // Upload + sofortige Vorschau
   async function uploadFile(file: File) {
+    // 1) Sofortige lokale Vorschau
+    const blobUrl = URL.createObjectURL(file);
+    setPreviewOverride(blobUrl);
+
     setUploading(true);
     try {
       const fd = new FormData();
@@ -38,10 +96,9 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
       fd.append("nameBase", file.name.replace(/\.[^.]+$/, ""));
       const res = await fetch("/api/upload", { method: "POST", body: fd });
       if (!res.ok) throw new Error("Upload failed");
-      const { url } = await res.json();
+      const { url } = (await res.json()) as { url: string }; // **DB-Speicherwert**: "folder/file.ext"
 
-      // Optional: altes Bild aufräumen (falls direkt ersetzt wird)
-      // Hinweis: Wenn der Datensatz das alte Bild noch referenziert, löscht der Server es NICHT (inUse=true).
+      // Optionale Alt-Datei abräumen (fail-silent)
       if (imageUrl && imageUrl !== url) {
         fetch("/api/upload", {
           method: "DELETE",
@@ -50,6 +107,11 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
         }).catch(() => {});
       }
 
+      // 2) Nach erfolgreichem Upload: echte CDN-URL berechnen und anzeigen
+      const absolute = absoluteCdnUrl(url) || "";
+      setPreviewOverride(absolute);
+
+      // 3) Parent mit **DB-Speicherwert** updaten
       onChange(url);
     } finally {
       setUploading(false);
@@ -70,9 +132,8 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
       onDrop={onDrop}
       className={[
         "rounded-xl border-2 border-dashed p-5 transition-colors",
-        dragOver
-          ? "border-amber-500 bg-amber-50/70 dark:bg-amber-900/20"
-          : "border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900",
+        dragOver ? "border-amber-500 bg-amber-50/70 dark:bg-amber-900/20"
+                 : "border-zinc-300 bg-white dark:border-zinc-700 dark:bg-zinc-900",
       ].join(" ")}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -102,20 +163,28 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
         </div>
       </div>
 
-      {imageUrl && (
+      {(imageUrl || previewSrc) && (
         <div className="mt-4 flex items-start gap-3">
           <img
-            src={imageUrl}
+            src={previewSrc || ""}
             alt=""
             className="h-16 w-16 rounded object-cover ring-1 ring-black/10 dark:ring-white/10"
           />
           <div className="min-w-0 flex-1">
             <div className="rounded-md bg-zinc-50 p-2 text-xs ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700">
-              <div className="truncate" title={imageUrl}>{imageUrl}</div>
+              <div className="truncate" title={previewSrc || ""}>
+                {previewSrc}
+              </div>
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
-              <a href={imageUrl} target="_blank" className="text-xs underline">Link öffnen</a>
-              <button type="button" onClick={() => navigator.clipboard.writeText(imageUrl)} className="text-xs underline">
+              <a href={previewSrc || "#"} target="_blank" className="text-xs underline">
+                Link öffnen
+              </a>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(previewSrc || "")}
+                className="text-xs underline"
+              >
                 Link kopieren
               </button>
               <button

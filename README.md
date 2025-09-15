@@ -40,9 +40,16 @@ docker compose `
 docker compose `
   --env-file ".\.env.local" `
   -f ".\compose.local.yml" `
-  run --rm backschmiede-koelker_local sh -lc "npm ci && npx prisma migrate dev"
+  run --rm backschmiede-koelker_local sh -lc "[ -f .docker-npm.stamp ] || (npm ci --prefer-offline --no-audit --loglevel=warn && touch .docker-npm.stamp); npx prisma migrate dev"
 
 docker compose --env-file ".\.env.local" -f ".\compose.local.yml" up
+
+# if you have added new packages with "npm" or sth, then you have to delete the .docker-npm.stamp file and restart the website
+
+# On Err "network not found":
+docker network create web 2>$null
+docker network create db  2>$null
+docker compose -f .\compose.local.yml --env-file .\.env.local up --build --force-recreate --remove-orphans
 ```
 
 
@@ -78,6 +85,7 @@ docker compose `
   -f "C:\Repository\ServerSoftware\webserver-02\traefik\compose.local.yml" `
   down
 ```
+5. Disconnect VPN
 
 
 
@@ -85,6 +93,9 @@ docker compose `
 ```bash
 docker compose --env-file .env.prod -f compose.yml up -d
 ```
+
+
+
 
 
 

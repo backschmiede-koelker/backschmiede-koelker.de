@@ -49,32 +49,59 @@ function GlowTile({
     ? { href, target: '_blank', rel: 'noopener noreferrer' }
     : { href };
 
+  const brandActiveLight: React.CSSProperties = {
+    background: [
+      'linear-gradient(118deg, rgba(52,211,153,0.42) 0%, rgba(16,185,129,0.34) 60%, rgba(251,191,36,0.14) 105%)'
+    ].join(', ')
+  };
+
+  const brandActiveDark: React.CSSProperties = {
+    // FLACH: Duoton ohne Radials, kein 3D
+    background: [
+      'linear-gradient(118deg, rgba(13,148,136,0.70) 0%, rgba(4,120,87,0.62) 60%, rgba(245,158,11,0.12) 105%)'
+    ].join(', ')
+  };
+
+  // Zarter Ring für Formtrennung auf allen Hintergründen
+  const subtleRing = 'pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-black/5 dark:ring-white/10';
+
   return (
     <Comp
       {...props}
       aria-current={active ? 'page' : undefined}
-      className={`group relative block rounded-2xl px-4 py-3 xl:py-3.5 2xl:px-5 2xl:py-4
-        border border-emerald-800/10 dark:border-emerald-300/10
-        bg-white/70 dark:bg-white/5
-        shadow-sm hover:shadow-md
-        transition-all duration-300
-        outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50
-        ${active ? 'ring-2 ring-emerald-500/50' : ''}`}
+      className={
+        `group isolate relative overflow-hidden block rounded-2xl px-4 py-3 xl:py-3.5 2xl:px-5 2xl:py-4
+         ${active
+            ? 'border-transparent bg-transparent text-black dark:text-white'
+            : 'border border-emerald-800/10 dark:border-emerald-300/10 bg-white/70 dark:bg-white/5'}
+         shadow-sm hover:shadow-md transition-all duration-300
+         outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50`
+      }
     >
-      {/* Light Shine */}
+      {active && (
+        <>
+          {/* Light */}
+          <span aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl dark:hidden" style={brandActiveLight} />
+          {/* Dark */}
+          <span aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl hidden dark:block" style={brandActiveDark} />
+          <span aria-hidden className={subtleRing} />
+        </>
+      )}
+
+      {/* dein bestehender Hover-Glow bleibt */}
       <span
         className="pointer-events-none absolute inset-0 rounded-2xl opacity-0
         group-hover:opacity-100 transition-opacity duration-300
         bg-gradient-to-r from-amber-200/30 via-emerald-200/30 to-amber-200/30
         dark:opacity-0"
       />
-      {/* Dark Shine */}
       <span
         className="pointer-events-none absolute inset-0 rounded-2xl opacity-0
         dark:group-hover:opacity-100 transition-opacity duration-300
         dark:bg-gradient-to-r dark:from-emerald-700/25 dark:via-teal-600/20 dark:to-emerald-700/25
         dark:ring-1 dark:ring-emerald-300/30 dark:group-hover:ring-emerald-300/60"
       />
+
       <div className="relative z-10">{children}</div>
     </Comp>
   );

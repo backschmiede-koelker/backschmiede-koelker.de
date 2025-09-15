@@ -2,6 +2,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma, OfferKind, Weekday, Location, OfferType } from "@prisma/client";
+import { toStoredPath } from "@/app/lib/uploads";
+import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
 // ====== Zeitzone Berlin ======
 const TZ = "Europe/Berlin";
@@ -40,14 +42,14 @@ async function uniqueOfferSlug(base: string) {
   }
 }
 
-// ====== Mapping → DTO ======
+// ====== Mapping → DTO (absolute URLs) ======
 function toDTO(item: any) {
   const common = {
     id: item.id,
     type: item.type,
     title: item.title,
     subtitle: item.subtitle,
-    imageUrl: item.imageUrl,
+    imageUrl: toAbsoluteAssetUrlServer(item.imageUrl),
     tags: item.tags,
     isActive: item.isActive,
     kind: item.kind,
@@ -142,9 +144,7 @@ export async function GET(req: Request) {
       ...locationWhere,
     };
 
-    const allWhere: Prisma.OfferWhereInput = listType === "all"
-      ? { ...locationWhere } // Admin: alles
-      : {};
+    const allWhere: Prisma.OfferWhereInput = listType === "all" ? { ...locationWhere } : {};
 
     const includeDetails = {
       generic: true,
@@ -181,16 +181,12 @@ export async function GET(req: Request) {
       });
     }
 
-    // listType === "all"
     const rows = await prisma.offer.findMany({
       where: allWhere,
       orderBy: [{ createdAt: "desc" }],
       include: includeDetails,
     });
-    return NextResponse.json({
-      type: "all",
-      items: rows.map(toDTO),
-    });
+    return NextResponse.json({ type: "all", items: rows.map(toDTO) });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
@@ -198,17 +194,6 @@ export async function GET(req: Request) {
 }
 
 // ====== POST: Neues Angebot je Typ ======
-//
-// Body-Form:
-// {
-//   type: "PRODUCT_DISCOUNT" | "GENERIC" | "PRODUCT_NEW" | "MULTIBUY_PRICE",
-//   base: {
-//     title, subtitle?, imageUrl?, tags?, isActive?, kind, weekday?/date?/startDate&endDate,
-//     locations?: Location[], priority?: number, minBasketCents?: number|null
-//   },
-//   payload: { ... je nach type ... }
-// }
-//
 export async function POST(req: Request) {
   try {
     const b = await req.json() as {
@@ -227,9 +212,9 @@ export async function POST(req: Request) {
         locations?: Location[];
         priority?: number;
         minBasketCents?: number | null;
-        priceCents?: number | null;           // optional Anzeige auf Basiskarte
-        originalPriceCents?: number | null;   // optional
-        unit?: string | null;                 // optional
+        priceCents?: number | null;
+        originalPriceCents?: number | null;
+        unit?: string | null;
       };
       payload: any;
     };
@@ -258,7 +243,7 @@ export async function POST(req: Request) {
       type: b.type,
       title: b.base.title.trim(),
       subtitle: b.base.subtitle ?? null,
-      imageUrl: b.base.imageUrl ?? null,
+      imageUrl: toStoredPath(b.base.imageUrl),
       tags: b.base.tags ?? [],
       isActive: b.base.isActive ?? true,
       kind: b.base.kind,
@@ -274,7 +259,6 @@ export async function POST(req: Request) {
       unit: b.base.unit ?? null,
     };
 
-    // Transaktion: Offer + Detail
     const created = await prisma.$transaction(async (tx) => {
       const createdOffer = await tx.offer.create({ data: baseData });
 
@@ -318,7 +302,6 @@ export async function POST(req: Request) {
       return createdOffer;
     });
 
-    // Detail mitliefern
     const full = await prisma.offer.findUnique({
       where: { id: created.id },
       include: {

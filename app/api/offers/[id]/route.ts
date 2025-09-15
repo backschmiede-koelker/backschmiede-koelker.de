@@ -2,7 +2,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { OfferKind, Weekday, Location } from "@prisma/client";
-import { pathFromAssetUrl, safeUnlink } from "../../../lib/uploads";
+import { toStoredPath } from "@/app/lib/uploads";
+import { pathFromStoredPath, safeUnlink, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
 const TZ = "Europe/Berlin";
 const toBerlin = (d: Date) => new Date(new Date(d.toLocaleString("en-US", { timeZone: TZ })).getTime());
@@ -15,7 +16,7 @@ function toDTO(item: any) {
     type: item.type,
     title: item.title,
     subtitle: item.subtitle,
-    imageUrl: item.imageUrl,
+    imageUrl: toAbsoluteAssetUrlServer(item.imageUrl),
     tags: item.tags,
     isActive: item.isActive,
     kind: item.kind,
@@ -42,14 +43,15 @@ function toDTO(item: any) {
   return common;
 }
 
-async function deleteAssetIfUnused(url: string) {
-  if (!url) return;
+async function deleteAssetIfUnused(stored?: string | null) {
+  const s = toStoredPath(stored);
+  if (!s) return;
   const [p, n, o] = await prisma.$transaction([
-    prisma.product.count({ where: { imageUrl: url } }),
-    prisma.news.count({ where: { imageUrl: url } }),
-    prisma.offer.count({ where: { imageUrl: url } }),
+    prisma.product.count({ where: { imageUrl: s } }),
+    prisma.news.count({ where: { imageUrl: s } }),
+    prisma.offer.count({ where: { imageUrl: s } }),
   ]);
-  if (p + n + o === 0) await safeUnlink(pathFromAssetUrl(url));
+  if (p + n + o === 0) await safeUnlink(pathFromStoredPath(s));
 }
 
 /** GET /api/offers/:id */
@@ -91,7 +93,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
         originalPriceCents: number | null;
         unit: string | null;
       }>;
-      payload?: any; // je nach type
+      payload?: any;
     };
 
     const current = await prisma.offer.findUnique({
@@ -105,7 +107,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     const data: any = {};
     if (typeof b.base?.title === "string") data.title = b.base.title.trim();
     if (b.base?.subtitle !== undefined) data.subtitle = b.base.subtitle;
-    if (b.base?.imageUrl !== undefined) data.imageUrl = b.base.imageUrl;
+    if (b.base?.imageUrl !== undefined) data.imageUrl = toStoredPath(b.base.imageUrl);
     if (Array.isArray(b.base?.tags)) data.tags = b.base.tags;
     if (typeof b.base?.isActive === "boolean") data.isActive = b.base.isActive;
 
@@ -127,7 +129,6 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
 
     const updated = await prisma.offer.update({ where: { id }, data });
 
-    // Detail aktualisieren je type
     if (current.type === "GENERIC" && b.payload) {
       await prisma.offerGeneric.update({
         where: { offerId: id },
@@ -172,7 +173,6 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
       });
     }
 
-    // altes Bild ggf. löschen, wenn es sich geändert hat und nirgends mehr benutzt wird
     if (b.base?.imageUrl !== undefined && prevImageUrl && prevImageUrl !== updated.imageUrl) {
       await deleteAssetIfUnused(prevImageUrl);
     }

@@ -53,3 +53,5 @@ server.txt
 
 uploads/*
 !uploads/*/.gitkeep
+
+.docker-npm.stamp

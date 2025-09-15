@@ -1,7 +1,9 @@
-// /app/api/news/route.ts
+// app/api/news/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { toStoredPath } from "@/app/lib/uploads";
+import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
 function slugify(s: string) {
   return s
@@ -40,7 +42,10 @@ export async function GET(req: Request) {
     ...(limit ? { take: limit } : {}),
   });
 
-  return NextResponse.json(items);
+  return NextResponse.json(items.map(i => ({
+    ...i,
+    imageUrl: toAbsoluteAssetUrlServer(i.imageUrl),
+  })));
 }
 
 export async function POST(req: Request) {
@@ -64,7 +69,7 @@ export async function POST(req: Request) {
       data: {
         title,
         body: b.body,
-        imageUrl: b.imageUrl ?? null,
+        imageUrl: toStoredPath(b.imageUrl),
         tag: (b.tag || null)?.trim() || null,
         ctaLabel: (b.ctaLabel || null)?.trim() || null,
         ctaHref: (b.ctaHref || null)?.trim() || null,
@@ -77,7 +82,9 @@ export async function POST(req: Request) {
   } catch (e: any) {
     if (e?.code === "P2002") {
       const alt = `${slugBase}-${Math.random().toString(36).slice(2,5)}`;
-      const created = await prisma.news.create({ data: { ...b, title, slug: alt, publishedAt: b.publishedAt ? new Date(b.publishedAt) : new Date() } as any });
+      const created = await prisma.news.create({
+        data: { ...b, title, slug: alt, publishedAt: b.publishedAt ? new Date(b.publishedAt) : new Date(), imageUrl: toStoredPath(b.imageUrl) } as any
+      });
       return NextResponse.json(created, { status: 201 });
     }
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });

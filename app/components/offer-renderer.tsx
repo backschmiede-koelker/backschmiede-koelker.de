@@ -2,7 +2,9 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { euro } from "../lib/format";
+import { publicAssetUrl } from "@/app/lib/uploads";
 
 type ProductLite = { id: string; name: string; priceCents: number; unit: string };
 type Weekday = "MONDAY"|"TUESDAY"|"WEDNESDAY"|"THURSDAY"|"FRIDAY"|"SATURDAY"|"SUNDAY";
@@ -12,7 +14,7 @@ export type OfferDTO = {
   type: "GENERIC" | "PRODUCT_NEW" | "PRODUCT_DISCOUNT" | "MULTIBUY_PRICE";
   title: string;
   subtitle?: string | null;
-  imageUrl?: string | null;
+  imageUrl?: string | null; // vom API bereits absolut ODER DB-Speicherwert; publicAssetUrl handhabt beides
   tags: string[];
   isActive: boolean;
 
@@ -44,12 +46,20 @@ function dateBadge(o: OfferDTO) {
 }
 
 export default function OfferRenderer({ item }: { item: OfferDTO }) {
+  const imgSrc = publicAssetUrl(item.imageUrl || null);
+
   return (
     <article className="group overflow-hidden rounded-2xl bg-white/90 dark:bg-zinc-900/70 ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
-      {item.imageUrl && (
-        <div className="aspect-[5/3] overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+      {imgSrc && (
+        <div className="relative aspect-[5/3] w-full overflow-hidden">
+          <Image
+            src={imgSrc}
+            alt={item.title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            priority={false}
+          />
         </div>
       )}
       <div className="p-4">
@@ -70,7 +80,6 @@ export default function OfferRenderer({ item }: { item: OfferDTO }) {
         <div className="mt-2 flex items-start justify-between gap-3">
           <h4 className="text-lg font-semibold leading-tight">{item.title}</h4>
 
-          {/* Preis-Ecke – je Typ unterschiedlich */}
           <div className="shrink-0 text-right">
             {item.type === "PRODUCT_DISCOUNT" && item.productDiscount && (
               <>
@@ -94,7 +103,6 @@ export default function OfferRenderer({ item }: { item: OfferDTO }) {
 
         {item.subtitle && <p className="mt-1 text-sm opacity-90">{item.subtitle}</p>}
 
-        {/* Typ-spezifische Inhalte */}
         {item.type === "GENERIC" && item.generic && (
           <div className="mt-2 text-sm">
             {item.generic.body}
