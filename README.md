@@ -47,9 +47,7 @@ docker compose --env-file ".\.env.local" -f ".\compose.local.yml" up
 # if you have added new packages with "npm" or sth, then you have to delete the .docker-npm.stamp file and restart the website
 
 # On Err "network not found":
-docker network create web 2>$null
-docker network create db  2>$null
-docker compose -f .\compose.local.yml --env-file .\.env.local up --build --force-recreate --remove-orphans
+docker compose --env-file .\.env.local -f .\compose.local.yml up --force-recreate
 ```
 
 

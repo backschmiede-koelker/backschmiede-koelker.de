@@ -7,8 +7,6 @@ import { FaBars, FaXmark } from 'react-icons/fa6';
 import { LuPartyPopper } from 'react-icons/lu';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
-// Optional, falls @types/canvas-confetti installiert ist:
-// import type { Options as ConfettiOptions } from 'canvas-confetti';
 
 type HeaderProps = {
   isSidebarOpen: boolean;
@@ -26,7 +24,6 @@ const iconBtn =
   'transition-all active:scale-95 ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50';
 
-// CTA: mobil quadratisch (h-10 w-10, rounded-xl), ab sm pill mit Text
 const ctaBtn =
   'inline-flex items-center justify-center gap-2 select-none text-white ' +
   'bg-gradient-to-r from-fuchsia-500 via-amber-400 to-emerald-500 ' +
@@ -36,13 +33,11 @@ const ctaBtn =
   'transition-all duration-300 active:scale-95 ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ' +
   'disabled:opacity-70 disabled:cursor-not-allowed disabled:saturate-75 ' +
-  // Shape & Padding responsiv:
   'h-10 w-10 rounded-xl sm:h-10 sm:w-auto sm:px-3 sm:rounded-full';
 
 const throwConfetti = async () => {
   const { default: confetti } = await import('canvas-confetti');
-
-  const defaults /* : Partial<ConfettiOptions> */ = {
+  const defaults = {
     zIndex: 2147483647,
     spread: 120,
     startVelocity: 45,
@@ -162,13 +157,14 @@ export default function Header({ isSidebarOpen, onToggleSidebar, onCloseSidebar 
             className={ctaBtn}
           >
             <LuPartyPopper className="text-[18px] drop-shadow-sm" aria-hidden />
-            {/* XS (<640px): nur Icon */}
             <span className="hidden sm:inline lg:hidden">Feier mit uns</span>
-            {/* LG (≥1024px): voller Titel */}
             <span className="hidden lg:inline">Feier unsere neue Website mit uns</span>
           </button>
 
-          <ThemeToggle />
+          {/* Fester Platz für den Toggle verhindert jeglichen Shift */}
+          <div className="h-10 w-10">
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>

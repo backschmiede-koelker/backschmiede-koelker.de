@@ -1,28 +1,55 @@
 // /app/jobs/page.tsx
-export default function Page() {
-  const mail = process.env.MAIL_TO || 'info@deine-domain.de';
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Stellenangebote</h1>
-      <div className="space-y-4">
-        <div className="rounded-xl p-4 bg-white dark:bg-zinc-800 shadow">
-          <h3 className="font-semibold">Bäckereifachverkäufer/in (m/w/d) - Teilzeit</h3>
-          <p className="text-sm opacity-80">Standorte: Mettingen & Recke · ab sofort</p>
-          <ul className="list-disc list-inside text-sm mt-2">
-            <li>Kundenberatung, Thekenverkauf, Kasse</li>
-            <li>Warenpräsentation & Hygiene</li>
-          </ul>
-        </div>
-        <div className="rounded-xl p-4 bg-white dark:bg-zinc-800 shadow">
-          <h3 className="font-semibold">Bäcker/in (m/w/d) - Vollzeit</h3>
-          <p className="text-sm opacity-80">Backstube Mettingen · ab Q4</p>
-        </div>
-      </div>
+import { Metadata } from "next";
+import { JobHero } from "@/app/components/jobs/job-hero";
+import { JobFilters } from "@/app/components/jobs/job-filters";
+import { JobList } from "@/app/components/jobs/job-list";
+import { fetchJobs } from "../lib/jobs/data";
+import { buildJobsListJsonLd } from "@/app/components/jobs/job-schema";
 
-      <div className="rounded-xl p-4 bg-green-600/10 border border-green-600/20">
-        <h2 className="text-xl font-bold">Bewerben</h2>
-        <p className="text-sm opacity-80">Sende Lebenslauf & kurze Motivation an <a className="underline" href={`mailto:${mail}`}>{mail}</a>.</p>
-        <p className="text-xs opacity-60 mt-1">Optional: Richte `SMTP_*` Variablen ein und ergänze eine Server Action/Route zum Hochladen/Versenden.</p>
+export const metadata: Metadata = {
+  title: "Stellenangebote | Bäckerei",
+  description:
+    "Jobs in Verkauf, Backstube und Logistik – mit fairer Bezahlung, Teamspirit und Benefits. Jetzt bewerben!",
+  alternates: { canonical: "/jobs" },
+  openGraph: {
+    title: "Stellenangebote | Bäckerei",
+    description:
+      "Aktuelle Jobs: Bäcker/in, Verkäufer/in, Aushilfe, Ausbildung. Bewirb dich jetzt!",
+    url: "/jobs",
+    type: "website",
+  },
+};
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const q = (searchParams?.q as string) || "";
+  const loc = (searchParams?.loc as string) || "";
+  const role = (searchParams?.role as string) || "";
+  const jobs = await fetchJobs({ q, loc, role });
+
+  return (
+    <div className="space-y-8">
+      <JobHero />
+      {/* JSON-LD für Job-Suchmaschinen (Liste) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(buildJobsListJsonLd(jobs)),
+        }}
+      />
+      <div className="mx-auto max-w-6xl px-3 md:px-4">
+        {/* Filter bewusst UNTER dem Header (Header hat z-50) */}
+        <div className="relative z-40">
+          <JobFilters />
+        </div>
+
+        {/* Jobliste darunter */}
+        <div className="relative z-10">
+          <JobList jobs={jobs} />
+        </div>
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ import DailyDeal from "./components/daily-deal";
 import WeeklyDeals from "./components/weekly-deals";
 import Hours from "./components/hours";
 import TgtgCta from "./components/tgtg-cta";
-import News from "./components/news";
+import News from "./components/news/news";
 import { prisma } from "@/lib/prisma";
 import { OfferKind, Weekday } from "@prisma/client";
 

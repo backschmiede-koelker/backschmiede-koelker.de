@@ -39,6 +39,7 @@ function TagChip({ label, onRemove }: { label: string; onRemove: () => void }) {
 
 export default function ProductGrid() {
   const [items, setItems] = useState<Product[]>([]);
+  const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -51,8 +52,17 @@ export default function ProductGrid() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch("/api/products?active=true", { cache: "no-store" });
-      setItems(await res.json());
+      try {
+        setStatus("loading");
+        const res = await fetch("/api/products?active=true", { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setItems(Array.isArray(data) ? data : []);
+        setStatus("ok");
+      } catch (e) {
+        console.error(e);
+        setStatus("error");
+      }
     })();
   }, []);
 
@@ -173,7 +183,18 @@ export default function ProductGrid() {
         </div>
       </div>
 
-      <div className="text-sm text-zinc-600 dark:text-zinc-300">{items.length === 0 ? "Lade…" : `${filtered.length} von ${items.length} Produkten`}</div>
+      <div className="text-sm text-zinc-600 dark:text-zinc-300">
+        {{
+          loading: "Lade…",
+          error: "Fehler beim Laden.",
+          ok:
+            items.length === 0
+              ? "Keine Produkte gefunden."
+              : (filtered.length === 0
+                  ? "Keine Treffer für deine Suche/Filter."
+                  : `${filtered.length} von ${items.length} Produkten`)
+        }[status]}
+      </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((p) => {
