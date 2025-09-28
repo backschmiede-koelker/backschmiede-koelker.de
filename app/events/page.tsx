@@ -1,12 +1,69 @@
 // /app/events/page.tsx
-import EventsList from '../components/events-list';
+"use client";
+
+import { InViewReveal, StaggerContainer, StaggerItem } from "../components/animations";
+import FeaturedHero from "../components/events/featured-hero";
+import EventFilters from "../components/events/event-filters";
+import EventList from "../components/events/event-list";
+import MonthGrid from "../components/events/month-grid";
+import Timeline from "../components/events/timeline";
+import VenueMap from "../components/events/venue-map";
+import Faq from "../components/events/faq";
+import CalendarSubscribeCta from "../components/events/calendar-subscribe-cta";
+import NewsletterCta from "../components/events/newsletter-cta";
+import RsvpForm from "../components/events/rsvp-form";
 
 export default function Page() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Veranstaltungen</h1>
-      <p className="text-sm opacity-80">Feiertage und Sonderöffnungen pflegst du zentral in Google Business - die Website zeigt diese automatisch über die Places-API an.</p>
-      <EventsList />
+    <div className="space-y-8">
+      <FeaturedHero />
+
+      <InViewReveal className="space-y-6">
+        <EventFilters />
+      </InViewReveal>
+
+      <StaggerContainer className="space-y-8">
+        <StaggerItem>
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-emerald-700 dark:text-emerald-300">Nächste Termine</h2>
+            <EventList />
+          </section>
+        </StaggerItem>
+
+        <StaggerItem>
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-emerald-700 dark:text-emerald-300">Kalender-Übersicht</h2>
+            <MonthGrid />
+          </section>
+        </StaggerItem>
+
+        <StaggerItem>
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold text-emerald-700 dark:text-emerald-300">Zeitstrahl</h2>
+            <Timeline />
+          </section>
+        </StaggerItem>
+
+        <StaggerItem>
+          <CalendarSubscribeCta />
+        </StaggerItem>
+
+        <StaggerItem>
+          <VenueMap />
+        </StaggerItem>
+
+        <StaggerItem>
+          <RsvpForm />
+        </StaggerItem>
+
+        <StaggerItem>
+          <Faq />
+        </StaggerItem>
+
+        <StaggerItem>
+          <NewsletterCta />
+        </StaggerItem>
+      </StaggerContainer>
     </div>
   );
 }
