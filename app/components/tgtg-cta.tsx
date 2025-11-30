@@ -37,17 +37,75 @@ const DEFAULT_LOCATIONS: LocationInfo[] = [
   },
 ];
 
+// Einzelnes FAQ-Item mit Animation
+function FAQItem({ question, children }: { question: string; children: React.ReactNode }) {
+  const [open, setOpen] = React.useState(false);
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
+  const [maxHeight, setMaxHeight] = React.useState(0);
+
+  React.useEffect(() => {
+    if (open && contentRef.current) {
+      setMaxHeight(contentRef.current.scrollHeight);
+    } else {
+      setMaxHeight(0);
+    }
+  }, [open]);
+
+  // Optional: bei Resize neu berechnen
+  React.useEffect(() => {
+    if (!open) return;
+    function handleResize() {
+      if (contentRef.current) {
+        setMaxHeight(contentRef.current.scrollHeight);
+      }
+    }
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [open]);
+
+  return (
+    <div className="border-t border-emerald-800/10 first:border-t-0 dark:border-emerald-300/15">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex w-full items-center justify-between gap-2 py-2 text-left"
+        aria-expanded={open}
+      >
+        <span className="text-sm font-medium">
+          {question}
+        </span>
+        <span
+          className={`inline-flex h-5 w-5 items-center justify-center text-xs transition-transform duration-200 ${
+            open ? 'rotate-90' : ''
+          }`}
+          aria-hidden
+        >
+          ›
+        </span>
+      </button>
+      <div
+        style={{ maxHeight }}
+        className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
+      >
+        <div ref={contentRef} className="pb-2 text-sm text-zinc-700 dark:text-zinc-300">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
   return (
     <section
       aria-labelledby="tgtg-title"
-      className={[
-        'relative overflow-hidden rounded-3xl p-5 sm:p-6',
-        'ring-1 ring-emerald-600/25',
-        'bg-gradient-to-br from-emerald-50/85 via-emerald-100/60 to-amber-50/60',
-        'dark:from-green-950/60 dark:via-zinc-900/80 dark:to-emerald-900/40',
-        'shadow-sm'
-      ].join(' ')}
+      className={`
+        relative overflow-hidden rounded-3xl p-5 sm:p-6
+        ring-1 ring-emerald-600/25
+        bg-gradient-to-br from-emerald-50/85 via-emerald-100/60 to-amber-50/60
+        dark:from-green-950/60 dark:via-zinc-900/80 dark:to-emerald-900/40
+        shadow-sm
+      `}
     >
       {/* Soft blobs */}
       <div
@@ -62,7 +120,7 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
       {/* Header */}
       <header className="relative z-10 mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 dark:border-emerald-300/15 bg-white/70 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 backdrop-blur dark:bg-white/10 dark:text-emerald-200">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 bg-white/70 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 backdrop-blur dark:border-emerald-300/15 dark:bg-white/10 dark:text-emerald-200">
             {/* Leaf icon */}
             <svg width="12" height="12" viewBox="0 0 24 24" className="shrink-0" aria-hidden>
               <path d="M3 21s6-1 10-5 5-10 5-10-6 1-10 5-5 10-5 10Z" fill="currentColor" />
@@ -70,10 +128,10 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
             Lebensmittel retten
           </div>
           <h3 id="tgtg-title" className="mt-2 text-2xl font-semibold leading-tight">
-            Too&nbsp;Good&nbsp;To&nbsp;Go - Überraschungstüten
+            Too&nbsp;Good&nbsp;To&nbsp;Go – Überraschungstüten
           </h3>
           <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
-            Spare und rette frische Backwaren vom Tag. Abholung zu festen Zeitfenstern - schnell sein lohnt sich!
+            Spare und rette frische Backwaren vom Tag. Abholung zu festen Zeitfenstern – schnell sein lohnt sich!
           </p>
         </div>
 
@@ -82,6 +140,7 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
           <a
             href="https://www.toogoodtogo.com/"
             target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             App öffnen
@@ -89,6 +148,7 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
           <a
             href="https://store.toogoodtogo.com/"
             target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center justify-center rounded-xl border border-emerald-800/15 bg-white/80 px-4 py-2 text-sm font-semibold text-zinc-900 backdrop-blur hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 dark:border-emerald-300/20 dark:bg-white/10 dark:text-white dark:hover:bg-emerald-900/40"
           >
             Für Partner
@@ -101,7 +161,7 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
         {/* Locations */}
         <div className="space-y-3">
           <h4 className="text-sm font-semibold tracking-wide text-zinc-800 dark:text-zinc-200">
-            Abholfenster & Standorte
+            Abholfenster &amp; Standorte
           </h4>
 
           <ul className="grid gap-3 sm:grid-cols-2">
@@ -153,7 +213,7 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
           </ul>
 
           <p className="text-xs text-amber-900/80 dark:text-amber-200/80">
-            Hinweis: Mengen sind begrenzt & variieren je Tag. Verfügbarkeiten bitte in der App prüfen.
+            Hinweis: Mengen sind begrenzt &amp; variieren je Tag. Verfügbarkeiten bitte in der App prüfen.
           </p>
         </div>
 
@@ -166,9 +226,9 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
           <ol className="space-y-3">
             {[
               { t: 'In der App suchen', d: '„Backschmiede Kölker“ auswählen und Verfügbarkeit checken.' },
-              { t: 'Tüte reservieren',   d: 'Direkt in der App bezahlen - du erhältst eine Bestätigung.' },
+              { t: 'Tüte reservieren',   d: 'Direkt in der App bezahlen – du erhältst eine Bestätigung.' },
               { t: 'Zur Zeit abholen',   d: 'Zum angegebenen Abholfenster erscheinen und Bestätigung zeigen.' },
-              { t: 'Genießen & sparen',  d: 'Frische Backwaren zu kleinem Preis - und Lebensmittel gerettet!' },
+              { t: 'Genießen & sparen',  d: 'Frische Backwaren zu kleinem Preis – und Lebensmittel gerettet!' },
             ].map((s, i) => (
               <li key={i} className="flex gap-3">
                 <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[12px] font-bold text-white">
@@ -183,30 +243,18 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
           </ol>
 
           <div className="rounded-xl border border-emerald-800/10 bg-white/80 p-3 dark:border-emerald-300/15 dark:bg-white/5">
-            <details>
-              <summary className="cursor-pointer select-none text-sm font-medium">
-                Was steckt in der Überraschungstüte?
-              </summary>
-              <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
-                Eine gemischte Auswahl vom Tag (z.&nbsp;B. Brötchen, Brote, süßes Gebäck) - abhängig davon, was übrig ist.
-              </p>
-            </details>
-            <details className="mt-2">
-              <summary className="cursor-pointer select-none text-sm font-medium">
-                Kann ich mehrere Tüten reservieren?
-              </summary>
-              <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
-                Wenn genug verfügbar ist: ja. Die App zeigt die aktuelle Anzahl je Standort.
-              </p>
-            </details>
-            <details className="mt-2">
-              <summary className="cursor-pointer select-none text-sm font-medium">
-                Was, wenn ich es nicht rechtzeitig schaffe?
-              </summary>
-              <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300">
-                Bitte plane genug Zeit ein - Abholung ist nur im angegebenen Fenster möglich.
-              </p>
-            </details>
+            <FAQItem question="Was steckt in der Überraschungstüte?">
+              Eine gemischte Auswahl vom Tag (z.&nbsp;B. Brötchen, Brote, süßes Gebäck) – abhängig davon,
+              was übrig ist.
+            </FAQItem>
+
+            <FAQItem question="Kann ich mehrere Tüten reservieren?">
+              Wenn genug verfügbar ist: ja. Die App zeigt die aktuelle Anzahl je Standort.
+            </FAQItem>
+
+            <FAQItem question="Was, wenn ich es nicht rechtzeitig schaffe?">
+              Bitte plane genug Zeit ein – Abholung ist nur im angegebenen Zeitfenster möglich.
+            </FAQItem>
           </div>
         </div>
       </div>

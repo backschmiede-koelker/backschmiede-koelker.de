@@ -106,7 +106,6 @@ export default async function Page() {
     getOffersPresence(),
     getNewsPresence(),
   ]);
-  const hasAnyOffers = hasDaily || hasWeekly;
 
   return (
     <>
@@ -147,7 +146,6 @@ export default async function Page() {
               <HeroScrollCta
                 angebotId="angebote"
                 zeitenId="oeffnungszeiten"
-                showAngebote={hasAnyOffers}
                 className="mt-6 flex flex-wrap justify-center gap-3 lg:justify-start"
               />
 
@@ -272,45 +270,39 @@ export default async function Page() {
         </section>
       )}
 
-      {/* ANGEBOTE - unabhängig von News */}
-      {hasAnyOffers && (
-        <section id="angebote" className="mx-auto mt-10 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="angebote-title">
-          <h2 className="mb-4 text-center text-3xl font-bold" id="angebote-title">
-            Angebote
-          </h2>
+      {/* ANGEBOTE - Abschnitt existiert immer (mindestens TGTG) */}
+      <section
+        id="angebote"
+        className="mx-auto mt-10 w-full max-w-5xl px-4 scroll-mt-20"
+        aria-labelledby="angebote-title"
+      >
+        <h2 className="mb-4 text-center text-3xl font-bold" id="angebote-title">
+          Angebote
+        </h2>
 
-          {/* Tagesangebote - nur wenn vorhanden */}
-          {hasDaily && (
-            <div className="relative overflow-hidden rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
-              <Suspense fallback={<div className="text-sm opacity-70">Lade Tagesangebote…</div>}>
-                <DailyDeal />
-              </Suspense>
-            </div>
-          )}
+        {/* Tagesangebote - nur wenn vorhanden */}
+        {hasDaily && (
+          <div className="relative overflow-hidden rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
+            <Suspense fallback={<div className="text-sm opacity-70">Lade Tagesangebote…</div>}>
+              <DailyDeal />
+            </Suspense>
+          </div>
+        )}
 
-          {/* Wochenangebote + TGTG - nur wenn vorhanden */}
-          {hasWeekly && (
-            <div className="mt-8 rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
-              <Suspense fallback={<div className="text-sm opacity-70">Lade Wochenangebote…</div>}>
-                <WeeklyDeals />
-              </Suspense>
+        {/* Wochenangebote - nur wenn vorhanden */}
+        {hasWeekly && (
+          <div className="mt-8 rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
+            <Suspense fallback={<div className="text-sm opacity-70">Lade Wochenangebote…</div>}>
+              <WeeklyDeals />
+            </Suspense>
+          </div>
+        )}
 
-              <div className="mt-8">
-                <TgtgCta
-                  locations={[
-                    {
-                      key: "RECKE",
-                      label: "Recke",
-                      mapsUrl: "...",
-                      windows: [{ day: "Mo-Fr", time: "17:00-18:00" }],
-                    },
-                  ]}
-                />
-              </div>
-            </div>
-          )}
-        </section>
-      )}
+        {/* To Good To Go - IMMER sichtbar */}
+        <div className={`mt-8 rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6`}>
+          <TgtgCta/>
+        </div>
+      </section>
 
       {/* ÖFFNUNGSZEITEN */}
       <section

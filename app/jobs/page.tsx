@@ -7,12 +7,12 @@ import { fetchJobs } from "../lib/jobs/data";
 import { buildJobsListJsonLd } from "@/app/components/jobs/job-schema";
 
 export const metadata: Metadata = {
-  title: "Stellenangebote | Bäckerei",
+  title: "Stellenangebote | Backschmiede Kölker",
   description:
-    "Jobs in Verkauf, Backstube und Logistik – mit fairer Bezahlung, Teamspirit und Benefits. Jetzt bewerben!",
+    "Jobs in Verkauf, Backstube und Logistik - mit fairer Bezahlung, Teamspirit und Benefits. Jetzt bewerben!",
   alternates: { canonical: "/jobs" },
   openGraph: {
-    title: "Stellenangebote | Bäckerei",
+    title: "Stellenangebote | Backschmiede Kölker",
     description:
       "Aktuelle Jobs: Bäcker/in, Verkäufer/in, Aushilfe, Ausbildung. Bewirb dich jetzt!",
     url: "/jobs",

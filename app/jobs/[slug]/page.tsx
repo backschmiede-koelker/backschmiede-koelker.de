@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const job = await getJobBySlug(params.slug);
   if (!job) return { title: "Stellenangebot", description: "Jobdetails" };
   return {
-    title: `${job.title} | Bäckerei`,
+    title: `${job.title} | Backschmiede Kölker`,
     description: job.teaser,
     alternates: { canonical: `/jobs/${job.slug}` },
     openGraph: {

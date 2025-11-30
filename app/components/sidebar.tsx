@@ -28,7 +28,7 @@ type NavItem = {
 const NAV: NavItem[] = [
   { href: '/',          label: 'Start',         sub: 'Willkommen',                 Icon: FaHouse },
   { href: '/products',  label: 'Produkte',      sub: 'Brote · Brötchen · Kuchen', Icon: FaListUl },
-  { href: '/events',    label: 'Veranstaltungen', sub: 'Kurse & Aktionen',        Icon: FaCalendarDays },
+  { href: '/events',    label: 'Veranstaltungen', sub: 'Events & Termine',        Icon: FaCalendarDays },
   { href: '/owner',     label: 'Inhaber',       sub: 'Lerne Josua kennen',        Icon: FaUser },
   { href: '/jobs',      label: 'Jobs',          sub: 'Werde Teil des Teams',      Icon: FaBriefcase },
 ];

@@ -19,7 +19,12 @@ export default function News() {
     if (error) return `Fehler: ${error}`;
     if (loading && !items) return "Lade …";
     if (!items) return "Lade …";
-    return `${items.length} Einträge${reachedEnd || items.length >= hardLimit ? " (Ende)" : ""}`;
+
+    const noun = items.length === 1 ? "Eintrag" : "Einträge";
+
+    return `${items.length} ${noun}${
+      reachedEnd || items.length >= hardLimit ? " (Ende)" : ""
+    }`;
   }, [items, loading, error, reachedEnd, hardLimit]);
 
   const scrollPrev = () => (Rail as any).scrollPrev?.();

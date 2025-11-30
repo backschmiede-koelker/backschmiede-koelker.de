@@ -1,5 +1,14 @@
 // /app/events/page.tsx
 
+export default function Page() {
+  return (
+    <div>
+      <h1>Im Aufbau</h1>
+    </div>
+  );
+}
+
+/*
 import type { Metadata } from "next";
 import { InViewReveal, StaggerContainer, StaggerItem } from "../components/animations";
 import FeaturedHero from "../components/events/featured-hero";
@@ -81,3 +90,4 @@ export default function Page() {
     </div>
   );
 }
+*/
