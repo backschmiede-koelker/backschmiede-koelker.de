@@ -6,6 +6,7 @@
 //   npm i lucide-react framer-motion
 // =============================
 
+import type { Metadata } from "next";
 import OwnerHero from "../components/owner/owner-hero";
 import OwnerStats from "../components/owner/owner-stats";
 import OwnerStory from "../components/owner/owner-story";
@@ -15,6 +16,20 @@ import OwnerValues from "../components/owner/owner-values";
 import OwnerAwards from "../components/owner/owner-awards";
 import OwnerCTA from "../components/owner/owner-cta";
 import OwnerFAQ from "../components/owner/owner-faq";
+
+export const metadata: Metadata = {
+  title: "Über uns | Backschmiede Kölker",
+  description:
+    "Die Inhaberstory, Werte und Vision der Backschmiede Kölker mit Team, Tradition und Handwerk in Recke & Mettingen.",
+  alternates: { canonical: "/owner" },
+  openGraph: {
+    title: "Über uns | Backschmiede Kölker",
+    description:
+      "Die Inhaberstory, Werte und Vision der Backschmiede Kölker mit Team, Tradition und Handwerk in Recke & Mettingen.",
+    url: "/owner",
+    type: "website",
+  },
+};
 
 export default function Page() {
   return (

@@ -1,10 +1,24 @@
 // /app/admin/news/page.tsx
 "use client";
+
+import type { Metadata } from "next";
 import { useEffect, useState } from "react";
 import { useNews } from "../../hooks/use-news";
 import ImageUploader from "../../components/image-uploader";
 import SelectBox from "../../components/select-box";
 import { KNOWN_PAGES } from "../../lib/known-pages";
+
+export const metadata: Metadata = {
+  title: "Admin - News | Backschmiede Kölker",
+  description: "News, Tags und CTAs für die Backschmiede Kölker schnell erfassen und bearbeiten.",
+  alternates: { canonical: "/admin/news" },
+  openGraph: {
+    title: "Admin - News | Backschmiede Kölker",
+    description: "News, Tags und CTAs für die Backschmiede Kölker schnell erfassen und bearbeiten.",
+    url: "/admin/news",
+    type: "website",
+  },
+};
 
 const PREDEFINED_TAGS = ["Kein Tag ausgewählt", "Aktion", "Event", "Info"];
 const LABEL = "block text-sm font-medium leading-5 h-5 mb-1";

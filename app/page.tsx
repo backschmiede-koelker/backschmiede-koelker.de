@@ -1,4 +1,5 @@
 // app/page.tsx
+import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense } from "react";
 import { FaWheatAwn, FaLeaf, FaHeart } from "react-icons/fa6";
@@ -85,6 +86,20 @@ async function getNewsPresence() {
     return true;
   }
 }
+
+export const metadata: Metadata = {
+  title: "Backschmiede Kölker - Handwerk aus Recke & Mettingen",
+  description:
+    "In Recke und Mettingen backt die Backschmiede Kölker Brote, Brötchen und Kuchen mit langer Teigführung, Sauerteig und regionalen Zutaten.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Backschmiede Kölker - Handwerk aus Recke & Mettingen",
+    description:
+      "In Recke und Mettingen backt die Backschmiede Kölker Brote, Brötchen und Kuchen mit langer Teigführung, Sauerteig und regionalen Zutaten.",
+    url: "/",
+    type: "website",
+  },
+};
 
 export default async function Page() {
   const [{ hasDaily, hasWeekly }, hasNews] = await Promise.all([
@@ -244,7 +259,7 @@ export default async function Page() {
         </div>
       </section>
 
-      {/* AKTUELLES – unabhängig von Angeboten */}
+      {/* AKTUELLES - unabhängig von Angeboten */}
       {hasNews && (
         <section id="aktuelles" className="mx-auto mt-0 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="aktuelles-title">
           <h2 className="mb-4 text-center text-3xl font-bold" id="aktuelles-title">
@@ -257,14 +272,14 @@ export default async function Page() {
         </section>
       )}
 
-      {/* ANGEBOTE – unabhängig von News */}
+      {/* ANGEBOTE - unabhängig von News */}
       {hasAnyOffers && (
         <section id="angebote" className="mx-auto mt-10 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="angebote-title">
           <h2 className="mb-4 text-center text-3xl font-bold" id="angebote-title">
             Angebote
           </h2>
 
-          {/* Tagesangebote – nur wenn vorhanden */}
+          {/* Tagesangebote - nur wenn vorhanden */}
           {hasDaily && (
             <div className="relative overflow-hidden rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
               <Suspense fallback={<div className="text-sm opacity-70">Lade Tagesangebote…</div>}>
@@ -273,7 +288,7 @@ export default async function Page() {
             </div>
           )}
 
-          {/* Wochenangebote + TGTG – nur wenn vorhanden */}
+          {/* Wochenangebote + TGTG - nur wenn vorhanden */}
           {hasWeekly && (
             <div className="mt-8 rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
               <Suspense fallback={<div className="text-sm opacity-70">Lade Wochenangebote…</div>}>

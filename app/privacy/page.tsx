@@ -1,7 +1,16 @@
 // /app/privacy/page.tsx
-export const metadata = {
-  title: 'Datenschutz - Backschmiede Kölker',
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Datenschutz | Backschmiede Kölker',
   description: 'Datenschutzerklärung der Backschmiede Kölker.',
+  alternates: { canonical: "/privacy" },
+  openGraph: {
+    title: 'Datenschutz | Backschmiede Kölker',
+    description: 'Datenschutzerklärung der Backschmiede Kölker.',
+    url: "/privacy",
+    type: "website",
+  },
 };
 
 export default function PrivacyPage() {

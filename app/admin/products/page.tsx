@@ -1,9 +1,23 @@
 // /app/admin/products/page.tsx
 "use client"
+
+import type { Metadata } from "next";
 import { useMemo, useState } from "react"
 import { useProducts } from "../../hooks/use-products"
 import NewProductForm from "../../components/new-product-form"
 import ProductCard from "../../components/product-card"
+
+export const metadata: Metadata = {
+  title: "Admin - Produkte | Backschmiede Kölker",
+  description: "Produkte, Preise, Einheiten und Tags direkt im Admin-Panel pflegen.",
+  alternates: { canonical: "/admin/products" },
+  openGraph: {
+    title: "Admin - Produkte | Backschmiede Kölker",
+    description: "Produkte, Preise, Einheiten und Tags direkt im Admin-Panel pflegen.",
+    url: "/admin/products",
+    type: "website",
+  },
+};
 
 export default function AdminProducts() {
   const { items, loading, reload, remove } = useProducts()

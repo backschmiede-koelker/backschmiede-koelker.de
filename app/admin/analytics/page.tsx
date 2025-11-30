@@ -1,4 +1,5 @@
 // /app/admin/analytics/page.tsx
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
@@ -6,7 +7,17 @@ import { Prisma } from "@prisma/client";
 import AnalyticsFilters from "./filters";
 import LineChart from "./line-chart";
 
-export const metadata = { title: "Analytics | Admin" };
+export const metadata: Metadata = {
+  title: "Admin - Analytics | Backschmiede Kölker",
+  description: "Anonyme Analytics, Trafficquellen und Kampagnen für die Backschmiede Kölker einsehen.",
+  alternates: { canonical: "/admin/analytics" },
+  openGraph: {
+    title: "Admin - Analytics | Backschmiede Kölker",
+    description: "Anonyme Analytics, Trafficquellen und Kampagnen für die Backschmiede Kölker einsehen.",
+    url: "/admin/analytics",
+    type: "website",
+  },
+};
 
 type Search = Record<string, string | string[] | undefined>;
 

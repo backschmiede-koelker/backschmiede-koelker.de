@@ -1,4 +1,5 @@
 // /app/admin/page.tsx
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   FaListUl,
@@ -10,6 +11,18 @@ import {
   FaNewspaper,
 } from "react-icons/fa6";
 import { signOut } from "@/auth";
+
+export const metadata: Metadata = {
+  title: "Admin | Backschmiede Kölker",
+  description: "Produkte, Angebote, News und Analysen für die Backschmiede Kölker zentral verwalten.",
+  alternates: { canonical: "/admin" },
+  openGraph: {
+    title: "Admin | Backschmiede Kölker",
+    description: "Produkte, Angebote, News und Analysen für die Backschmiede Kölker zentral verwalten.",
+    url: "/admin",
+    type: "website",
+  },
+};
 
 type Accent =
   | "emerald"

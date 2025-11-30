@@ -1,7 +1,21 @@
 // /app/login/page.tsx
 "use client"
+
+import type { Metadata } from "next";
 import { signIn } from "next-auth/react"
 import { useState } from "react"
+
+export const metadata: Metadata = {
+  title: "Admin Login | Backschmiede Kölker",
+  description: "Sicherer Zugang zum Adminbereich der Backschmiede Kölker.",
+  alternates: { canonical: "/login" },
+  openGraph: {
+    title: "Admin Login | Backschmiede Kölker",
+    description: "Sicherer Zugang zum Adminbereich der Backschmiede Kölker.",
+    url: "/login",
+    type: "website",
+  },
+};
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")

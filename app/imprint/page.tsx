@@ -1,7 +1,16 @@
 // /app/imprint/page.tsx
-export const metadata = {
-  title: 'Impressum - Backschmiede Kölker',
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'Impressum | Backschmiede Kölker',
   description: 'Impressum der Backschmiede Kölker mit Anbieterkennzeichnung und Kontakt.',
+  alternates: { canonical: "/imprint" },
+  openGraph: {
+    title: 'Impressum | Backschmiede Kölker',
+    description: 'Impressum der Backschmiede Kölker mit Anbieterkennzeichnung und Kontakt.',
+    url: "/imprint",
+    type: "website",
+  },
 };
 
 export default function ImpressumPage() {

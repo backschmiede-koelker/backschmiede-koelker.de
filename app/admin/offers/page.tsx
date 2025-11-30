@@ -1,6 +1,7 @@
 // app/admin/offers/page.tsx
 "use client";
 
+import type { Metadata } from "next";
 import SectionCard from "app/components/ui/section-card";
 import FieldLabel from "app/components/ui/field-label";
 import OfferTypeSelector from "app/admin/offers/components/offer-type-selector";
@@ -21,6 +22,18 @@ import { useOffers } from "./hooks/use-offers";
 import { useOfferUnits } from "./hooks/use-offer-units";
 import { useOfferForm } from "./hooks/use-offer-form";
 import OfferList from "./components/offer-list";
+
+export const metadata: Metadata = {
+  title: "Admin - Angebote | Backschmiede Kölker",
+  description: "Tages- und Wochenangebote, Aktionen und Filialprioritäten zentral planen und steuern.",
+  alternates: { canonical: "/admin/offers" },
+  openGraph: {
+    title: "Admin - Angebote | Backschmiede Kölker",
+    description: "Tages- und Wochenangebote, Aktionen und Filialprioritäten zentral planen und steuern.",
+    url: "/admin/offers",
+    type: "website",
+  },
+};
 
 export default function AdminOffers() {
   const { items, loading, reload } = useOffers();

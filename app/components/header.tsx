@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import ThemeToggle from './theme-toggle';
-import { FaBars, FaXmark } from 'react-icons/fa6';
+import { FaBars, FaXmark, FaRegSnowflake, FaSnowflake } from 'react-icons/fa6';
 import { LuPartyPopper } from 'react-icons/lu';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -12,6 +12,8 @@ type HeaderProps = {
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
   onCloseSidebar: () => void;
+  isSnowing: boolean;
+  onToggleSnow: () => void;
 };
 
 const COOLDOWN_MS = 500; // 0.5s
@@ -24,16 +26,30 @@ const iconBtn =
   'transition-all active:scale-95 ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50';
 
-const ctaBtn =
-  'inline-flex items-center justify-center gap-2 select-none text-white ' +
-  'bg-gradient-to-r from-fuchsia-500 via-amber-400 to-emerald-500 ' +
-  'hover:from-fuchsia-600 hover:via-amber-500 hover:to-emerald-600 ' +
-  'shadow-lg shadow-fuchsia-500/20 hover:shadow-emerald-500/25 ' +
-  'ring-1 ring-white/10 hover:ring-white/20 ' +
-  'transition-all duration-300 active:scale-95 ' +
-  'focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ' +
-  'disabled:opacity-70 disabled:cursor-not-allowed disabled:saturate-75 ' +
-  'h-10 w-10 rounded-xl sm:h-10 sm:w-auto sm:px-3 sm:rounded-full';
+const partyBtn = (isCoolingDown: boolean) =>
+  [
+    iconBtn,
+    "border-2",
+    "border-fuchsia-500/70 dark:border-fuchsia-400/80",
+    "text-fuchsia-600 dark:text-fuchsia-300",
+    "hover:border-violet-400/80 hover:text-violet-300",
+    "shadow-[0_0_12px_rgba(255,0,150,0.35)] hover:shadow-[0_0_18px_rgba(170,0,255,0.45)]",
+    isCoolingDown && "opacity-60 cursor-not-allowed",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+const snowBtn = (isSnowing: boolean) =>
+  iconBtn +
+  " " +
+  (isSnowing
+    ? // ❄ AN: Leuchten & Glow
+      "border-emerald-500/60 dark:border-emerald-400/60 " +
+      "text-emerald-600 dark:text-emerald-300 " +
+      "shadow-[0_0_10px_rgba(16,185,129,0.35)]"
+    : // ❄ AUS: einfach normaler Button, NICHT ausgegraut
+      "text-zinc-700 dark:text-zinc-200 hover:text-emerald-600 dark:hover:text-emerald-300"
+  );
 
 const throwConfetti = async () => {
   const { default: confetti } = await import('canvas-confetti');
@@ -63,7 +79,13 @@ const throwConfetti = async () => {
   });
 };
 
-export default function Header({ isSidebarOpen, onToggleSidebar, onCloseSidebar }: HeaderProps) {
+export default function Header({
+  isSidebarOpen,
+  onToggleSidebar,
+  onCloseSidebar,
+  isSnowing,
+  onToggleSnow,
+}: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [isCoolingDown, setIsCoolingDown] = useState(false);
   const cooldownTimer = useRef<number | null>(null);
@@ -152,13 +174,27 @@ export default function Header({ isSidebarOpen, onToggleSidebar, onCloseSidebar 
             onClick={handleConfettiClick}
             disabled={isCoolingDown}
             aria-disabled={isCoolingDown}
-            aria-label="Feier unsere neue Website mit uns"
-            title="Feier unsere neue Website mit uns"
-            className={ctaBtn}
+            className={partyBtn(isCoolingDown)}
+            aria-label="Konfetti"
+            title="Konfetti"
           >
-            <LuPartyPopper className="text-[18px] drop-shadow-sm" aria-hidden />
-            <span className="hidden sm:inline lg:hidden">Feier mit uns</span>
-            <span className="hidden lg:inline">Feier unsere neue Website mit uns</span>
+            <LuPartyPopper className="text-[18px]" aria-hidden />
+          </button>
+
+          {/* ❄ Schnee-Toggle – direkt neben Konfetti */}
+          <button
+            type="button"
+            onClick={onToggleSnow}
+            aria-pressed={isSnowing}
+            aria-label={isSnowing ? "Schnee ausschalten" : "Schnee einschalten"}
+            title={isSnowing ? "Schnee ausschalten" : "Schnee einschalten"}
+            className={snowBtn(isSnowing)}
+          >
+            {isSnowing ? (
+              <FaRegSnowflake className="text-[17px]" />
+            ) : (
+              <FaRegSnowflake className="text-[17px]" />
+            )}
           </button>
 
           {/* Fester Platz für den Toggle verhindert jeglichen Shift */}
