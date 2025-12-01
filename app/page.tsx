@@ -5,76 +5,12 @@ import { Suspense } from "react";
 import { FaWheatAwn, FaLeaf, FaHeart } from "react-icons/fa6";
 
 import HeroScrollCta from "./components/hero-scroll-cta";
-import DailyDeal from "./components/daily-deal";
-import WeeklyDeals from "./components/weekly-deals";
 import Hours from "./components/hours";
 import TgtgCta from "./components/tgtg-cta";
 import News from "./components/news/news";
+import TodayOffersSection from "./components/offers/today-offers-section";
+import UpcomingOffersSection from "./components/offers/upcoming-offers-section";
 import { prisma } from "@/lib/prisma";
-import { OfferKind, Weekday } from "@prisma/client";
-
-/** ===== Berlin-Zeitzone Helpers (wie in /api/offers) ===== */
-const TZ = "Europe/Berlin";
-function toBerlinDate(d: Date) {
-  return new Date(new Date(d.toLocaleString("en-US", { timeZone: TZ })).getTime());
-}
-function startOfDayBerlin(d: Date) { const z = toBerlinDate(d); z.setHours(0,0,0,0); return z; }
-function endOfDayBerlin(d: Date)   { const z = toBerlinDate(d); z.setHours(23,59,59,999); return z; }
-function startOfWeekBerlin(d: Date) {
-  const z = toBerlinDate(d);
-  const js = z.getDay(); // 0=So … 6=Sa
-  const moOffset = (js + 6) % 7; // Montag=0
-  z.setDate(z.getDate() - moOffset);
-  z.setHours(0,0,0,0);
-  return z;
-}
-function endOfWeekBerlin(d: Date) {
-  const s = startOfWeekBerlin(d);
-  const e = new Date(s);
-  e.setDate(e.getDate() + 6);
-  e.setHours(23,59,59,999);
-  return e;
-}
-function weekdayEnumBerlin(d: Date): Weekday {
-  const js = toBerlinDate(d).getDay(); // 0..6 (So..Sa)
-  const idx = (js + 6) % 7; // Montag=0
-  return [Weekday.MONDAY,Weekday.TUESDAY,Weekday.WEDNESDAY,Weekday.THURSDAY,Weekday.FRIDAY,Weekday.SATURDAY,Weekday.SUNDAY][idx]!;
-}
-
-/** Prüft serverseitig via DB, ob *aktuelle* Tages-/Wochenangebote existieren */
-async function getOffersPresence() {
-  const baseDate = new Date();
-  const dayStart  = startOfDayBerlin(baseDate);
-  const dayEnd    = endOfDayBerlin(baseDate);
-  const weekStart = startOfWeekBerlin(baseDate);
-  const weekEnd   = endOfWeekBerlin(baseDate);
-  const weekdayToday = weekdayEnumBerlin(baseDate);
-
-  // Tagesangebote: ONE_DAY am heutigen Tag, RECURRING_WEEKDAY passend zum Wochentag,
-  // oder DATE_RANGE, das den heutigen Tag überlappt.
-  const dailyCount = await prisma.offer.count({
-    where: {
-      isActive: true,
-      OR: [
-        { kind: OfferKind.ONE_DAY,           date: { gte: dayStart, lte: dayEnd } },
-        { kind: OfferKind.RECURRING_WEEKDAY, weekday: weekdayToday },
-        { kind: OfferKind.DATE_RANGE, AND: [{ startDate: { lte: dayEnd } }, { endDate: { gte: dayStart } }] },
-      ],
-    },
-  });
-
-  // Wochenangebote: alle DATE_RANGE, die diese Woche überlappen.
-  const weeklyCount = await prisma.offer.count({
-    where: {
-      isActive: true,
-      kind: OfferKind.DATE_RANGE,
-      startDate: { lte: weekEnd },
-      endDate:   { gte: weekStart },
-    },
-  });
-
-  return { hasDaily: dailyCount > 0, hasWeekly: weeklyCount > 0 };
-}
 
 /** Prüft serverseitig via DB, ob mindestens eine aktive News existiert */
 async function getNewsPresence() {
@@ -102,10 +38,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const [{ hasDaily, hasWeekly }, hasNews] = await Promise.all([
-    getOffersPresence(),
-    getNewsPresence(),
-  ]);
+  const hasNews = await getNewsPresence();
 
   return (
     <>
@@ -129,20 +62,25 @@ export default async function Page() {
                 Frisch gebacken in Mettingen &amp; Recke
               </div>
 
-              <h1 id="hero-title" className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
+              <h1
+                id="hero-title"
+                className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl"
+              >
                 <span className="bg-gradient-to-r from-emerald-700 via-emerald-600 to-amber-600 bg-clip-text text-transparent dark:from-emerald-300 dark:via-teal-200 dark:to-amber-300">
                   Backschmiede Kölker
                 </span>
                 <br />
-                <span className="text-zinc-900 dark:text-zinc-100">Handwerk. Zeit. Gute Zutaten.</span>
+                <span className="text-zinc-900 dark:text-zinc-100">
+                  Handwerk. Zeit. Gute Zutaten.
+                </span>
               </h1>
 
               <p className="mt-4 text-base leading-7 text-zinc-700 dark:text-zinc-300">
-                Brote, Brötchen und Kuchen mit langer Teigführung, eigenem Sauerteig und viel Liebe.
-                Komm vorbei - wir freuen uns auf dich!
+                Brote, Brötchen und Kuchen mit langer Teigführung, eigenem
+                Sauerteig und viel Liebe. Komm vorbei - wir freuen uns auf dich!
               </p>
 
-              {/* CTA: Öffnungszeiten zuerst, Angebote optional (Platzhalter wenn keine) */}
+              {/* CTA: Öffnungszeiten & Angebote */}
               <HeroScrollCta
                 angebotId="angebote"
                 zeitenId="oeffnungszeiten"
@@ -172,7 +110,13 @@ export default async function Page() {
                 <div className="absolute left-0 top-8 w-[58%] rotate-[-3.5deg]">
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-800/10 bg-white/60 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5">
                     <div className="relative aspect-[4/3] w-full">
-                      <Image src="/mettingen-draussen-alt.png" alt="Mettingen" fill className="object-cover" priority />
+                      <Image
+                        src="/mettingen-draussen-alt.png"
+                        alt="Mettingen"
+                        fill
+                        className="object-cover"
+                        priority
+                      />
                     </div>
                     <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/85 px-3 py-1.5 text-xs font-medium text-zinc-700 backdrop-blur dark:bg-zinc-900/70 dark:text-zinc-200 border border-emerald-800/10 dark:border-emerald-300/10">
                       Mettingen
@@ -183,7 +127,13 @@ export default async function Page() {
                 <div className="absolute right-0 top-0 w-[58%] rotate-[4deg]">
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-800/10 bg-white/60 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5">
                     <div className="relative aspect-[4/3] w-full">
-                      <Image src="/recke-tuer-ballons.jpg" alt="Recke" fill className="object-cover" priority />
+                      <Image
+                        src="/recke-tuer-ballons.jpg"
+                        alt="Recke"
+                        fill
+                        className="object-cover"
+                        priority
+                      />
                     </div>
                     <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/85 px-3 py-1.5 text-xs font-medium text-zinc-700 backdrop-blur dark:bg-zinc-900/70 dark:text-zinc-200 border border-emerald-800/10 dark:border-emerald-300/10">
                       Recke
@@ -207,7 +157,13 @@ export default async function Page() {
                 >
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-800/10 bg-white/60 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5">
                     <div className="relative aspect-[4/3] w-full">
-                      <Image src="/mettingen-draussen-alt.png" alt="Mettingen" fill className="object-cover" priority />
+                      <Image
+                        src="/mettingen-draussen-alt.png"
+                        alt="Mettingen"
+                        fill
+                        className="object-cover"
+                        priority
+                      />
                     </div>
                     <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/85 px-3 py-1.5 text-xs font-medium text-zinc-700 backdrop-blur dark:bg-zinc-900/70 dark:text-zinc-200 border border-emerald-800/10 dark:border-emerald-300/10">
                       Mettingen
@@ -226,7 +182,13 @@ export default async function Page() {
                 >
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-800/10 bg-white/60 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5">
                     <div className="relative aspect-[4/3] w-full">
-                      <Image src="/recke-tuer-ballons.jpg" alt="Recke" fill className="object-cover" priority />
+                      <Image
+                        src="/recke-tuer-ballons.jpg"
+                        alt="Recke"
+                        fill
+                        className="object-cover"
+                        priority
+                      />
                     </div>
                     <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/85 px-3 py-1.5 text-xs font-medium text-zinc-700 backdrop-blur dark:bg-zinc-900/70 dark:text-zinc-200 border border-emerald-800/10 dark:border-emerald-300/10">
                       Recke
@@ -235,13 +197,17 @@ export default async function Page() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
         {/* Waves */}
         <div className="relative">
-          <svg aria-hidden viewBox="0 0 1440 140" className="block h-[56px] sm:h-[84px] lg:h-[110px] w-full" preserveAspectRatio="none">
+          <svg
+            aria-hidden
+            viewBox="0 0 1440 140"
+            className="block h-[56px] sm:h-[84px] lg:h-[110px] w-full"
+            preserveAspectRatio="none"
+          >
             <path
               fill="currentColor"
               className="text-white dark:text-zinc-900 opacity-70 sm:opacity-80"
@@ -259,8 +225,15 @@ export default async function Page() {
 
       {/* AKTUELLES - unabhängig von Angeboten */}
       {hasNews && (
-        <section id="aktuelles" className="mx-auto mt-0 w-full max-w-5xl px-4 scroll-mt-20" aria-labelledby="aktuelles-title">
-          <h2 className="mb-4 text-center text-3xl font-bold" id="aktuelles-title">
+        <section
+          id="aktuelles"
+          className="mx-auto mt-0 w-full max-w-5xl px-4 scroll-mt-20"
+          aria-labelledby="aktuelles-title"
+        >
+          <h2
+            className="mb-4 text-center text-3xl font-bold"
+            id="aktuelles-title"
+          >
             Aktuelles
           </h2>
 
@@ -270,37 +243,38 @@ export default async function Page() {
         </section>
       )}
 
-      {/* ANGEBOTE - Abschnitt existiert immer (mindestens TGTG) */}
+      {/* ANGEBOTE */}
       <section
         id="angebote"
         className="mx-auto mt-10 w-full max-w-5xl px-4 scroll-mt-20"
         aria-labelledby="angebote-title"
       >
-        <h2 className="mb-4 text-center text-3xl font-bold" id="angebote-title">
-          Angebote
-        </h2>
+        <header className="mb-4 text-center">
+          <h2
+            className="text-3xl font-bold"
+            id="angebote-title"
+          >
+            Angebote
+          </h2>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+            Hier findest du unsere aktuellen Spezialpreise und Aktionen – heute
+            und für die nächsten Tage.
+          </p>
+        </header>
 
-        {/* Tagesangebote - nur wenn vorhanden */}
-        {hasDaily && (
-          <div className="relative overflow-hidden rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
-            <Suspense fallback={<div className="text-sm opacity-70">Lade Tagesangebote…</div>}>
-              <DailyDeal />
-            </Suspense>
-          </div>
-        )}
+        {/* HEUTE – zeigt nur etwas, wenn auch wirklich Angebote existieren */}
+        <Suspense fallback={null}>
+          <TodayOffersSection />
+        </Suspense>
 
-        {/* Wochenangebote - nur wenn vorhanden */}
-        {hasWeekly && (
-          <div className="mt-8 rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
-            <Suspense fallback={<div className="text-sm opacity-70">Lade Wochenangebote…</div>}>
-              <WeeklyDeals />
-            </Suspense>
-          </div>
-        )}
+        {/* DEMNÄCHST – wird automatisch ausgeblendet, wenn leer */}
+        <Suspense fallback={null}>
+          <UpcomingOffersSection />
+        </Suspense>
 
-        {/* To Good To Go - IMMER sichtbar */}
-        <div className={`mt-8 rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6`}>
-          <TgtgCta/>
+        {/* To Good To Go – immer sichtbar, sorgt dafür dass die Section nie „leer“ wirkt */}
+        <div className="mt-8">
+          <TgtgCta />
         </div>
       </section>
 
@@ -310,7 +284,10 @@ export default async function Page() {
         className="mx-auto mt-12 w-full max-w-5xl px-4 scroll-mt-20"
         aria-labelledby="oeffnungszeiten-title"
       >
-        <h2 className="mb-4 text-center text-3xl font-bold" id="oeffnungszeiten-title">
+        <h2
+          className="mb-4 text-center text-3xl font-bold"
+          id="oeffnungszeiten-title"
+        >
           Öffnungszeiten
         </h2>
         <div className="rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">

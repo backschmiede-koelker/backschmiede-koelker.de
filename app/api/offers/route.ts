@@ -60,109 +60,200 @@ function toDTO(item: any) {
     locations: item.locations,
     priority: item.priority,
     minBasketCents: item.minBasketCents ?? null,
+
+    // Basis-Preisfelder aus Offer – für GENERIC & Co als Fallback nutzbar
+    priceCents: item.priceCents ?? null,
+    originalPriceCents: item.originalPriceCents ?? null,
+    unit: item.unit ?? null,
   };
 
   if (item.type === "GENERIC") {
-    return { ...common, generic: { body: item.generic?.body ?? null, ctaLabel: item.generic?.ctaLabel ?? null, ctaHref: item.generic?.ctaHref ?? null } };
+    return {
+      ...common,
+      generic: {
+        body: item.generic?.body ?? null,
+        ctaLabel: item.generic?.ctaLabel ?? null,
+        ctaHref: item.generic?.ctaHref ?? null,
+      },
+    };
   }
   if (item.type === "PRODUCT_NEW") {
     return {
       ...common,
-      productNew: item.productNew ? {
-        product: item.productNew.product,
-        highlightLabel: item.productNew.highlightLabel ?? null,
-      } : undefined
+      productNew: item.productNew
+        ? {
+            product: item.productNew.product,
+            highlightLabel: item.productNew.highlightLabel ?? null,
+          }
+        : undefined,
     };
   }
   if (item.type === "PRODUCT_DISCOUNT") {
     return {
       ...common,
-      productDiscount: item.productDiscount ? {
-        product: item.productDiscount.product,
-        priceCents: item.productDiscount.priceCents,
-        originalPriceCents: item.productDiscount.originalPriceCents ?? null,
-        unit: item.productDiscount.unit ?? null,
-      } : undefined
+      productDiscount: item.productDiscount
+        ? {
+            product: item.productDiscount.product,
+            priceCents: item.productDiscount.priceCents,
+            originalPriceCents: item.productDiscount.originalPriceCents ?? null,
+            unit: item.productDiscount.unit ?? null,
+          }
+        : undefined,
     };
   }
   if (item.type === "MULTIBUY_PRICE") {
     return {
       ...common,
-      multibuyPrice: item.multibuyPrice ? {
-        product: item.multibuyPrice.product,
-        packQty: item.multibuyPrice.packQty,
-        packPriceCents: item.multibuyPrice.packPriceCents,
-        comparePackQty: item.multibuyPrice.comparePackQty ?? null,
-        comparePriceCents: item.multibuyPrice.comparePriceCents ?? null,
-        unit: item.multibuyPrice.unit ?? null,
-      } : undefined
+      multibuyPrice: item.multibuyPrice
+        ? {
+            product: item.multibuyPrice.product,
+            packQty: item.multibuyPrice.packQty,
+            packPriceCents: item.multibuyPrice.packPriceCents,
+            comparePackQty: item.multibuyPrice.comparePackQty ?? null,
+            comparePriceCents: item.multibuyPrice.comparePriceCents ?? null,
+            unit: item.multibuyPrice.unit ?? null,
+          }
+        : undefined,
     };
   }
   return common;
 }
 
-// ====== GET: Listen (daily/weekly/all) ======
+// ====== GET: Listen (today/upcoming/weekly/all) ======
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const t = (url.searchParams.get("type") || "weekly").toLowerCase();
-    const listType: "daily" | "weekly" | "all" = t === "daily" ? "daily" : t === "all" ? "all" : "weekly";
+    const tRaw = (url.searchParams.get("type") || "today").toLowerCase();
+
+    // Alias "daily" → "today", "weekly" bleibt
+    const listType: "today" | "upcoming" | "weekly" | "all" =
+      tRaw === "upcoming"
+        ? "upcoming"
+        : tRaw === "weekly"
+        ? "weekly"
+        : tRaw === "all"
+        ? "all"
+        : "today";
+
     const dateParam = parseDateParam(url.searchParams.get("date"));
     const weekParam = parseDateParam(url.searchParams.get("week"));
 
     const locSingle = url.searchParams.get("location");
     const locMulti = url.searchParams.get("locations");
     const locations: Location[] = locMulti
-      ? (locMulti.split(",").map(s => s.trim()).filter(Boolean) as Location[])
-      : locSingle ? ([locSingle] as Location[]) : [];
+      ? (locMulti.split(",").map((s) => s.trim()).filter(Boolean) as Location[])
+      : locSingle
+      ? ([locSingle] as Location[])
+      : [];
 
     const baseDate = dateParam ?? weekParam ?? new Date();
     const dayStart = startOfDayBerlin(baseDate);
-    const dayEnd   = endOfDayBerlin(baseDate);
+    const dayEnd = endOfDayBerlin(baseDate);
     const weekStart = startOfWeekBerlin(weekParam ?? baseDate);
-    const weekEnd   = endOfWeekBerlin(weekParam ?? baseDate);
+    const weekEnd = endOfWeekBerlin(weekParam ?? baseDate);
     const weekdayToday = weekdayEnumBerlin(baseDate);
 
     const locationWhere: Prisma.OfferWhereInput =
       locations.length > 0 ? { locations: { hasSome: locations } } : {};
 
-    const dailyWhere: Prisma.OfferWhereInput = {
+    const activeBase: Prisma.OfferWhereInput = {
       isActive: true,
-      OR: [
-        { kind: OfferKind.ONE_DAY,           date: { gte: dayStart, lte: dayEnd } },
-        { kind: OfferKind.RECURRING_WEEKDAY, weekday: weekdayToday },
-        { kind: OfferKind.DATE_RANGE, AND: [{ startDate: { lte: dayEnd } }, { endDate: { gte: dayStart } }] },
-      ],
       ...locationWhere,
     };
 
+    // HEUTE gültige Angebote:
+    // - ONE_DAY: date = heute
+    // - RECURRING_WEEKDAY: weekday = heute
+    // - DATE_RANGE: überlappt heutigen Tag
+    const todayWhere: Prisma.OfferWhereInput = {
+      ...activeBase,
+      OR: [
+        { kind: OfferKind.ONE_DAY, date: { gte: dayStart, lte: dayEnd } },
+        { kind: OfferKind.RECURRING_WEEKDAY, weekday: weekdayToday },
+        {
+          kind: OfferKind.DATE_RANGE,
+          AND: [{ startDate: { lte: dayEnd } }, { endDate: { gte: dayStart } }],
+        },
+      ],
+    };
+
+    // DEMNÄCHST gültige Angebote (in Zukunft, nicht heute):
+    // - ONE_DAY: date > heute
+    // - RECURRING_WEEKDAY: anderer Wochentag
+    // - DATE_RANGE: Startdatum nach heute
+    const upcomingWhere: Prisma.OfferWhereInput = {
+      ...activeBase,
+      OR: [
+        { kind: OfferKind.ONE_DAY, date: { gt: dayEnd } },
+        {
+          kind: OfferKind.RECURRING_WEEKDAY,
+          NOT: { weekday: weekdayToday },
+        },
+        {
+          kind: OfferKind.DATE_RANGE,
+          startDate: { gt: dayEnd },
+        },
+      ],
+    };
+
+    // Alte Wochenlogik (DATE_RANGE, die Woche überlappen) – falls du sie später noch nutzt
     const weeklyWhere: Prisma.OfferWhereInput = {
-      isActive: true,
+      ...activeBase,
       kind: OfferKind.DATE_RANGE,
       startDate: { lte: weekEnd },
-      endDate:   { gte: weekStart },
-      ...locationWhere,
+      endDate: { gte: weekStart },
     };
 
-    const allWhere: Prisma.OfferWhereInput = listType === "all" ? { ...locationWhere } : {};
+    // Admin-Ansicht: alle Angebote (inkl. inaktiver)
+    const allWhere: Prisma.OfferWhereInput =
+      listType === "all" ? { ...locationWhere } : {};
 
     const includeDetails = {
       generic: true,
-      productNew: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
-      productDiscount: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
-      multibuyPrice: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
+      productNew: {
+        include: {
+          product: { select: { id: true, name: true, priceCents: true, unit: true } },
+        },
+      },
+      productDiscount: {
+        include: {
+          product: { select: { id: true, name: true, priceCents: true, unit: true } },
+        },
+      },
+      multibuyPrice: {
+        include: {
+          product: { select: { id: true, name: true, priceCents: true, unit: true } },
+        },
+      },
     };
 
-    if (listType === "daily") {
+    if (listType === "today") {
       const rows = await prisma.offer.findMany({
-        where: dailyWhere,
-        orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
+        where: todayWhere,
+        orderBy: [
+          { priority: "desc" },
+          { createdAt: "desc" },
+        ],
         include: includeDetails,
       });
       return NextResponse.json({
-        type: "daily",
-        from: dayStart.toISOString(),
-        to:   dayEnd.toISOString(),
+        type: "today",
+        date: dayStart.toISOString(),
+        items: rows.map(toDTO),
+      });
+    }
+
+    if (listType === "upcoming") {
+      const rows = await prisma.offer.findMany({
+        where: upcomingWhere,
+        orderBy: [
+          { priority: "desc" },
+          { createdAt: "desc" },
+        ],
+        include: includeDetails,
+      });
+      return NextResponse.json({
+        type: "upcoming",
         items: rows.map(toDTO),
       });
     }
@@ -170,17 +261,21 @@ export async function GET(req: Request) {
     if (listType === "weekly") {
       const rows = await prisma.offer.findMany({
         where: weeklyWhere,
-        orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
+        orderBy: [
+          { priority: "desc" },
+          { createdAt: "desc" },
+        ],
         include: includeDetails,
       });
       return NextResponse.json({
         type: "weekly",
         from: weekStart.toISOString(),
-        to:   weekEnd.toISOString(),
+        to: weekEnd.toISOString(),
         items: rows.map(toDTO),
       });
     }
 
+    // ALL
     const rows = await prisma.offer.findMany({
       where: allWhere,
       orderBy: [{ createdAt: "desc" }],
@@ -196,7 +291,7 @@ export async function GET(req: Request) {
 // ====== POST: Neues Angebot je Typ ======
 export async function POST(req: Request) {
   try {
-    const b = await req.json() as {
+    const b = (await req.json()) as {
       type: OfferType;
       base: {
         title: string;
@@ -222,18 +317,29 @@ export async function POST(req: Request) {
     if (!b?.type || !Object.values(OfferType).includes(b.type)) {
       return NextResponse.json({ error: "Ungültiger Angebots-Typ" }, { status: 400 });
     }
-    if (!b?.base?.title?.trim()) return NextResponse.json({ error: "Titel ist erforderlich." }, { status: 400 });
+    if (!b?.base?.title?.trim()) {
+      return NextResponse.json({ error: "Titel ist erforderlich." }, { status: 400 });
+    }
     if (!b?.base?.kind || !Object.values(OfferKind).includes(b.base.kind)) {
       return NextResponse.json({ error: "Ungültige Angebots-Art (kind)." }, { status: 400 });
     }
     if (b.base.kind === "RECURRING_WEEKDAY" && b.base.weekday == null) {
-      return NextResponse.json({ error: "weekday fehlt für wöchentliches Angebot." }, { status: 400 });
+      return NextResponse.json(
+        { error: "weekday fehlt für wöchentliches Angebot." },
+        { status: 400 },
+      );
     }
     if (b.base.kind === "ONE_DAY" && !b.base.date) {
-      return NextResponse.json({ error: "date fehlt für Eintages-Angebot." }, { status: 400 });
+      return NextResponse.json(
+        { error: "date fehlt für Eintages-Angebot." },
+        { status: 400 },
+      );
     }
     if (b.base.kind === "DATE_RANGE" && (!b.base.startDate || !b.base.endDate)) {
-      return NextResponse.json({ error: "startDate/endDate fehlen für Zeitraum-Angebot." }, { status: 400 });
+      return NextResponse.json(
+        { error: "startDate/endDate fehlen für Zeitraum-Angebot." },
+        { status: 400 },
+      );
     }
 
     const slug = await uniqueOfferSlug(b.base.title);
@@ -247,15 +353,30 @@ export async function POST(req: Request) {
       tags: b.base.tags ?? [],
       isActive: b.base.isActive ?? true,
       kind: b.base.kind,
-      weekday: b.base.kind === "RECURRING_WEEKDAY" ? (b.base.weekday as Weekday) : null,
-      date: b.base.kind === "ONE_DAY" ? startOfDayBerlin(new Date(`${b.base.date}T00:00:00.000Z`)) : null,
-      startDate: b.base.kind === "DATE_RANGE" ? startOfDayBerlin(new Date(`${b.base.startDate}T00:00:00.000Z`)) : null,
-      endDate: b.base.kind === "DATE_RANGE" ? endOfDayBerlin(new Date(`${b.base.endDate}T00:00:00.000Z`)) : null,
+      weekday:
+        b.base.kind === "RECURRING_WEEKDAY" ? (b.base.weekday as Weekday) : null,
+      date:
+        b.base.kind === "ONE_DAY"
+          ? startOfDayBerlin(new Date(`${b.base.date}T00:00:00.000Z`))
+          : null,
+      startDate:
+        b.base.kind === "DATE_RANGE"
+          ? startOfDayBerlin(new Date(`${b.base.startDate}T00:00:00.000Z`))
+          : null,
+      endDate:
+        b.base.kind === "DATE_RANGE"
+          ? endOfDayBerlin(new Date(`${b.base.endDate}T00:00:00.000Z`))
+          : null,
       locations: Array.isArray(b.base.locations) ? b.base.locations : [],
       priority: typeof b.base.priority === "number" ? b.base.priority : 0,
-      minBasketCents: b.base.minBasketCents == null ? null : Number(b.base.minBasketCents),
-      priceCents: b.base.priceCents == null ? null : Number(b.base.priceCents),
-      originalPriceCents: b.base.originalPriceCents == null ? null : Number(b.base.originalPriceCents),
+      minBasketCents:
+        b.base.minBasketCents == null ? null : Number(b.base.minBasketCents),
+      priceCents:
+        b.base.priceCents == null ? null : Number(b.base.priceCents),
+      originalPriceCents:
+        b.base.originalPriceCents == null
+          ? null
+          : Number(b.base.originalPriceCents),
       unit: b.base.unit ?? null,
     };
 
@@ -263,40 +384,96 @@ export async function POST(req: Request) {
       const createdOffer = await tx.offer.create({ data: baseData });
 
       if (b.type === "GENERIC") {
-        const p = b.payload as { body?: string | null; ctaLabel?: string | null; ctaHref?: string | null };
-        await tx.offerGeneric.create({ data: { offerId: createdOffer.id, body: p?.body ?? null, ctaLabel: p?.ctaLabel ?? null, ctaHref: p?.ctaHref ?? null } });
+        const p = b.payload as {
+          body?: string | null;
+          ctaLabel?: string | null;
+          ctaHref?: string | null;
+        };
+        await tx.offerGeneric.create({
+          data: {
+            offerId: createdOffer.id,
+            body: p?.body ?? null,
+            ctaLabel: p?.ctaLabel ?? null,
+            ctaHref: p?.ctaHref ?? null,
+          },
+        });
       }
 
       if (b.type === "PRODUCT_NEW") {
-        const p = b.payload as { productId: string; highlightLabel?: string | null };
-        if (!p?.productId) throw new Error("productId erforderlich für PRODUCT_NEW");
-        await tx.offerProductNew.create({ data: { offerId: createdOffer.id, productId: p.productId, highlightLabel: p.highlightLabel ?? "NEU" } });
+        const p = b.payload as {
+          productId: string;
+          highlightLabel?: string | null;
+        };
+        if (!p?.productId)
+          throw new Error("productId erforderlich für PRODUCT_NEW");
+        await tx.offerProductNew.create({
+          data: {
+            offerId: createdOffer.id,
+            productId: p.productId,
+            highlightLabel: p.highlightLabel ?? "NEU",
+          },
+        });
       }
 
       if (b.type === "PRODUCT_DISCOUNT") {
-        const p = b.payload as { productId: string; priceCents: number; originalPriceCents?: number | null; unit?: string | null };
-        if (!p?.productId || !Number.isFinite(p?.priceCents)) throw new Error("productId/priceCents erforderlich für PRODUCT_DISCOUNT");
-        await tx.offerProductDiscount.create({ data: {
-          offerId: createdOffer.id,
-          productId: p.productId,
-          priceCents: Number(p.priceCents),
-          originalPriceCents: p.originalPriceCents == null ? null : Number(p.originalPriceCents),
-          unit: p.unit ?? null,
-        } });
+        const p = b.payload as {
+          productId: string;
+          priceCents: number;
+          originalPriceCents?: number | null;
+          unit?: string | null;
+        };
+        if (!p?.productId || !Number.isFinite(p?.priceCents))
+          throw new Error(
+            "productId/priceCents erforderlich für PRODUCT_DISCOUNT",
+          );
+        await tx.offerProductDiscount.create({
+          data: {
+            offerId: createdOffer.id,
+            productId: p.productId,
+            priceCents: Number(p.priceCents),
+            originalPriceCents:
+              p.originalPriceCents == null
+                ? null
+                : Number(p.originalPriceCents),
+            unit: p.unit ?? null,
+          },
+        });
       }
 
       if (b.type === "MULTIBUY_PRICE") {
-        const p = b.payload as { productId: string; packQty: number; packPriceCents: number; comparePackQty?: number | null; comparePriceCents?: number | null; unit?: string | null };
-        if (!p?.productId || !Number.isFinite(p?.packQty) || !Number.isFinite(p?.packPriceCents)) throw new Error("productId/packQty/packPriceCents erforderlich für MULTIBUY_PRICE");
-        await tx.offerMultibuyPrice.create({ data: {
-          offerId: createdOffer.id,
-          productId: p.productId,
-          packQty: Math.max(1, Number(p.packQty)),
-          packPriceCents: Number(p.packPriceCents),
-          comparePackQty: p.comparePackQty == null ? null : Math.max(1, Number(p.comparePackQty)),
-          comparePriceCents: p.comparePriceCents == null ? null : Number(p.comparePriceCents),
-          unit: p.unit ?? null,
-        } });
+        const p = b.payload as {
+          productId: string;
+          packQty: number;
+          packPriceCents: number;
+          comparePackQty?: number | null;
+          comparePriceCents?: number | null;
+          unit?: string | null;
+        };
+        if (
+          !p?.productId ||
+          !Number.isFinite(p?.packQty) ||
+          !Number.isFinite(p?.packPriceCents)
+        )
+          throw new Error(
+            "productId/packQty/packPriceCents erforderlich für MULTIBUY_PRICE",
+          );
+        await tx.offerMultibuyPrice.create({
+          data: {
+            offerId: createdOffer.id,
+            productId: p.productId,
+            packQty: Math.max(1, Number(p.packQty)),
+            packPriceCents: Number(p.packPriceCents),
+            comparePackQty:
+              p.comparePackQty == null
+                ? null
+                : Math.max(1, Number(p.comparePackQty)),
+            comparePriceCents:
+              p.comparePriceCents == null
+                ? null
+                : Number(p.comparePriceCents),
+            unit: p.unit ?? null,
+          },
+        });
       }
 
       return createdOffer;
@@ -306,15 +483,36 @@ export async function POST(req: Request) {
       where: { id: created.id },
       include: {
         generic: true,
-        productNew: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
-        productDiscount: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
-        multibuyPrice: { include: { product: { select: { id: true, name: true, priceCents: true, unit: true } } } },
+        productNew: {
+          include: {
+            product: {
+              select: { id: true, name: true, priceCents: true, unit: true },
+            },
+          },
+        },
+        productDiscount: {
+          include: {
+            product: {
+              select: { id: true, name: true, priceCents: true, unit: true },
+            },
+          },
+        },
+        multibuyPrice: {
+          include: {
+            product: {
+              select: { id: true, name: true, priceCents: true, unit: true },
+            },
+          },
+        },
       },
     });
 
     return NextResponse.json(toDTO(full), { status: 201 });
   } catch (e: any) {
     console.error(e);
-    return NextResponse.json({ error: e?.message || "Internal Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: e?.message || "Internal Error" },
+      { status: 500 },
+    );
   }
 }
