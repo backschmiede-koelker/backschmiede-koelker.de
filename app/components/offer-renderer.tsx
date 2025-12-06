@@ -68,6 +68,8 @@ export type OfferDTO = {
 
 type Context = "today" | "default";
 
+const TIME_ZONE = "Europe/Berlin";
+
 function dateBadge(o: OfferDTO) {
   const dd = (iso?: string | null) =>
     iso
@@ -75,15 +77,19 @@ function dateBadge(o: OfferDTO) {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
+          timeZone: TIME_ZONE,
         }).format(new Date(iso))
       : "";
+
   const dm = (iso?: string | null) =>
     iso
       ? new Intl.DateTimeFormat("de-DE", {
           day: "2-digit",
           month: "2-digit",
+          timeZone: TIME_ZONE,
         }).format(new Date(iso))
       : "";
+
   const weekdayMap: Record<NonNullable<OfferDTO["weekday"]>, string> = {
     MONDAY: "Montag",
     TUESDAY: "Dienstag",
