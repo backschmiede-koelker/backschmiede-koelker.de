@@ -1,4 +1,4 @@
-// /lib/jobs/types.ts
+// lib/jobs/types.ts
 export type EmploymentType =
   | "FULL_TIME"
   | "PART_TIME"
@@ -9,7 +9,8 @@ export type Role =
   | "Bäcker/in"
   | "Verkäufer/in"
   | "Azubi"
-  | "Aushilfe";
+  | "Aushilfe"
+  | string;
 
 export type Salary = {
   currency: "EUR";
@@ -22,16 +23,31 @@ export type Job = {
   id: string;
   slug: string;
   title: string;
-  role: Role;
+  role?: Role;
   teaser: string;
+
   descriptionHtml: string;
   responsibilities: string[];
   qualifications: string[];
   benefits: string[];
+
   employmentType: EmploymentType;
+  workloadNote?: string | null;
+
   locations: string[];
-  shift?: string;
+
+  shift?: string | null;
   salary?: Salary;
+
+  startsAt?: Date | null;
+  startsAsap: boolean;
+
   datePosted: Date;
-  validThrough?: Date;
+  validThrough?: Date | null;
+
+  contactEmail?: string | null;
+  contactPhone?: string | null;
+  applyUrl?: string | null;
+
+  isActive: boolean;
 };

@@ -1,12 +1,28 @@
-// app/admin/offers/offer-type-selector.tsx
+// app/admin/offers/components/offer-type-selector.tsx
 import React from "react";
-import { OfferType } from "@prisma/client";
+import { OfferType } from "@/app/types/offers";
 
 const TYPES: { key: OfferType; title: string; hint: string }[] = [
-  { key: "GENERIC", title: "Allgemein", hint: "Hinweis, Aktion, Platzhalter" },
-  { key: "PRODUCT_NEW", title: "Jetzt neu", hint: "Neues Produkt zeigen" },
-  { key: "PRODUCT_DISCOUNT", title: "Produkt reduziert", hint: "Neuer Preis (optional statt)" },
-  { key: "MULTIBUY_PRICE", title: "Mehr für weniger", hint: "z. B. 5 Stück für 1,80 €" },
+  {
+    key: OfferType.GENERIC,
+    title: "Allgemein",
+    hint: "Hinweis, Aktion, Platzhalter",
+  },
+  {
+    key: OfferType.PRODUCT_NEW,
+    title: "Jetzt neu",
+    hint: "Neues Produkt zeigen",
+  },
+  {
+    key: OfferType.PRODUCT_DISCOUNT,
+    title: "Produkt reduziert",
+    hint: "Neuer Preis (optional statt)",
+  },
+  {
+    key: OfferType.MULTIBUY_PRICE,
+    title: "Mehr für weniger",
+    hint: "z. B. 5 Stück für 1,80 €",
+  },
 ];
 
 export default function OfferTypeSelector({

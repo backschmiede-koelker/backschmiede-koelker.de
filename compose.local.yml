@@ -5,7 +5,12 @@ services:
     working_dir: /app
     command: >
       sh -lc "
-        [ -f .docker-npm.stamp ] || (npm ci --prefer-offline --no-audit --loglevel=warn && touch .docker-npm.stamp);
+        [ -f .docker-npm.stamp ] || (
+          npm ci --prefer-offline --no-audit --loglevel=warn &&
+          npx prisma generate &&
+          touch .docker-npm.stamp
+        );
+        npx prisma generate;
         npx prisma migrate dev;
         npm run dev
       "
@@ -20,6 +25,8 @@ services:
       CHOKIDAR_INTERVAL: "500"
       WATCHPACK_POLLING: "true"
       WATCHPACK_POLLING_INTERVAL: "500"
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     volumes:
       - ./:/app
       - ./uploads:/uploads

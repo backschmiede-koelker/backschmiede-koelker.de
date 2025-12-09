@@ -1,21 +1,26 @@
 // prisma/schema.prisma
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  schemas  = ["backschmiede_koelker"]
 }
 
 enum Role {
   ADMIN
+
+  @@schema("backschmiede_koelker")
 }
 
 enum OfferKind {
   RECURRING_WEEKDAY
   ONE_DAY
   DATE_RANGE
+
+  @@schema("backschmiede_koelker")
 }
 
 enum Weekday {
@@ -26,11 +31,15 @@ enum Weekday {
   FRIDAY
   SATURDAY
   SUNDAY
+
+  @@schema("backschmiede_koelker")
 }
 
 enum Location {
   RECKE
   METTINGEN
+
+  @@schema("backschmiede_koelker")
 }
 
 // NEU: klare Typen – genau ein Detail-Datensatz je Offer.type
@@ -39,6 +48,8 @@ enum OfferType {
   PRODUCT_NEW // „Jetzt neu: <Produkt>“
   PRODUCT_DISCOUNT // Produkt jetzt für X € (optional statt Y €)
   MULTIBUY_PRICE // N Stück für X € (optional: früher M für X €)
+
+  @@schema("backschmiede_koelker")
 }
 
 model User {
@@ -48,6 +59,8 @@ model User {
   role         Role     @default(ADMIN)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@schema("backschmiede_koelker")
 }
 
 model Product {
@@ -69,6 +82,8 @@ model Product {
 
   @@index([isActive, createdAt])
   @@index([name])
+
+  @@schema("backschmiede_koelker")
 }
 
 // Basistabelle: Zeitraum/Standort/Priorität + grobe Infos
@@ -115,6 +130,8 @@ model Offer {
   @@index([weekday])
   @@index([startDate, endDate])
   @@index([priority, createdAt])
+
+  @@schema("backschmiede_koelker")
 }
 
 // --- Detail-Modelle je Typ ---
@@ -126,6 +143,8 @@ model OfferGeneric {
   ctaHref  String?
 
   offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@schema("backschmiede_koelker")
 }
 
 model OfferProductNew {
@@ -136,6 +155,8 @@ model OfferProductNew {
   // ← benannte Relation:
   product Product @relation("ProductToOfferProductNew", fields: [productId], references: [id], onDelete: Restrict)
   offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@schema("backschmiede_koelker")
 }
 
 model OfferProductDiscount {
@@ -148,6 +169,8 @@ model OfferProductDiscount {
   // ← benannte Relation:
   product Product @relation("ProductToOfferProductDiscount", fields: [productId], references: [id], onDelete: Restrict)
   offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@schema("backschmiede_koelker")
 }
 
 model OfferMultibuyPrice {
@@ -162,6 +185,8 @@ model OfferMultibuyPrice {
   // ← benannte Relation:
   product Product @relation("ProductToOfferMultibuyPrice", fields: [productId], references: [id], onDelete: Restrict)
   offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@schema("backschmiede_koelker")
 }
 
 // Unverändert aus deinem Projekt (falls genutzt)
@@ -171,6 +196,8 @@ model ContentBlock {
   content   String
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+
+  @@schema("backschmiede_koelker")
 }
 
 model Pageview {
@@ -200,6 +227,8 @@ model Pageview {
   @@index([device])
   @@index([browser])
   @@index([lang])
+
+  @@schema("backschmiede_koelker")
 }
 
 model News {
@@ -220,4 +249,69 @@ model News {
   @@index([isActive, publishedAt])
   @@index([tag])
   @@index([title])
+
+  @@schema("backschmiede_koelker")
+}
+
+enum JobEmploymentType {
+  FULL_TIME
+  PART_TIME
+  MINI_JOB
+  APPRENTICESHIP
+
+  @@schema("backschmiede_koelker")
+}
+
+enum JobSalaryUnit {
+  HOUR
+  MONTH
+  YEAR
+
+  @@schema("backschmiede_koelker")
+}
+
+model Job {
+  id           String            @id @default(cuid())
+  slug         String            @unique
+
+  title        String
+  role         String?           // z.B. "Bäcker/in", "Verkäufer/in", "Azubi"
+  teaser       String            // kurze Zusammenfassung
+
+  description  String            // HTML oder Markdown
+
+  responsibilities String[]      // Aufgaben – eine Zeile = ein Bullet
+  qualifications  String[]       // Anforderungen
+  benefits        String[]       // Benefits
+
+  employmentType JobEmploymentType
+  workloadNote   String?         // z.B. "Vollzeit, Teilzeit möglich"
+
+  locations    Location[]        // RECKE, METTINGEN (aus deinem bestehenden Enum)
+
+  shift        String?           // Freitext: "Früh- & Spätschicht", "Nachtschicht"
+  salaryMinCents Int?
+  salaryMaxCents Int?
+  salaryUnit   JobSalaryUnit?
+
+  isActive     Boolean           @default(true)
+
+  startsAt     DateTime?
+  startsAsap   Boolean           @default(true)
+
+  datePosted   DateTime          @default(now())
+  validThrough DateTime?
+
+  contactEmail String?
+  contactPhone String?
+  applyUrl     String?           // z.B. StepStone/Indeed-Link
+
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([isActive, datePosted])
+  @@index([slug])
+  @@index([title])
+
+  @@schema("backschmiede_koelker")
 }

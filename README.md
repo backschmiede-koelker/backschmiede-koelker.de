@@ -37,10 +37,13 @@ docker compose `
 ```
 5. Start backschmiede-koelker_local:
 ```bash
+# prisma generate for VS Code:
+npx dotenv -e .env.local -- prisma generate
+
 docker compose `
   --env-file ".\.env.local" `
   -f ".\compose.local.yml" `
-  run --rm backschmiede-koelker_local sh -lc "[ -f .docker-npm.stamp ] || (npm ci --prefer-offline --no-audit --loglevel=warn && touch .docker-npm.stamp); npx prisma migrate dev"
+  run --rm backschmiede-koelker_local sh -lc "[ -f .docker-npm.stamp ] || (npm ci --prefer-offline --no-audit --loglevel=warn && npx prisma generate && touch .docker-npm.stamp); npx prisma generate; npx prisma migrate dev"
 
 docker compose --env-file ".\.env.local" -f ".\compose.local.yml" up
 
@@ -143,6 +146,9 @@ merge changes into main -> github actions updates website
 ## How to change admin password:
 
 ```bash
-# Set ADMIN_PASSWORD in .env
-npx prisma db seed
+# Set ADMIN_PASSWORD in .env.local
+docker compose `
+>>   --env-file ".\.env.local" `
+>>   -f ".\compose.local.yml" `
+>>   run --rm backschmiede-koelker_local sh -lc "npx prisma db seed"
 ```

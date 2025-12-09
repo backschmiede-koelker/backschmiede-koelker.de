@@ -1,132 +1,132 @@
-// /lib/jobs/data.ts
-import { slugify } from "../utils/slug";
-import type { Job } from "./types";
+// lib/jobs/data.ts
+import { prisma } from "@/lib/prisma";
+import type {
+  Job as JobModel,
+  Location,
+  JobEmploymentType,
+  JobSalaryUnit,
+  Prisma,
+} from "@/generated/prisma/client";
+import type { Job, Salary, EmploymentType } from "./types";
 
-const RAW: Omit<
-  Job,
-  "id" | "slug" | "datePosted" | "validThrough"
->[] = [
-  {
-    title: "Bäckereifachverkäufer/in (m/w/d)",
-    role: "Verkäufer/in",
-    teaser:
-      "Du liebst den Umgang mit Menschen und frische Backwaren? Dann ab an die Theke!",
-    descriptionHtml:
-      "<p>Als Bäckereifachverkäufer/in berätst du unsere Gäste, bereitest Snacks zu und sorgst für einen einladenden Tresen.</p>",
-    responsibilities: [
-      "Beratung & Verkauf von Backwaren",
-      "Kassenführung & Abrechnung",
-      "Snackzubereitung & Warenpräsentation",
-      "Hygienestandards (HACCP) einhalten",
-    ],
-    qualifications: [
-      "Freude an Service und Teamarbeit",
-      "Deutschkenntnisse",
-      "Erfahrung im Verkauf von Vorteil",
-    ],
-    benefits: ["Mitarbeiterrabatte", "Planbare Schichten", "Team-Events"],
-    employmentType: "PART_TIME",
-    locations: ["Mettingen", "Recke"],
-    shift: "Früh- & Spätschicht",
-    salary: { currency: "EUR", min: 13, max: 16, unitText: "HOUR" },
-  },
-  {
-    title: "Bäcker/in (m/w/d)",
-    role: "Bäcker/in",
-    teaser:
-      "Backe mit uns – traditionell & modern, mit natürlichen Zutaten und moderner Technik.",
-    descriptionHtml:
-      "<p>In unserer Backstube arbeitest du mit Sauerteig, Langzeitführung und moderner Technik.</p>",
-    responsibilities: [
-      "Teigbereitung & Aufarbeitung",
-      "Ofenführung",
-      "Qualitätskontrolle",
-      "Reinigung & Hygiene",
-    ],
-    qualifications: [
-      "Abgeschlossene Ausbildung als Bäcker/in oder Erfahrung",
-      "Zuverlässigkeit & Teamgeist",
-    ],
-    benefits: ["Schichtzuschläge", "Fortbildungen", "Moderne Backstube"],
-    employmentType: "FULL_TIME",
-    locations: ["Mettingen"],
-    shift: "Nachtschicht",
-    salary: { currency: "EUR", min: 2600, max: 3200, unitText: "MONTH" },
-  },
-  {
-    title: "Ausbildung Fachverkäufer/in im Lebensmittelhandwerk",
-    role: "Azubi",
-    teaser:
-      "Starte deine Ausbildung im Verkauf – mit echter Praxis und Übernahmechance.",
-    descriptionHtml:
-      "<p>Du lernst Beratung, Warenkunde, Snackzubereitung und die Basics der Betriebsabläufe.</p>",
-    responsibilities: ["Beratung", "Kasse", "Snacks", "Warenkunde"],
-    qualifications: ["Freundlichkeit", "Teamfähigkeit", "Lernbereitschaft"],
-    benefits: ["Azubi-Events", "Übernahmechance", "Prämien"],
-    employmentType: "APPRENTICESHIP",
-    locations: ["Recke", "Mettingen"],
-  },
-  {
-    title: "Aushilfe Verkauf (m/w/d)",
-    role: "Aushilfe",
-    teaser:
-      "Du suchst flexible Stunden neben Schule/Studium? Unterstütze unser Team im Verkauf.",
-    descriptionHtml:
-      "<p>Du packst dort an, wo es brennt – von der Snackvorbereitung bis zur Kasse.</p>",
-    responsibilities: [
-      "Unterstützung im Tagesgeschäft",
-      "Kasse & Auffüllen",
-      "Reinigung nach Plan",
-    ],
-    qualifications: [
-      "Zuverlässig, freundlich, teamfähig",
-      "Gern auch Quereinsteiger/innen",
-    ],
-    benefits: ["Flexible Einsätze", "Rabatte", "Faires Miteinander"],
-    employmentType: "MINI_JOB",
-    locations: ["Mettingen", "Recke"],
-  },
-];
+const LOCATION_LABEL: Record<Location, string> = {
+  METTINGEN: "Mettingen",
+  RECKE: "Recke",
+};
 
-const NOW = new Date();
-const DATA: Job[] = RAW.map((r, i) => {
-  const slug = slugify(`${r.title}-${r.locations[0] || "de"}`);
-  const id = `job-${i + 1}`;
-  const datePosted = new Date(NOW.getTime() - (i + 1) * 24 * 3600 * 1000);
-  const validThrough = new Date(NOW.getTime() + 60 * 24 * 3600 * 1000);
-  return { ...r, id, slug, datePosted, validThrough };
-});
+const LABEL_TO_LOCATION: Record<string, Location> = {
+  mettingen: "METTINGEN",
+  recke: "RECKE",
+};
+
+const UNIT_MAP: Record<JobSalaryUnit, Salary["unitText"]> = {
+  HOUR: "HOUR",
+  MONTH: "MONTH",
+  YEAR: "YEAR",
+};
+
+function mapSalary(
+  minCents?: number | null,
+  maxCents?: number | null,
+  unit?: JobSalaryUnit | null
+): Salary | undefined {
+  if (!minCents && !maxCents) return undefined;
+  return {
+    currency: "EUR",
+    min: minCents != null ? minCents / 100 : undefined,
+    max: maxCents != null ? maxCents / 100 : undefined,
+    unitText: unit ? UNIT_MAP[unit] : "MONTH",
+  };
+}
+
+function mapJob(model: JobModel): Job {
+  return {
+    id: model.id,
+    slug: model.slug,
+    title: model.title,
+    role: model.role ?? undefined,
+    teaser: model.teaser,
+
+    descriptionHtml: model.description,
+    responsibilities: model.responsibilities,
+    qualifications: model.qualifications,
+    benefits: model.benefits,
+
+    employmentType: model.employmentType as EmploymentType,
+    workloadNote: model.workloadNote ?? undefined,
+
+    locations: model.locations.map((loc) => LOCATION_LABEL[loc]),
+
+    shift: model.shift ?? undefined,
+    salary: mapSalary(model.salaryMinCents, model.salaryMaxCents, model.salaryUnit),
+
+    startsAt: model.startsAt ?? undefined,
+    startsAsap: model.startsAsap,
+
+    datePosted: model.datePosted,
+    validThrough: model.validThrough ?? undefined,
+
+    contactEmail: model.contactEmail ?? undefined,
+    contactPhone: model.contactPhone ?? undefined,
+    applyUrl: model.applyUrl ?? undefined,
+
+    isActive: model.isActive,
+  };
+}
 
 export async function fetchJobs(filter?: {
   q?: string;
   loc?: string; // "Beide" | "Mettingen" | "Recke"
   role?: string; // "Alle" | Role
-}) {
-  let res = [...DATA];
+  includeInactive?: boolean;
+}): Promise<Job[]> {
+  const where: Prisma.JobWhereInput = {};
+
+  if (!filter?.includeInactive) {
+    where.isActive = true;
+  }
+
   if (filter?.q) {
-    const q = filter.q.toLowerCase();
-    res = res.filter(
-      (j) =>
-        j.title.toLowerCase().includes(q) ||
-        j.teaser.toLowerCase().includes(q) ||
-        j.descriptionHtml.toLowerCase().includes(q) ||
-        j.role.toLowerCase().includes(q)
-    );
+    const q = filter.q.trim();
+    if (q) {
+      where.OR = [
+        { title: { contains: q, mode: "insensitive" } },
+        { teaser: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
+        { role: { contains: q, mode: "insensitive" } },
+      ];
+    }
   }
+
   if (filter?.loc && filter.loc !== "Beide") {
-    const l = filter.loc.toLowerCase();
-    res = res.filter((j) => j.locations.some((x) => x.toLowerCase() === l));
+    const key = filter.loc.toLowerCase();
+    const locEnum = LABEL_TO_LOCATION[key];
+    if (locEnum) {
+      where.locations = { has: locEnum };
+    }
   }
+
   if (filter?.role && filter.role !== "Alle") {
-    res = res.filter((j) => j.role === filter.role);
+    where.role = filter.role;
   }
-  return res;
+
+  const rows = await prisma.job.findMany({
+    where,
+    orderBy: { datePosted: "desc" },
+  });
+
+  return rows.map(mapJob);
 }
 
-export async function getJobBySlug(slug: string) {
-  return DATA.find((j) => j.slug === slug);
+export async function getJobBySlug(slug: string): Promise<Job | undefined> {
+  const row = await prisma.job.findUnique({ where: { slug } });
+  return row ? mapJob(row) : undefined;
 }
 
-export async function allJobs() {
-  return DATA;
+export async function allJobs(): Promise<Job[]> {
+  const rows = await prisma.job.findMany({
+    where: { isActive: true },
+    orderBy: { datePosted: "desc" },
+  });
+  return rows.map(mapJob);
 }

@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { PRICE_RE, parseEuroToCents } from "@/app/lib/format";
-import { OfferKind, Weekday, Location, OfferType } from "@prisma/client";
+import { OfferKind, Weekday, Location, OfferType } from "../../../types/offers";
 
 export type ProductLite = { id: string; name: string; priceCents: number; unit: string };
 
@@ -17,7 +17,7 @@ function toYMD(d: Date) {
 export function useOfferForm({ allUnits, onCreated }: { allUnits: string[]; onCreated?: () => void }) {
   const [creating, setCreating] = useState(false);
 
-  const [type, setType] = useState<OfferType>("GENERIC");
+  const [type, setType] = useState<OfferType>(OfferType.GENERIC);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");

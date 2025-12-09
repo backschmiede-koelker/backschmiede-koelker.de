@@ -1,15 +1,20 @@
+// app/components/offer-card.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import ImageUploader from "./image-uploader";
 import ProductPicker from "./product-picker";
 import SelectBox from "./select-box";
-import { PRICE_RE, parseEuroToCents, euro, centsToEuroString } from "../lib/format";
-import { OfferKind, Weekday, Location } from "@prisma/client";
+import {
+  PRICE_RE,
+  parseEuroToCents,
+  euro,
+  centsToEuroString,
+} from "../lib/format";
+import { OfferKind, Weekday, Location } from "../types/offers";
 import FieldLabel from "@/app/components/ui/field-label";
 import { WEEKDAY_OPTIONS } from "@/app/components/ui/weekdays";
 
-// (Discount kann weiterhin euer Unit-Handling nutzen, hier bleibt’s bei SelectBox-Logik)
 type OfferDTO = import("./offer-renderer").OfferDTO;
 type ProductLite = { id: string; name: string; priceCents: number; unit: string };
 
@@ -73,20 +78,33 @@ export default function OfferCard({
   const [title, setTitle] = useState(item.title);
   const [description, setDescription] = useState(item.subtitle ?? ""); // bei GENERIC auch Body
   const [imageUrl, setImageUrl] = useState(item.imageUrl ?? "");
-  const [kind, setKind] = useState<OfferKind>(item.kind);
-  const [weekday, setWeekday] = useState<Weekday>(item.weekday ?? Weekday.MONDAY);
+
+  // item.kind / item.weekday / item.locations kommen aus OfferDTO (Prisma-Enums),
+  // wir mappen sie einmal auf unsere eigenen Enums.
+  const [kind, setKind] = useState<OfferKind>(item.kind as any);
+  const [weekday, setWeekday] = useState<Weekday>(
+    (item.weekday as any) ?? Weekday.MONDAY,
+  );
 
   // Datumsfelder (leer, wenn DB leer → wir setzen Defaults per useEffect unten)
   const [date, setDate] = useState(item.date ? item.date.slice(0, 10) : "");
-  const [startDate, setStart] = useState(item.startDate ? item.startDate.slice(0, 10) : "");
-  const [endDate, setEnd] = useState(item.endDate ? item.endDate.slice(0, 10) : "");
+  const [startDate, setStart] = useState(
+    item.startDate ? item.startDate.slice(0, 10) : "",
+  );
+  const [endDate, setEnd] = useState(
+    item.endDate ? item.endDate.slice(0, 10) : "",
+  );
 
-  const [locations, setLocations] = useState<Location[]>(item.locations);
+  const [locations, setLocations] = useState<Location[]>(
+    (item.locations as any) ?? [],
+  );
   const [priority, setPriority] = useState<number>(
-    Number.isFinite(Number(item.priority)) ? Number(item.priority) : 0
+    Number.isFinite(Number(item.priority)) ? Number(item.priority) : 0,
   );
   const [minSpend, setMinSpend] = useState<string>(
-    item.minBasketCents != null ? (item.minBasketCents / 100).toFixed(2).replace(".", ",") : ""
+    item.minBasketCents != null
+      ? (item.minBasketCents / 100).toFixed(2).replace(".", ",")
+      : "",
   );
   const [isActive, setIsActive] = useState<boolean>(!!item.isActive);
 
@@ -114,56 +132,68 @@ export default function OfferCard({
   }
 
   function toggleLoc(l: Location) {
-    setLocations((s) => (s.includes(l) ? s.filter((x) => x !== l) : [...s, l]));
+    setLocations((s) =>
+      s.includes(l) ? s.filter((x) => x !== l) : [...s, l],
+    );
   }
 
   // PRODUCT_NEW
-  const [pNewProduct, setPNewProduct] = useState<ProductLite | null>(item.productNew?.product ?? null);
-  const [pNewLabel, setPNewLabel] = useState<string>(item.productNew?.highlightLabel ?? "NEU");
+  const [pNewProduct, setPNewProduct] = useState<ProductLite | null>(
+    (item.productNew?.product as any) ?? null,
+  );
+  const [pNewLabel, setPNewLabel] = useState<string>(
+    item.productNew?.highlightLabel ?? "NEU",
+  );
 
   // PRODUCT_DISCOUNT
   const [pDiscProduct, setPDiscProduct] = useState<ProductLite | null>(
-    item.productDiscount?.product ?? null
+    (item.productDiscount?.product as any) ?? null,
   );
   const [pDiscPrice, setPDiscPrice] = useState<string>(
-    item.productDiscount ? centsToEuroString(item.productDiscount.priceCents) : ""
+    item.productDiscount ? centsToEuroString(item.productDiscount.priceCents) : "",
   );
   const [pDiscOriginal, setPDiscOriginal] = useState<string>(
     item.productDiscount?.originalPriceCents != null
       ? centsToEuroString(item.productDiscount.originalPriceCents)
-      : ""
+      : "",
   );
   const [pDiscUnit, setPDiscUnit] = useState<string>(
-    item.productDiscount?.unit ?? (pDiscProduct?.unit ?? "pro Stück")
+    item.productDiscount?.unit ?? (pDiscProduct?.unit ?? "pro Stück"),
   );
   const discPreview = useMemo(() => {
     if (!pDiscProduct || !PRICE_RE.test(pDiscPrice)) return null;
     const newCents = parseEuroToCents(pDiscPrice);
     const origCents =
-      pDiscOriginal && PRICE_RE.test(pDiscOriginal) ? parseEuroToCents(pDiscOriginal) : null;
+      pDiscOriginal && PRICE_RE.test(pDiscOriginal)
+        ? parseEuroToCents(pDiscOriginal)
+        : null;
     return { newCents, origCents };
   }, [pDiscProduct, pDiscPrice, pDiscOriginal]);
 
   // MULTIBUY_PRICE
   const [pMultiProduct, setPMultiProduct] = useState<ProductLite | null>(
-    item.multibuyPrice?.product ?? null
+    (item.multibuyPrice?.product as any) ?? null,
   );
   const [pMultiQty, setPMultiQty] = useState<string>(
-    item.multibuyPrice ? String(item.multibuyPrice.packQty) : ""
+    item.multibuyPrice ? String(item.multibuyPrice.packQty) : "",
   );
   const [pMultiPrice, setPMultiPrice] = useState<string>(
-    item.multibuyPrice ? centsToEuroString(item.multibuyPrice.packPriceCents) : ""
+    item.multibuyPrice
+      ? centsToEuroString(item.multibuyPrice.packPriceCents)
+      : "",
   );
   const [pMultiCompareQty, setPMultiCompareQty] = useState<string>(
-    item.multibuyPrice?.comparePackQty != null ? String(item.multibuyPrice.comparePackQty) : ""
+    item.multibuyPrice?.comparePackQty != null
+      ? String(item.multibuyPrice.comparePackQty)
+      : "",
   );
   const [pMultiComparePrice, setPMultiComparePrice] = useState<string>(
     item.multibuyPrice?.comparePriceCents != null
       ? centsToEuroString(item.multibuyPrice.comparePriceCents)
-      : ""
+      : "",
   );
   const [pMultiUnit, setPMultiUnit] = useState<string>(
-    item.multibuyPrice?.unit ?? (pMultiProduct?.unit ?? "pro Stück")
+    item.multibuyPrice?.unit ?? (pMultiProduct?.unit ?? "pro Stück"),
   );
 
   const multiPreview = useMemo(() => {
@@ -171,21 +201,28 @@ export default function OfferCard({
     const hasQty = Number.isFinite(qtyNum) && qtyNum > 0;
     if (!pMultiProduct || !PRICE_RE.test(pMultiPrice) || !hasQty) return null;
     const packCents = parseEuroToCents(pMultiPrice);
-    const cQty = pMultiCompareQty && Number.isFinite(Number(pMultiCompareQty))
-      ? Number(pMultiCompareQty)
-      : null;
+    const cQty =
+      pMultiCompareQty && Number.isFinite(Number(pMultiCompareQty))
+        ? Number(pMultiCompareQty)
+        : null;
     const cPrice =
       pMultiComparePrice && PRICE_RE.test(pMultiComparePrice)
         ? parseEuroToCents(pMultiComparePrice)
         : null;
     return { packCents, qtyNum, cQty, cPrice };
-  }, [pMultiProduct, pMultiQty, pMultiPrice, pMultiCompareQty, pMultiComparePrice]);
+  }, [
+    pMultiProduct,
+    pMultiQty,
+    pMultiPrice,
+    pMultiCompareQty,
+    pMultiComparePrice,
+  ]);
 
   const validBase =
     title.trim() &&
-    ((kind === "DATE_RANGE" && startDate && endDate) ||
-      (kind === "ONE_DAY" && date) ||
-      (kind === "RECURRING_WEEKDAY" && weekday));
+    ((kind === OfferKind.DATE_RANGE && startDate && endDate) ||
+      (kind === OfferKind.ONE_DAY && date) ||
+      (kind === OfferKind.RECURRING_WEEKDAY && weekday));
 
   async function save() {
     if (!validBase) {
@@ -204,9 +241,9 @@ export default function OfferCard({
         priority: Number.isFinite(Number(priority)) ? Number(priority) : 0,
         minBasketCents: minSpend ? parseEuroToCents(minSpend) : null,
       };
-      if (kind === "RECURRING_WEEKDAY") base.weekday = weekday;
-      if (kind === "ONE_DAY") base.date = date;
-      if (kind === "DATE_RANGE") {
+      if (kind === OfferKind.RECURRING_WEEKDAY) base.weekday = weekday;
+      if (kind === OfferKind.ONE_DAY) base.date = date;
+      if (kind === OfferKind.DATE_RANGE) {
         base.startDate = startDate;
         base.endDate = endDate;
       }
@@ -228,7 +265,9 @@ export default function OfferCard({
           productId: pDiscProduct.id,
           priceCents: parseEuroToCents(pDiscPrice),
           originalPriceCents:
-            pDiscOriginal && PRICE_RE.test(pDiscOriginal) ? parseEuroToCents(pDiscOriginal) : null,
+            pDiscOriginal && PRICE_RE.test(pDiscOriginal)
+              ? parseEuroToCents(pDiscOriginal)
+              : null,
           unit: finalUnit || null,
         };
       }
@@ -236,8 +275,10 @@ export default function OfferCard({
       if (item.type === "MULTIBUY_PRICE") {
         if (!pMultiProduct) return alert("Bitte Produkt auswählen.");
         const qty = Number(pMultiQty);
-        if (!Number.isFinite(qty) || qty <= 0) return alert("Bitte eine gültige Menge eingeben.");
-        if (!PRICE_RE.test(pMultiPrice)) return alert("Bitte gültigen Set-Preis eingeben.");
+        if (!Number.isFinite(qty) || qty <= 0)
+          return alert("Bitte eine gültige Menge eingeben.");
+        if (!PRICE_RE.test(pMultiPrice))
+          return alert("Bitte gültigen Set-Preis eingeben.");
         const finalUnit = (pMultiUnit || "").trim();
         payload = {
           productId: pMultiProduct.id,
@@ -323,7 +364,7 @@ export default function OfferCard({
               <input
                 type="radio"
                 name={`kind-${item.id}`}
-                checked={kind === "DATE_RANGE"}
+                checked={kind === OfferKind.DATE_RANGE}
                 onChange={() => setKindWithDefaults(OfferKind.DATE_RANGE)}
               />
               <span>Zeitraum</span>
@@ -332,7 +373,7 @@ export default function OfferCard({
               <input
                 type="radio"
                 name={`kind-${item.id}`}
-                checked={kind === "ONE_DAY"}
+                checked={kind === OfferKind.ONE_DAY}
                 onChange={() => setKindWithDefaults(OfferKind.ONE_DAY)}
               />
               <span>Ein Tag</span>
@@ -341,14 +382,14 @@ export default function OfferCard({
               <input
                 type="radio"
                 name={`kind-${item.id}`}
-                checked={kind === "RECURRING_WEEKDAY"}
+                checked={kind === OfferKind.RECURRING_WEEKDAY}
                 onChange={() => setKindWithDefaults(OfferKind.RECURRING_WEEKDAY)}
               />
               <span>Wöchentlich</span>
             </label>
           </div>
 
-          {kind === "DATE_RANGE" ? (
+          {kind === OfferKind.DATE_RANGE ? (
             <>
               <div className="min-w-0">
                 <FieldLabel>Start</FieldLabel>
@@ -369,7 +410,7 @@ export default function OfferCard({
                 />
               </div>
             </>
-          ) : kind === "ONE_DAY" ? (
+          ) : kind === OfferKind.ONE_DAY ? (
             <>
               <div className="min-w-0">
                 <FieldLabel>Datum</FieldLabel>
@@ -388,10 +429,15 @@ export default function OfferCard({
                 <FieldLabel>Wochentag</FieldLabel>
                 <div className="mt-1 min-w-0">
                   <SelectBox
-                    value={WEEKDAY_OPTIONS.find((w) => w.value === weekday)?.label || "Montag"}
+                    value={
+                      WEEKDAY_OPTIONS.find((w) => w.value === weekday)?.label ||
+                      "Montag"
+                    }
                     onChange={(label) => {
-                      const found = WEEKDAY_OPTIONS.find((w) => w.label === label);
-                      if (found) return setWeekday(found.value);
+                      const found = WEEKDAY_OPTIONS.find(
+                        (w) => w.label === label,
+                      );
+                      if (found) return setWeekday(found.value as Weekday);
                     }}
                     options={WEEKDAY_OPTIONS.map((w) => w.label)}
                     className="w-full min-w-0"
@@ -420,7 +466,7 @@ export default function OfferCard({
                         : "bg-zinc-100 ring-zinc-300 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-200",
                     ].join(" ")}
                   >
-                    {l === "RECKE" ? "Recke" : "Mettingen"}
+                    {l === Location.RECKE ? "Recke" : "Mettingen"}
                   </button>
                 );
               })}
@@ -461,7 +507,6 @@ export default function OfferCard({
         {item.type === "PRODUCT_NEW" && (
           <div className="grid gap-3 min-w-0">
             <div className="min-w-0">
-              {/* Doppeltes Label entfernt – ProductPicker zeigt sein Label */}
               <ProductPicker value={pNewProduct} onChange={setPNewProduct} />
             </div>
             <div className="min-w-0">
@@ -478,7 +523,6 @@ export default function OfferCard({
         {item.type === "PRODUCT_DISCOUNT" && (
           <div className="grid gap-3 min-w-0">
             <div className="min-w-0">
-              {/* Doppeltes Label entfernt – ProductPicker zeigt sein Label */}
               <ProductPicker
                 value={pDiscProduct}
                 onChange={(p) => {
@@ -525,7 +569,6 @@ export default function OfferCard({
                   </span>
                 </div>
               </div>
-              {/* Einheit (SelectBox ↔ Custom) mit Platzhalter */}
               <div className="lg:col-span-2 2xl:col-span-1 min-w-0">
                 <FieldLabel>Einheit (optional)</FieldLabel>
                 <UnitWithCustom
@@ -547,7 +590,10 @@ export default function OfferCard({
                 ) : (
                   <i>—</i>
                 )}{" "}
-                → Neu: <span className="tabular-nums font-semibold">{euro(discPreview.newCents)}</span>
+                → Neu:{" "}
+                <span className="tabular-nums font-semibold">
+                  {euro(discPreview.newCents)}
+                </span>
                 {pDiscUnit ? <> / {pDiscUnit}</> : null}
               </div>
             )}
@@ -557,7 +603,6 @@ export default function OfferCard({
         {item.type === "MULTIBUY_PRICE" && (
           <div className="grid gap-3 min-w-0">
             <div className="min-w-0">
-              {/* Doppeltes Label entfernt – ProductPicker zeigt sein Label */}
               <ProductPicker
                 value={pMultiProduct}
                 onChange={(p) => {
@@ -567,7 +612,6 @@ export default function OfferCard({
               />
             </div>
 
-            {/* Menge / Set-Preis / Einheit */}
             <div className="grid gap-2 lg:grid-cols-2 2xl:grid-cols-3 min-w-0">
               <div className="min-w-0">
                 <FieldLabel>Menge</FieldLabel>
@@ -614,7 +658,9 @@ export default function OfferCard({
                   className="mt-1 w-full min-w-0 max-w-full rounded-md border px-3 py-2 bg-white dark:bg-zinc-800"
                   placeholder="0"
                   value={pMultiCompareQty}
-                  onChange={(e) => setPMultiCompareQty(e.target.value.replace(",", "."))}
+                  onChange={(e) =>
+                    setPMultiCompareQty(e.target.value.replace(",", "."))
+                  }
                 />
               </div>
               <div className="min-w-0">
@@ -626,7 +672,8 @@ export default function OfferCard({
                     value={pMultiComparePrice}
                     onChange={(e) => {
                       const v = e.target.value.replace(/\./g, ",");
-                      if (v === "" || PRICE_RE.test(v)) setPMultiComparePrice(v);
+                      if (v === "" || PRICE_RE.test(v))
+                        setPMultiComparePrice(v);
                     }}
                   />
                   <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-sm text-zinc-500">
@@ -643,8 +690,13 @@ export default function OfferCard({
                 {multiPreview.cQty ? (
                   <>
                     {" "}
-                    — <span className="opacity-70">statt {multiPreview.cQty} {pMultiUnit || ""}</span>
-                    {multiPreview.cPrice ? <> für {euro(multiPreview.cPrice)}</> : null}
+                    —{" "}
+                    <span className="opacity-70">
+                      statt {multiPreview.cQty} {pMultiUnit || ""}
+                    </span>
+                    {multiPreview.cPrice ? (
+                      <> für {euro(multiPreview.cPrice)}</>
+                    ) : null}
                   </>
                 ) : null}
               </div>
@@ -717,13 +769,14 @@ function UnitWithCustom({
     <div className="min-h-[112px] min-w-0">
       {!customMode ? (
         <>
-          {/* Ab Handy einspaltig; ab sm (≥640px) Select + Button nebeneinander */}
           <div className="grid gap-2 grid-cols-1 sm:grid-cols-[minmax(0,1fr),auto] sm:items-start min-w-0">
             <SelectBox
               ariaLabel="Einheit wählen"
               value={value || ""}
               onChange={(v) => onChange(v)}
-              options={Array.from(new Set([value || "", ...allUnits])).filter(Boolean)}
+              options={Array.from(new Set([value || "", ...allUnits])).filter(
+                Boolean,
+              )}
               placeholder={placeholder}
               className="w-full min-w-0 max-w-full"
             />
@@ -744,7 +797,6 @@ function UnitWithCustom({
             value={customUnit}
             onChange={(e) => setCustomUnit(e.target.value)}
           />
-          {/* Buttons bleiben kompakt, auch auf sehr schmalen Displays */}
           <div className="flex gap-2 flex-wrap">
             <button
               type="button"

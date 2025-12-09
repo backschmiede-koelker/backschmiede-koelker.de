@@ -1,5 +1,5 @@
 // /app/data/locations.ts
-import type { Location } from "@prisma/client";
+import type { Location } from "@/generated/prisma/client";
 
 export type FallbackHours = {
   weekday_text: string[];

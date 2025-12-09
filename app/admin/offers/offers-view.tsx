@@ -1,3 +1,4 @@
+// app/admin/offers/offers-view.tsx
 "use client";
 
 import SectionCard from "app/components/ui/section-card";
@@ -13,8 +14,7 @@ import OfferBaseFields from "@/app/components/offer-base-fields";
 import MultiBuyForm from "@/app/components/multibuy-form";
 import ProductPicker from "@/app/components/product-picker";
 
-import { OfferKind, Weekday, Location } from "@prisma/client";
-import { euro } from "@/app/lib/format";
+import { OfferType, Location } from "@/app/types/offers";
 
 import { useOffers } from "./hooks/use-offers";
 import { useOfferUnits } from "./hooks/use-offer-units";
@@ -38,7 +38,10 @@ export default function AdminOffersView() {
 
       <SectionCard className="relative z-30 overflow-visible">
         {/* Typ-Auswahl */}
-        <OfferTypeSelector type={form.type} onChange={form.setType} />
+        <OfferTypeSelector
+          type={form.type}
+          onChange={(t: OfferType) => form.setType(t)}
+        />
 
         {/* Basisfelder */}
         <div className="mt-4">
@@ -71,9 +74,13 @@ export default function AdminOffersView() {
         {/* Filialen + Priorität */}
         <LocationPriorityRow
           locations={form.locations}
-          onToggleLocation={(l) => {
+          onToggleLocation={(l: Location) => {
             const includes = form.locations.includes(l);
-            form.setLocations(includes ? form.locations.filter((x) => x !== l) : [...form.locations, l]);
+            form.setLocations(
+              includes
+                ? form.locations.filter((x) => x !== l)
+                : [...form.locations, l],
+            );
           }}
           priority={form.priority}
           onPriorityChange={(v) => form.setPriority(v)}
@@ -84,7 +91,7 @@ export default function AdminOffersView() {
 
         {/* TYP-SPEZIFISCHE FELDER */}
         <div className="mt-6 grid gap-4">
-          {form.type === "GENERIC" && (
+          {form.type === OfferType.GENERIC && (
             <SectionCard muted>
               <div className="font-medium">Allgemein</div>
               <p className="mt-1 text-sm text-zinc-600">
@@ -93,7 +100,7 @@ export default function AdminOffersView() {
             </SectionCard>
           )}
 
-          {form.type === "PRODUCT_NEW" && (
+          {form.type === OfferType.PRODUCT_NEW && (
             <SectionCard>
               <div className="grid gap-3">
                 <div>
@@ -107,24 +114,38 @@ export default function AdminOffersView() {
                   <input
                     className="mt-1 w-full rounded-md border px-3 py-2 bg-white dark:bg-zinc-800"
                     value={form.pNew.label}
-                    onChange={(e) => form.setPNew((s) => ({ ...s, label: e.target.value }))}
+                    onChange={(e) =>
+                      form.setPNew((s) => ({ ...s, label: e.target.value }))
+                    }
                   />
                 </div>
               </div>
             </SectionCard>
           )}
 
-          {form.type === "PRODUCT_DISCOUNT" && (
+          {form.type === OfferType.PRODUCT_DISCOUNT && (
             <ProductDiscountForm
               value={form.pDisc}
               onChange={form.setPDisc}
               allUnits={allUnits}
-              preview={form.discPreview ? { old: form.discPreview.origCents, now: form.discPreview.newCents } : null}
+              preview={
+                form.discPreview
+                  ? {
+                      old: form.discPreview.origCents,
+                      now: form.discPreview.newCents,
+                    }
+                  : null
+              }
             />
           )}
 
-          {form.type === "MULTIBUY_PRICE" && (
-            <MultiBuyForm value={form.pMulti} onChange={form.setPMulti} allUnits={allUnits} preview={form.multiPreview} />
+          {form.type === OfferType.MULTIBUY_PRICE && (
+            <MultiBuyForm
+              value={form.pMulti}
+              onChange={form.setPMulti}
+              allUnits={allUnits}
+              preview={form.multiPreview}
+            />
           )}
         </div>
 

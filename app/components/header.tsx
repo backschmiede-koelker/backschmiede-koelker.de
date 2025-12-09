@@ -29,11 +29,10 @@ const iconBtn =
 const partyBtn = (isCoolingDown: boolean) =>
   [
     iconBtn,
-    "border-2",
-    "border-fuchsia-500/70 dark:border-fuchsia-400/80",
-    "text-fuchsia-600 dark:text-fuchsia-300",
-    "hover:border-violet-400/80 hover:text-violet-300",
-    "shadow-[0_0_12px_rgba(255,0,150,0.35)] hover:shadow-[0_0_18px_rgba(170,0,255,0.45)]",
+    "border-amber-500/70 dark:border-amber-400/80",
+    "text-amber-600 dark:text-amber-300",
+    "hover:text-amber-500 dark:hover:text-amber-200",
+    "shadow-[0_0_10px_rgba(245,158,11,0.35)] hover:shadow-[0_0_16px_rgba(245,158,11,0.5)]",
     isCoolingDown && "opacity-60 cursor-not-allowed",
   ]
     .filter(Boolean)

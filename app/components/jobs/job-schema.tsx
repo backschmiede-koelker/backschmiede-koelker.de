@@ -1,8 +1,17 @@
-// /app/components/jobs/job-schema.tsx
+// app/components/jobs/job-schema.tsx
 import type { Job } from "../../lib/jobs/types";
 
+function baseUrl() {
+  return (process.env.NEXT_PUBLIC_BASE_URL || "https://www.example.com").replace(
+    /\/+$/,
+    ""
+  );
+}
+
 export function buildJobPostingJsonLd(job: Job) {
-  const base = {
+  const origin = baseUrl();
+
+  const payload: any = {
     "@context": "https://schema.org/",
     "@type": "JobPosting",
     title: job.title,
@@ -12,9 +21,9 @@ export function buildJobPostingJsonLd(job: Job) {
     employmentType: job.employmentType,
     hiringOrganization: {
       "@type": "Organization",
-      name: "Bäckerei Muster",
-      sameAs: "https://www.example.com",
-      logo: "https://www.example.com/logo.png",
+      name: "Backschmiede Kölker",
+      sameAs: origin,
+      logo: `${origin}/logo.png`, 
     },
     jobLocation: job.locations.map((l) => ({
       "@type": "Place",
@@ -28,37 +37,44 @@ export function buildJobPostingJsonLd(job: Job) {
       "@type": "Country",
       name: "DE",
     },
-    baseSalary: job.salary
-      ? {
-          "@type": "MonetaryAmount",
-          currency: job.salary.currency,
-          value: {
-            "@type": "QuantitativeValue",
-            minValue: job.salary.min,
-            maxValue: job.salary.max,
-            unitText: job.salary.unitText,
-          },
-        }
-      : undefined,
     directApply: true,
     identifier: {
       "@type": "PropertyValue",
-      name: "Bäckerei Muster",
+      name: "Backschmiede Kölker",
       value: job.id,
     },
-  } as const;
+    url: `${origin}/jobs/${job.slug}`,
+  };
 
-  return base;
+  if (job.startsAt) {
+    payload.jobStartDate = job.startsAt.toISOString();
+  }
+
+  if (job.salary) {
+    payload.baseSalary = {
+      "@type": "MonetaryAmount",
+      currency: job.salary.currency,
+      value: {
+        "@type": "QuantitativeValue",
+        minValue: job.salary.min,
+        maxValue: job.salary.max,
+        unitText: job.salary.unitText,
+      },
+    };
+  }
+
+  return payload;
 }
 
 export function buildJobsListJsonLd(jobs: Job[]) {
+  const origin = baseUrl();
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
     itemListElement: jobs.map((j, idx) => ({
       "@type": "ListItem",
       position: idx + 1,
-      url: `https://www.example.com/jobs/${j.slug}`,
+      url: `${origin}/jobs/${j.slug}`,
       item: buildJobPostingJsonLd(j),
     })),
   };

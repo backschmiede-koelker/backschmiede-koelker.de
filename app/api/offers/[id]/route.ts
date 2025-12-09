@@ -1,7 +1,7 @@
 // app/api/offers/[id]/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { OfferKind, Weekday, Location } from "@prisma/client";
+import { OfferKind, Weekday, Location } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import {
   pathFromStoredPath,

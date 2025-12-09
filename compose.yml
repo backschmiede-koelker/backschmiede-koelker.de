@@ -11,6 +11,8 @@ services:
       - UPLOAD_DIR=${UPLOAD_DIR}
       - BASE_ASSET_URL=${BASE_ASSET_URL}
       - PORT=${PORT}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
     volumes:
       - ./uploads:${UPLOAD_DIR}
     labels:

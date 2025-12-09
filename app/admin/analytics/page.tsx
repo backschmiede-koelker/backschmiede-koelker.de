@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import AnalyticsFilters from "./filters";
 import LineChart from "./line-chart";
 

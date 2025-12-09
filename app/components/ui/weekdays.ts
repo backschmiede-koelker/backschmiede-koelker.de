@@ -1,5 +1,5 @@
 // app/components/ui/weekdays.ts
-import { Weekday } from "@prisma/client";
+import { Weekday } from "@/app/types/offers";
 
 export const WEEKDAY_OPTIONS: { label: string; value: Weekday }[] = [
   { label: "Montag", value: Weekday.MONDAY },
