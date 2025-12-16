@@ -15,8 +15,8 @@ import MultiChipInput from "./multi-chip-input";
 import { TAG_SUGGESTIONS } from "./tag-suggestions";
 
 const DEFAULT_APPLY_EMAIL = "info@backschmiede-koelker.de";
-const DEFAULT_APPLY_URL: string | null = null; // vorbereitet für späteren Standard
-const DEFAULT_CONTACT_PHONE: string | null = null; // vorbereitet für späteren Standard
+const DEFAULT_APPLY_URL: string | null = null;
+const DEFAULT_CONTACT_PHONE: string | null = null;
 
 const EMPLOYMENT: { value: JobEmploymentType; label: string }[] = [
   { value: "FULL_TIME", label: "Vollzeit" },
@@ -49,13 +49,13 @@ function uniq(arr: string[]) {
   return Array.from(new Set(arr.map((x) => x.trim()).filter(Boolean)));
 }
 
-function toIntOrZero(v: string) {
-  const n = Number(v);
-  if (!Number.isFinite(n)) return 0;
-  return Math.round(n);
-}
-
-export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
+export default function NewJobForm({
+  onCreated,
+  highestPriority,
+}: {
+  onCreated: () => void;
+  highestPriority: { value: number; title: string } | null;
+}) {
   const [saving, setSaving] = useState(false);
   const [presetKey, setPresetKey] = useState<string>("");
 
@@ -64,13 +64,16 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
   const [teaser, setTeaser] = useState("");
   const [description, setDescription] = useState("");
 
-  const [priority, setPriority] = useState<string>("0");
+  const [priority, setPriority] = useState<number>(0);
 
   const [employmentTypes, setEmploymentTypes] = useState<JobEmploymentType[]>([
     "FULL_TIME",
     "PART_TIME",
   ]);
-  const [locations, setLocations] = useState<JobLocation[]>(["METTINGEN", "RECKE"]);
+  const [locations, setLocations] = useState<JobLocation[]>([
+    "METTINGEN",
+    "RECKE",
+  ]);
 
   const [responsibilities, setResponsibilities] = useState<string[]>([]);
   const [qualifications, setQualifications] = useState<string[]>([]);
@@ -88,7 +91,9 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
 
   const [applyEmail, setApplyEmail] = useState<string>(DEFAULT_APPLY_EMAIL);
   const [applyUrl, setApplyUrl] = useState<string>(DEFAULT_APPLY_URL ?? "");
-  const [contactPhone, setContactPhone] = useState<string>(DEFAULT_CONTACT_PHONE ?? "");
+  const [contactPhone, setContactPhone] = useState<string>(
+    DEFAULT_CONTACT_PHONE ?? ""
+  );
 
   const [isActive, setIsActive] = useState(true);
 
@@ -100,8 +105,14 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
     };
 
     return {
-      responsibilities: uniq([...fromPresets.responsibilities, ...TAG_SUGGESTIONS.responsibilities]),
-      qualifications: uniq([...fromPresets.qualifications, ...TAG_SUGGESTIONS.qualifications]),
+      responsibilities: uniq([
+        ...fromPresets.responsibilities,
+        ...TAG_SUGGESTIONS.responsibilities,
+      ]),
+      qualifications: uniq([
+        ...fromPresets.qualifications,
+        ...TAG_SUGGESTIONS.qualifications,
+      ]),
       benefits: uniq([...fromPresets.benefits, ...TAG_SUGGESTIONS.benefits]),
     };
   }, []);
@@ -122,11 +133,15 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
   }
 
   function toggleEmployment(t: JobEmploymentType) {
-    setEmploymentTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
+    setEmploymentTypes((prev) =>
+      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+    );
   }
 
   function toggleLocation(l: JobLocation) {
-    setLocations((prev) => (prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]));
+    setLocations((prev) =>
+      prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]
+    );
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -153,7 +168,7 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
           category,
           teaser,
           description,
-          priority: toIntOrZero(priority),
+          priority,
           employmentTypes,
           locations,
           responsibilities,
@@ -161,9 +176,9 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
           benefits,
           salaryMinCents: minC,
           salaryMaxCents: maxC,
-          salaryUnit: (minC || maxC) ? salaryUnit : null,
+          salaryUnit: minC || maxC ? salaryUnit : null,
           startsAsap,
-          startsAt: startsAsap ? null : (startsAt || null),
+          startsAt: startsAsap ? null : startsAt || null,
           shift: shift.trim() || null,
           workloadNote: workloadNote.trim() || null,
           applyEmail: applyEmail.trim() || null,
@@ -183,7 +198,7 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
       setCategory("SONSTIGES");
       setTeaser("");
       setDescription("");
-      setPriority("0");
+      setPriority(0);
       setEmploymentTypes(["FULL_TIME", "PART_TIME"]);
       setLocations(["METTINGEN", "RECKE"]);
       setResponsibilities([]);
@@ -226,7 +241,9 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
   return (
     <section className="mt-6 rounded-2xl border border-zinc-300/80 bg-white/90 dark:border-white/10 dark:bg-white/5 p-4 sm:p-5 shadow-md shadow-zinc-900/10 ring-1 ring-zinc-900/10 dark:shadow-none dark:ring-0 min-w-0 overflow-x-hidden">
       <div className="flex flex-col gap-1">
-        <h2 className="text-sm font-extrabold tracking-tight">Neue Stellenanzeige</h2>
+        <h2 className="text-sm font-extrabold tracking-tight">
+          Neue Stellenanzeige
+        </h2>
         <p className="text-xs text-zinc-600 dark:text-zinc-300">
           Preset wählen → anpassen → speichern.
         </p>
@@ -241,7 +258,8 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
             <SelectBox
               value={
                 presetKey
-                  ? (JOB_PRESETS.find((p) => p.key === presetKey)?.label || "Preset wählen")
+                  ? JOB_PRESETS.find((p) => p.key === presetKey)?.label ||
+                    "Preset wählen"
                   : "Preset wählen"
               }
               onChange={(label) => {
@@ -268,7 +286,10 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
           <FieldLabel>Bereich</FieldLabel>
           <div className="mt-1">
             <SelectBox
-              value={CATEGORY_OPTIONS.find((o) => o.value === category)?.label || "Sonstiges"}
+              value={
+                CATEGORY_OPTIONS.find((o) => o.value === category)?.label ||
+                "Sonstiges"
+              }
               onChange={(label) => {
                 const found = CATEGORY_OPTIONS.find((o) => o.label === label);
                 if (found) setCategory(found.value);
@@ -278,20 +299,24 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
           </div>
         </div>
 
+        {/* ✅ Priorität-Feld: optisch identisch zu allen anderen Inputs */}
         <div className="min-w-0">
-          <FieldLabel>
-            Priorität <span className="text-xs text-zinc-500">(optional)</span>
-          </FieldLabel>
+          <FieldLabel>Priorität</FieldLabel>
           <input
-            inputMode="numeric"
+            type="number"
             value={priority}
-            onChange={(e) => setPriority(e.target.value)}
+            onChange={(e) => setPriority(Number(e.target.value))}
             className={inputBase}
-            placeholder="0"
           />
-          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            Höher = weiter oben. Gleiche Priorität → alphabetisch nach Titel.
-          </p>
+
+          {/* ✅ Anzeige NUR der höchsten Prio */}
+          {highestPriority ? (
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              Aktuell höchste Priorität:{" "}
+              <span className="font-medium">{highestPriority.value}</span>{" "}
+              ({highestPriority.title})
+            </p>
+          ) : null}
         </div>
 
         <div className="min-w-0">
@@ -313,7 +338,9 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
                         "dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/70",
                   ].join(" ")}
                 >
-                  <span className="whitespace-normal break-words leading-snug">{o.label}</span>
+                  <span className="whitespace-normal break-words leading-snug">
+                    {o.label}
+                  </span>
                 </button>
               );
             })}
@@ -342,7 +369,9 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
                         "dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/70",
                   ].join(" ")}
                 >
-                  <span className="whitespace-normal break-words leading-snug">{o.label}</span>
+                  <span className="whitespace-normal break-words leading-snug">
+                    {o.label}
+                  </span>
                 </button>
               );
             })}
@@ -448,12 +477,23 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
 
           <div className="min-w-0">
             <FieldLabel>
-              Gehaltseinheit <span className="text-xs text-zinc-500">(optional)</span>
+              Gehaltseinheit{" "}
+              <span className="text-xs text-zinc-500">(optional)</span>
             </FieldLabel>
             <div className="mt-1">
               <SelectBox
-                value={salaryUnit === "HOUR" ? "pro Stunde" : salaryUnit === "MONTH" ? "pro Monat" : "pro Jahr"}
-                onChange={(v) => setSalaryUnit(v === "pro Stunde" ? "HOUR" : v === "pro Monat" ? "MONTH" : "YEAR")}
+                value={
+                  salaryUnit === "HOUR"
+                    ? "pro Stunde"
+                    : salaryUnit === "MONTH"
+                    ? "pro Monat"
+                    : "pro Jahr"
+                }
+                onChange={(v) =>
+                  setSalaryUnit(
+                    v === "pro Stunde" ? "HOUR" : v === "pro Monat" ? "MONTH" : "YEAR"
+                  )
+                }
                 options={["pro Stunde", "pro Monat", "pro Jahr"]}
               />
             </div>
@@ -469,14 +509,17 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
                 value={startsAt}
                 onChange={(e) => setStartsAt(e.target.value)}
                 disabled={startsAsap}
-                className={[inputBase, startsAsap ? dateDisabledClass : ""].join(" ")}
+                className={[inputBase, startsAsap ? dateDisabledClass : ""].join(
+                  " "
+                )}
               />
             </div>
           </div>
 
           <div className="min-w-0">
             <FieldLabel>
-              Schicht / Zeiten <span className="text-xs text-zinc-500">(optional)</span>
+              Schicht / Zeiten{" "}
+              <span className="text-xs text-zinc-500">(optional)</span>
             </FieldLabel>
             <input
               value={shift}
@@ -502,7 +545,8 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
         <div className="grid gap-4 lg:grid-cols-2 min-w-0">
           <div className="min-w-0">
             <FieldLabel>
-              Bewerbungs-E-Mail <span className="text-xs text-zinc-500">(optional)</span>
+              Bewerbungs-E-Mail{" "}
+              <span className="text-xs text-zinc-500">(optional)</span>
             </FieldLabel>
             <input
               value={applyEmail}
@@ -514,7 +558,8 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
 
           <div className="min-w-0">
             <FieldLabel>
-              Bewerbungs-URL <span className="text-xs text-zinc-500">(optional)</span>
+              Bewerbungs-URL{" "}
+              <span className="text-xs text-zinc-500">(optional)</span>
             </FieldLabel>
             <input
               value={applyUrl}
@@ -526,7 +571,8 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
 
           <div className="min-w-0">
             <FieldLabel>
-              Telefon für Rückfragen <span className="text-xs text-zinc-500">(optional)</span>
+              Telefon für Rückfragen{" "}
+              <span className="text-xs text-zinc-500">(optional)</span>
             </FieldLabel>
             <input
               value={contactPhone}

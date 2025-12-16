@@ -5,13 +5,32 @@ import { useMemo, useState } from "react";
 import { useJobs } from "./components/use-jobs";
 import NewJobForm from "./components/new-job-form";
 import JobEditorCard from "./components/job-editor-card";
-import { categoryLabel, locationLabel, employmentLabel } from "@/app/components/jobs/formatters";
+import {
+  categoryLabel,
+  locationLabel,
+  employmentLabel,
+} from "@/app/components/jobs/formatters";
 
 export default function JobsView() {
   const { items, loading, reload, remove } = useJobs();
 
   const [q, setQ] = useState("");
   const [filterCat, setFilterCat] = useState<string>("ALLE");
+
+  const highestPriority = useMemo(() => {
+    if (!items.length) return null;
+
+    const top = [...items].reduce((best, cur) => {
+      const bp = best?.priority ?? 0;
+      const cp = cur?.priority ?? 0;
+      return cp > bp ? cur : best;
+    }, items[0]);
+
+    return {
+      value: top.priority ?? 0,
+      title: top.title,
+    };
+  }, [items]);
 
   const categories = useMemo(() => {
     const s = new Set<string>();
@@ -58,7 +77,10 @@ export default function JobsView() {
     <main className="mx-auto w-full max-w-5xl px-3 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 min-w-0 overflow-x-hidden">
       <h1 className="text-2xl font-extrabold tracking-tight">Jobs</h1>
 
-      <NewJobForm onCreated={reload} />
+      <NewJobForm
+        onCreated={reload}
+        highestPriority={highestPriority}
+      />
 
       <div className="h-8 sm:h-10" />
 
@@ -75,7 +97,6 @@ export default function JobsView() {
               onChange={(e) => setQ(e.target.value)}
             />
 
-            {/* ✅ Extra Innen-Padding, damit Ränder/Ring nicht am Container abgeschnitten werden */}
             <div className="flex flex-wrap gap-2 min-w-0 px-1 py-1">
               <button
                 type="button"
@@ -89,7 +110,9 @@ export default function JobsView() {
                       "dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/70",
                 ].join(" ")}
               >
-                <span className="min-w-0 truncate">Alle</span>
+                <span className="whitespace-normal break-words leading-snug">
+                  Alle
+                </span>
               </button>
 
               {categories.map((c) => (
@@ -106,7 +129,9 @@ export default function JobsView() {
                         "dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/70",
                   ].join(" ")}
                 >
-                  <span className="min-w-0 truncate">{categoryLabel(c as any)}</span>
+                  <span className="whitespace-normal break-words leading-snug">
+                    {categoryLabel(c as any)}
+                  </span>
                 </button>
               ))}
             </div>
@@ -119,7 +144,12 @@ export default function JobsView() {
           </li>
 
           {filtered.map((job) => (
-            <JobEditorCard key={job.id} job={job} onSaved={reload} onDelete={() => remove(job.id)} />
+            <JobEditorCard
+              key={job.id}
+              job={job}
+              onSaved={reload}
+              onDelete={() => remove(job.id)}
+            />
           ))}
         </ul>
       </div>
