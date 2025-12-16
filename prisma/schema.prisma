@@ -11,7 +11,6 @@ datasource db {
 
 enum Role {
   ADMIN
-
   @@schema("backschmiede_koelker")
 }
 
@@ -19,7 +18,6 @@ enum OfferKind {
   RECURRING_WEEKDAY
   ONE_DAY
   DATE_RANGE
-
   @@schema("backschmiede_koelker")
 }
 
@@ -31,24 +29,20 @@ enum Weekday {
   FRIDAY
   SATURDAY
   SUNDAY
-
   @@schema("backschmiede_koelker")
 }
 
 enum Location {
   RECKE
   METTINGEN
-
   @@schema("backschmiede_koelker")
 }
 
-// NEU: klare Typen – genau ein Detail-Datensatz je Offer.type
 enum OfferType {
-  GENERIC // freier Text/CTA
-  PRODUCT_NEW // „Jetzt neu: <Produkt>“
-  PRODUCT_DISCOUNT // Produkt jetzt für X € (optional statt Y €)
-  MULTIBUY_PRICE // N Stück für X € (optional: früher M für X €)
-
+  GENERIC
+  PRODUCT_NEW
+  PRODUCT_DISCOUNT
+  MULTIBUY_PRICE
   @@schema("backschmiede_koelker")
 }
 
@@ -75,7 +69,6 @@ model Product {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  // ← Gegenseiten + benannte Relationen:
   offersNew      OfferProductNew[]      @relation("ProductToOfferProductNew")
   offersDiscount OfferProductDiscount[] @relation("ProductToOfferProductDiscount")
   offersMultibuy OfferMultibuyPrice[]   @relation("ProductToOfferMultibuyPrice")
@@ -86,7 +79,6 @@ model Product {
   @@schema("backschmiede_koelker")
 }
 
-// Basistabelle: Zeitraum/Standort/Priorität + grobe Infos
 model Offer {
   id   String    @id @default(cuid())
   slug String    @unique
@@ -98,12 +90,10 @@ model Offer {
   tags     String[]
   isActive Boolean  @default(true)
 
-  // Anzeige-Preisfelder (optional; für Produktkarten oft in Detail-Model)
   priceCents         Int?
   originalPriceCents Int?
   unit               String?
 
-  // Gültigkeit
   kind      OfferKind
   weekday   Weekday?
   date      DateTime?
@@ -113,10 +103,8 @@ model Offer {
   locations Location[]
   priority  Int        @default(0)
 
-  // Optional: universelle Schwelle (z. B. „ab 10 € Einkaufswert“)
   minBasketCents Int?
 
-  // 1:1 Detail-Relationen (genau eins davon je type)
   generic         OfferGeneric?
   productNew      OfferProductNew?
   productDiscount OfferProductDiscount?
@@ -134,8 +122,6 @@ model Offer {
   @@schema("backschmiede_koelker")
 }
 
-// --- Detail-Modelle je Typ ---
-
 model OfferGeneric {
   offerId  String  @id
   body     String?
@@ -152,7 +138,6 @@ model OfferProductNew {
   productId      String
   highlightLabel String?
 
-  // ← benannte Relation:
   product Product @relation("ProductToOfferProductNew", fields: [productId], references: [id], onDelete: Restrict)
   offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
 
@@ -166,7 +151,6 @@ model OfferProductDiscount {
   originalPriceCents Int?
   unit               String?
 
-  // ← benannte Relation:
   product Product @relation("ProductToOfferProductDiscount", fields: [productId], references: [id], onDelete: Restrict)
   offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
 
@@ -182,14 +166,12 @@ model OfferMultibuyPrice {
   comparePriceCents Int?
   unit              String?
 
-  // ← benannte Relation:
   product Product @relation("ProductToOfferMultibuyPrice", fields: [productId], references: [id], onDelete: Restrict)
   offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
 
   @@schema("backschmiede_koelker")
 }
 
-// Unverändert aus deinem Projekt (falls genutzt)
 model ContentBlock {
   id        String   @id @default(cuid())
   slug      String   @unique
@@ -258,7 +240,19 @@ enum JobEmploymentType {
   PART_TIME
   MINI_JOB
   APPRENTICESHIP
+  @@schema("backschmiede_koelker")
+}
 
+enum JobCategory {
+  BAECKER
+  KONDITOR
+  VERKAEUFER
+  AZUBI
+  AUSHILFE
+  LOGISTIK
+  PRODUKTION
+  VERWALTUNG
+  SONSTIGES
   @@schema("backschmiede_koelker")
 }
 
@@ -266,52 +260,52 @@ enum JobSalaryUnit {
   HOUR
   MONTH
   YEAR
-
   @@schema("backschmiede_koelker")
 }
 
 model Job {
-  id           String            @id @default(cuid())
-  slug         String            @unique
+  id           String   @id @default(cuid())
+  slug         String   @unique
 
   title        String
-  role         String?           // z.B. "Bäcker/in", "Verkäufer/in", "Azubi"
-  teaser       String            // kurze Zusammenfassung
+  category     JobCategory @default(SONSTIGES)
 
-  description  String            // HTML oder Markdown
+  teaser       String
+  description  String
 
-  responsibilities String[]      // Aufgaben – eine Zeile = ein Bullet
-  qualifications  String[]       // Anforderungen
-  benefits        String[]       // Benefits
+  responsibilities String[]
+  qualifications  String[]
+  benefits        String[]
 
-  employmentType JobEmploymentType
-  workloadNote   String?         // z.B. "Vollzeit, Teilzeit möglich"
+  employmentTypes JobEmploymentType[]
+  locations    Location[]
 
-  locations    Location[]        // RECKE, METTINGEN (aus deinem bestehenden Enum)
+  shift        String?
+  workloadNote String?
 
-  shift        String?           // Freitext: "Früh- & Spätschicht", "Nachtschicht"
   salaryMinCents Int?
   salaryMaxCents Int?
   salaryUnit   JobSalaryUnit?
 
-  isActive     Boolean           @default(true)
+  isActive     Boolean  @default(true)
 
   startsAt     DateTime?
-  startsAsap   Boolean           @default(true)
+  startsAsap   Boolean  @default(true)
 
-  datePosted   DateTime          @default(now())
+  datePosted   DateTime @default(now())
   validThrough DateTime?
 
-  contactEmail String?
+  applyEmail   String?
+  applyUrl     String?
   contactPhone String?
-  applyUrl     String?           // z.B. StepStone/Indeed-Link
 
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([isActive, datePosted])
   @@index([slug])
   @@index([title])
+  @@index([category])
 
   @@schema("backschmiede_koelker")
 }

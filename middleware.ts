@@ -44,6 +44,11 @@ export default auth((req: NextRequestWithSession) => {
     return req.auth?.user?.role === "ADMIN" ? base : redirectWithCookies("/login");
   }
 
+  if (pathname.startsWith("/api/jobs")) {
+    if (req.method === "GET") return base;
+    return req.auth?.user?.role === "ADMIN" ? base : redirectWithCookies("/login");
+  }
+
   return base;
 });
 

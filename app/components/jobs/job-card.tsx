@@ -1,91 +1,202 @@
-// /app/components/jobs/job-card.tsx
+// app/components/jobs/job-card.tsx
 "use client";
 
 import Link from "next/link";
-import type { Job } from "../../lib/jobs/types";
-import { employmentTypeLabel } from "@/app/components/jobs/utils";
-import { locationBadge, salaryBadge } from "@/app/components/jobs/ui-parts";
-import { InViewReveal } from "@/app/components/animations";
+import type { Job } from "@/app/lib/jobs/types";
+import {
+  categoryLabel,
+  employmentLabel,
+  locationLabel,
+  salaryLabel,
+  startLabel,
+} from "./formatters";
+
+function joinLocations(job: Job) {
+  const loc = job.locations.map(locationLabel);
+  if (loc.length <= 2) return loc.join(" · ");
+  return `${loc[0]} +${loc.length - 1}`;
+}
 
 export function JobCard({ job }: { job: Job }) {
+  const salary = salaryLabel(job);
+  const locations = joinLocations(job);
+  const category = categoryLabel(job.category);
+  const start = startLabel(job);
+
   return (
-    <InViewReveal
-      className={[
-        "relative z-0 w-full",
-        "group rounded-2xl border overflow-hidden",
-        "bg-white/80 dark:bg-zinc-900/80 backdrop-blur",
-        "shadow-sm transition",
-        "hover:shadow-emerald-500/20 hover:shadow-lg",
-      ].join(" ")}
-      y={18}
-      opacityFrom={0}
-      visibility={{ amountEnter: 0.12, amountLeave: 0 }}
+    <article
+      className="group relative overflow-hidden rounded-2xl
+        border border-zinc-300
+        bg-gradient-to-b from-white to-zinc-100/80
+        p-4
+        shadow-xl shadow-zinc-900/20 ring-1 ring-zinc-900/20
+        transition
+        hover:-translate-y-[1px] hover:shadow-2xl hover:shadow-zinc-900/30
+
+        dark:border-white/10
+        dark:bg-white/5
+        dark:from-transparent dark:to-transparent
+        dark:shadow-none dark:ring-0
+        dark:hover:bg-white/7
+
+        sm:p-5"
     >
-      <div className="h-1 w-full bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-600" />
-      <div className="p-4 md:p-6 space-y-4">
-        <header className="flex flex-col gap-1">
-          <h3 className="text-lg md:text-xl font-extrabold tracking-tight">
-            <Link href={`/jobs/${job.slug}`} className="hover:underline">
-              {job.title}
-            </Link>
-          </h3>
-          <p className="text-[13px] md:text-sm opacity-80">{job.teaser}</p>
-        </header>
+      {/* Accent (wie bei dir) */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-600 opacity-90" />
+      <div className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
 
-        <div className="flex flex-wrap gap-2 text-[11px] md:text-xs">
-          <span className="rounded-full border px-2 py-1">
-            💼 {employmentTypeLabel(job.employmentType)}
+      <div className="relative flex flex-col gap-2">
+        {/* Top row */}
+        <div className="flex flex-wrap items-center gap-2 text-[11px] sm:text-xs">
+          <span
+            className="inline-flex max-w-full items-center gap-2 rounded-full
+              border border-zinc-300
+              bg-zinc-50
+              px-2.5 py-1
+              text-zinc-900
+              shadow-sm shadow-zinc-900/10
+
+              dark:border-white/10
+              dark:bg-zinc-900/50
+              dark:text-zinc-200
+              dark:shadow-none"
+          >
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="truncate">{category}</span>
           </span>
-          {locationBadge(job.locations)}
-          {salaryBadge(job.salary)}
-          {job.shift && (
-            <span className="rounded-full border px-2 py-1">⏰ {job.shift}</span>
-          )}
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <section className="rounded-lg border p-3 bg-emerald-50/60 dark:bg-emerald-900/10">
-            <h4 className="text-sm font-semibold mb-1">Das bieten wir</h4>
-            <ul className="list-disc pl-5 text-[13px] space-y-0.5">
-              {job.benefits.slice(0, 5).map((b, i) => (
-                <li key={i}>{b}</li>
-              ))}
-            </ul>
-          </section>
-          <section className="rounded-lg border p-3">
-            <h4 className="text-sm font-semibold mb-1">Dein Profil</h4>
-            <ul className="list-disc pl-5 text-[13px] space-y-0.5">
-              {job.qualifications.slice(0, 5).map((q, i) => (
-                <li key={i}>{q}</li>
-              ))}
-            </ul>
-          </section>
-        </div>
+          <span
+            className="inline-flex max-w-full items-center gap-2 rounded-full
+              border border-zinc-300
+              bg-zinc-50
+              px-2.5 py-1
+              text-zinc-900
+              shadow-sm shadow-zinc-900/10
 
-        <footer className="flex flex-wrap items-center gap-3 text-[12px] md:text-sm">
-          <span className="rounded-md bg-emerald-600/10 text-emerald-700 dark:text-emerald-300 px-2 py-1">
-            ab {job.datePosted.toLocaleDateString("de-DE")}
+              dark:border-white/10
+              dark:bg-zinc-900/50
+              dark:text-zinc-200
+              dark:shadow-none"
+          >
+            <span className="h-2 w-2 rounded-full bg-amber-400" />
+            <span className="truncate">{locations}</span>
           </span>
-          {job.validThrough && (
-            <span className="opacity-70">
-              Ausschreibung bis {job.validThrough.toLocaleDateString("de-DE")}
+
+          <span
+            className="inline-flex max-w-full items-center gap-2 rounded-full
+              border border-emerald-700/30
+              bg-emerald-50
+              px-2.5 py-1
+              text-emerald-950
+              shadow-sm shadow-emerald-900/10
+
+              dark:border-emerald-400/20
+              dark:bg-emerald-900/20
+              dark:text-emerald-200
+              dark:shadow-none"
+          >
+            <span className="truncate">{start}</span>
+          </span>
+
+          {salary && (
+            <span
+              className="inline-flex max-w-full items-center rounded-full
+                border border-zinc-300
+                bg-zinc-50
+                px-2.5 py-1
+                text-zinc-900
+                shadow-sm shadow-zinc-900/10
+
+                dark:border-white/10
+                dark:bg-zinc-900/50
+                dark:text-zinc-200
+                dark:shadow-none"
+            >
+              <span className="truncate">{salary}</span>
             </span>
           )}
-          <div className="ms-auto flex gap-2">
-            <Link
-              href={`/jobs/${job.slug}`}
-              className={[
-                "rounded-lg px-4 py-2 text-sm font-medium border",
-                "bg-emerald-600 text-white border-emerald-700/40",
-                "hover:translate-y-[-1px] hover:shadow-md hover:brightness-105",
-                "active:translate-y-[0px] transition",
-              ].join(" ")}
+        </div>
+
+        {/* Title (wie bei dir) */}
+        <h3 className="text-base font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-lg">
+          <Link
+            href={`/jobs/${job.slug}`}
+            className="outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-md
+              hover:underline decoration-2 underline-offset-4"
+          >
+            {job.title}
+          </Link>
+        </h3>
+
+        {/* Teaser */}
+        <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 line-clamp-2">
+          {job.teaser}
+        </p>
+
+        {/* Employment pills: ALLE anzeigen (max 4) */}
+        <div className="mt-1 flex flex-wrap gap-2 text-[11px] sm:text-xs">
+          {job.employmentTypes.map((t) => (
+            <span
+              key={t}
+              className="inline-flex max-w-full items-center rounded-full
+                border border-emerald-700/30
+                bg-emerald-50
+                px-2.5 py-1
+                text-emerald-950
+                shadow-sm shadow-emerald-900/10
+
+                dark:border-emerald-400/20
+                dark:bg-emerald-900/15
+                dark:text-emerald-200
+                dark:shadow-none"
+              title={employmentLabel(t)}
             >
-              Details & Bewerbung
-            </Link>
+              <span className="truncate">{employmentLabel(t)}</span>
+            </span>
+          ))}
+
+          {job.shift && (
+            <span
+              className="inline-flex max-w-full items-center rounded-full
+                border border-zinc-300
+                bg-zinc-50
+                px-2.5 py-1
+                text-zinc-900
+                shadow-sm shadow-zinc-900/10
+
+                dark:border-white/10
+                dark:bg-zinc-900/50
+                dark:text-zinc-200
+                dark:shadow-none"
+            >
+              <span className="truncate">{job.shift}</span>
+            </span>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 text-xs text-zinc-700 dark:text-zinc-400">
+            {job.benefits?.length
+              ? `✅ ${job.benefits.slice(0, 2).join(" · ")}`
+              : "✅ Faire Konditionen & Teamgeist"}
           </div>
-        </footer>
+
+          <Link
+            href={`/jobs/${job.slug}`}
+            className="inline-flex w-full items-center justify-center rounded-xl
+              bg-gradient-to-r from-emerald-600 to-emerald-700 px-4 py-2 text-sm font-semibold text-white
+              shadow-lg shadow-emerald-600/20 transition
+              hover:from-emerald-700 hover:to-emerald-800
+              active:translate-y-[1px] active:shadow-md
+              focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40
+              sm:w-auto"
+          >
+            Details ansehen
+          </Link>
+        </div>
       </div>
-    </InViewReveal>
+    </article>
   );
 }

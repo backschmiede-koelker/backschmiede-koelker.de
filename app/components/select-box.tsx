@@ -37,7 +37,7 @@ export default function SelectBox({ value, onChange, options, placeholder, disab
         className={[
           "w-full rounded-md px-3 py-2 text-left ring-1 shadow-sm transition",
           "bg-white ring-zinc-300 hover:bg-zinc-50",
-          "dark:bg-zinc-800 dark:ring-zinc-700 dark:hover:bg-zinc-800/90",
+          "dark:bg-zinc-800 dark:ring-zinc-700 dark:hover:bg-zinc-800/70",
           disabled ? "opacity-60 cursor-not-allowed" : ""
         ].join(" ")}
       >

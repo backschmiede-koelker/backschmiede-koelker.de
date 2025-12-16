@@ -9,6 +9,7 @@ import {
   FaRightFromBracket,
   FaChartLine,
   FaNewspaper,
+  FaBriefcase,
 } from "react-icons/fa6";
 import { signOut } from "@/auth";
 
@@ -234,6 +235,13 @@ export default function AdminHome() {
           subtitle="Aktuelles erstellen & verwalten"
           Icon={FaNewspaper}
           accent="sky"
+        />
+        <AdminTile
+          href="/admin/jobs"
+          title="Jobs"
+          subtitle="Stellenanzeigen für Google Jobs & Website"
+          Icon={FaBriefcase}
+          accent="lime"
         />
         <AdminTile
           href="/admin/analytics"

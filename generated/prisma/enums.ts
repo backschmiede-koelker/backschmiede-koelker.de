@@ -66,6 +66,21 @@ export const JobEmploymentType = {
 export type JobEmploymentType = (typeof JobEmploymentType)[keyof typeof JobEmploymentType]
 
 
+export const JobCategory = {
+  BAECKER: 'BAECKER',
+  KONDITOR: 'KONDITOR',
+  VERKAEUFER: 'VERKAEUFER',
+  AZUBI: 'AZUBI',
+  AUSHILFE: 'AUSHILFE',
+  LOGISTIK: 'LOGISTIK',
+  PRODUKTION: 'PRODUKTION',
+  VERWALTUNG: 'VERWALTUNG',
+  SONSTIGES: 'SONSTIGES'
+} as const
+
+export type JobCategory = (typeof JobCategory)[keyof typeof JobCategory]
+
+
 export const JobSalaryUnit = {
   HOUR: 'HOUR',
   MONTH: 'MONTH',

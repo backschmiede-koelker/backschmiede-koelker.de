@@ -1,3 +1,4 @@
+// app/admin/products/page.tsx
 import type { Metadata } from "next";
 
 import AdminProductsView from "./products-view";

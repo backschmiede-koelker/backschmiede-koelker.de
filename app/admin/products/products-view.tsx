@@ -1,3 +1,4 @@
+// app/admin/products/products-view.tsx
 "use client";
 
 import { useMemo, useState } from "react";

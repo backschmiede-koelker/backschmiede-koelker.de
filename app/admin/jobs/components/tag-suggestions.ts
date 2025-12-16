@@ -1,0 +1,45 @@
+// app/admin/jobs/components/tag-suggestions.ts
+export const TAG_SUGGESTIONS = {
+  responsibilities: [
+    "Kundenberatung & Verkauf",
+    "Warenpräsentation",
+    "Kasse",
+    "Backwaren herstellen",
+    "Teigführung & Ofenarbeit",
+    "Vorbereitung / Mise en place",
+    "Hygiene & HACCP",
+    "Reinigung & Ordnung",
+    "Qualitätskontrolle",
+    "Bestellungen vorbereiten",
+    "Teamübergabe / Schichtübergabe",
+    "Herstellung von Feinbackwaren & Torten",
+    "Dekoration / Garnieren",
+    "Cremes, Füllungen & Massen herstellen",
+    "Arbeiten mit Schokolade",
+  ],
+  qualifications: [
+    "Zuverlässigkeit",
+    "Teamfähigkeit",
+    "Freundliche Art",
+    "Sorgfältige Arbeitsweise",
+    "Belastbarkeit",
+    "Pünktlichkeit",
+    "Erfahrung wünschenswert (nicht zwingend)",
+    "Quereinsteiger willkommen",
+
+    // Konditor-spezifisch
+    "Handwerkliches Geschick",
+    "Sauberes Arbeiten",
+    "Qualitätsbewusstsein",
+  ],
+  benefits: [
+    "Mitarbeiterrabatte",
+    "Planbare Schichten",
+    "Gutes Team",
+    "Faire Bezahlung",
+    "Zuschläge",
+    "Gründliche Einarbeitung",
+    "Feste Teams",
+    "Weiterentwicklung",
+  ],
+} as const;

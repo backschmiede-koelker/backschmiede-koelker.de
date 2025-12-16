@@ -1419,16 +1419,16 @@ export const JobScalarFieldEnum = {
   id: 'id',
   slug: 'slug',
   title: 'title',
-  role: 'role',
+  category: 'category',
   teaser: 'teaser',
   description: 'description',
   responsibilities: 'responsibilities',
   qualifications: 'qualifications',
   benefits: 'benefits',
-  employmentType: 'employmentType',
-  workloadNote: 'workloadNote',
+  employmentTypes: 'employmentTypes',
   locations: 'locations',
   shift: 'shift',
+  workloadNote: 'workloadNote',
   salaryMinCents: 'salaryMinCents',
   salaryMaxCents: 'salaryMaxCents',
   salaryUnit: 'salaryUnit',
@@ -1437,9 +1437,9 @@ export const JobScalarFieldEnum = {
   startsAsap: 'startsAsap',
   datePosted: 'datePosted',
   validThrough: 'validThrough',
-  contactEmail: 'contactEmail',
-  contactPhone: 'contactPhone',
+  applyEmail: 'applyEmail',
   applyUrl: 'applyUrl',
+  contactPhone: 'contactPhone',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1597,9 +1597,16 @@ export type EnumLocationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
- * Reference to a field of type 'JobEmploymentType'
+ * Reference to a field of type 'JobCategory'
  */
-export type EnumJobEmploymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobEmploymentType'>
+export type EnumJobCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobCategory'>
+    
+
+
+/**
+ * Reference to a field of type 'JobCategory[]'
+ */
+export type ListEnumJobCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobCategory[]'>
     
 
 
@@ -1607,6 +1614,13 @@ export type EnumJobEmploymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType
  * Reference to a field of type 'JobEmploymentType[]'
  */
 export type ListEnumJobEmploymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobEmploymentType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'JobEmploymentType'
+ */
+export type EnumJobEmploymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'JobEmploymentType'>
     
 
 

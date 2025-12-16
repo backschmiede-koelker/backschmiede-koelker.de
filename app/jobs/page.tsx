@@ -1,20 +1,18 @@
-// /app/jobs/page.tsx
 import { Metadata } from "next";
 import { JobHero } from "@/app/components/jobs/job-hero";
 import { JobFilters } from "@/app/components/jobs/job-filters";
 import { JobList } from "@/app/components/jobs/job-list";
-import { fetchJobs } from "../lib/jobs/data";
+import { buildFacetsFromActiveJobs } from "@/app/components/jobs/facets";
 import { buildJobsListJsonLd } from "@/app/components/jobs/job-schema";
+import { fetchJobs } from "@/app/lib/jobs/db";
 
 export const metadata: Metadata = {
   title: "Stellenangebote | Backschmiede Kölker",
-  description:
-    "Jobs in Verkauf, Backstube und Logistik - mit fairer Bezahlung, Teamspirit und Benefits. Jetzt bewerben!",
+  description: "Jobs in Backstube, Verkauf & mehr – fair, planbar, Teamspirit. Jetzt bewerben!",
   alternates: { canonical: "/jobs" },
   openGraph: {
     title: "Stellenangebote | Backschmiede Kölker",
-    description:
-      "Aktuelle Jobs: Bäcker/in, Verkäufer/in, Aushilfe, Ausbildung. Bewirb dich jetzt!",
+    description: "Aktuelle Jobs bei der Backschmiede Kölker. Jetzt bewerben!",
     url: "/jobs",
     type: "website",
   },
@@ -27,29 +25,28 @@ export default async function Page({
 }) {
   const q = (searchParams?.q as string) || "";
   const loc = (searchParams?.loc as string) || "";
-  const role = (searchParams?.role as string) || "";
-  const jobs = await fetchJobs({ q, loc, role });
+  const cat = (searchParams?.cat as string) || "";
+  const emp = (searchParams?.emp as string) || ""; // "Vollzeit,Teilzeit" labels → wir mappen in db.ts
+
+  const jobs = await fetchJobs({ q, loc, cat, emp });
+  const activeAll = await fetchJobs({ activeOnly: true }); // unfiltered facets
+  const facets = buildFacetsFromActiveJobs(activeAll);
 
   return (
-    <div className="space-y-8">
-      <JobHero />
-      {/* JSON-LD für Job-Suchmaschinen (Liste) */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(buildJobsListJsonLd(jobs)),
-        }}
-      />
-      <div className="mx-auto max-w-6xl px-3 md:px-4">
-        {/* Filter bewusst UNTER dem Header (Header hat z-50) */}
-        <div className="relative z-40">
-          <JobFilters />
+    <div className="space-y-6">
+      <div className="mx-auto max-w-6xl px-3 md:px-4 pt-4">
+        <JobHero />
+
+        <div className="mt-4">
+          <JobFilters facets={facets} />
         </div>
 
-        {/* Jobliste darunter */}
-        <div className="relative z-10">
-          <JobList jobs={jobs} />
-        </div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJobsListJsonLd(jobs)) }}
+        />
+
+        <JobList jobs={jobs} />
       </div>
     </div>
   );

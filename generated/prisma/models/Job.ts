@@ -40,12 +40,11 @@ export type JobMinAggregateOutputType = {
   id: string | null
   slug: string | null
   title: string | null
-  role: string | null
+  category: $Enums.JobCategory | null
   teaser: string | null
   description: string | null
-  employmentType: $Enums.JobEmploymentType | null
-  workloadNote: string | null
   shift: string | null
+  workloadNote: string | null
   salaryMinCents: number | null
   salaryMaxCents: number | null
   salaryUnit: $Enums.JobSalaryUnit | null
@@ -54,9 +53,9 @@ export type JobMinAggregateOutputType = {
   startsAsap: boolean | null
   datePosted: Date | null
   validThrough: Date | null
-  contactEmail: string | null
-  contactPhone: string | null
+  applyEmail: string | null
   applyUrl: string | null
+  contactPhone: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -65,12 +64,11 @@ export type JobMaxAggregateOutputType = {
   id: string | null
   slug: string | null
   title: string | null
-  role: string | null
+  category: $Enums.JobCategory | null
   teaser: string | null
   description: string | null
-  employmentType: $Enums.JobEmploymentType | null
-  workloadNote: string | null
   shift: string | null
+  workloadNote: string | null
   salaryMinCents: number | null
   salaryMaxCents: number | null
   salaryUnit: $Enums.JobSalaryUnit | null
@@ -79,9 +77,9 @@ export type JobMaxAggregateOutputType = {
   startsAsap: boolean | null
   datePosted: Date | null
   validThrough: Date | null
-  contactEmail: string | null
-  contactPhone: string | null
+  applyEmail: string | null
   applyUrl: string | null
+  contactPhone: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -90,16 +88,16 @@ export type JobCountAggregateOutputType = {
   id: number
   slug: number
   title: number
-  role: number
+  category: number
   teaser: number
   description: number
   responsibilities: number
   qualifications: number
   benefits: number
-  employmentType: number
-  workloadNote: number
+  employmentTypes: number
   locations: number
   shift: number
+  workloadNote: number
   salaryMinCents: number
   salaryMaxCents: number
   salaryUnit: number
@@ -108,9 +106,9 @@ export type JobCountAggregateOutputType = {
   startsAsap: number
   datePosted: number
   validThrough: number
-  contactEmail: number
-  contactPhone: number
+  applyEmail: number
   applyUrl: number
+  contactPhone: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -131,12 +129,11 @@ export type JobMinAggregateInputType = {
   id?: true
   slug?: true
   title?: true
-  role?: true
+  category?: true
   teaser?: true
   description?: true
-  employmentType?: true
-  workloadNote?: true
   shift?: true
+  workloadNote?: true
   salaryMinCents?: true
   salaryMaxCents?: true
   salaryUnit?: true
@@ -145,9 +142,9 @@ export type JobMinAggregateInputType = {
   startsAsap?: true
   datePosted?: true
   validThrough?: true
-  contactEmail?: true
-  contactPhone?: true
+  applyEmail?: true
   applyUrl?: true
+  contactPhone?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -156,12 +153,11 @@ export type JobMaxAggregateInputType = {
   id?: true
   slug?: true
   title?: true
-  role?: true
+  category?: true
   teaser?: true
   description?: true
-  employmentType?: true
-  workloadNote?: true
   shift?: true
+  workloadNote?: true
   salaryMinCents?: true
   salaryMaxCents?: true
   salaryUnit?: true
@@ -170,9 +166,9 @@ export type JobMaxAggregateInputType = {
   startsAsap?: true
   datePosted?: true
   validThrough?: true
-  contactEmail?: true
-  contactPhone?: true
+  applyEmail?: true
   applyUrl?: true
+  contactPhone?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -181,16 +177,16 @@ export type JobCountAggregateInputType = {
   id?: true
   slug?: true
   title?: true
-  role?: true
+  category?: true
   teaser?: true
   description?: true
   responsibilities?: true
   qualifications?: true
   benefits?: true
-  employmentType?: true
-  workloadNote?: true
+  employmentTypes?: true
   locations?: true
   shift?: true
+  workloadNote?: true
   salaryMinCents?: true
   salaryMaxCents?: true
   salaryUnit?: true
@@ -199,9 +195,9 @@ export type JobCountAggregateInputType = {
   startsAsap?: true
   datePosted?: true
   validThrough?: true
-  contactEmail?: true
-  contactPhone?: true
+  applyEmail?: true
   applyUrl?: true
+  contactPhone?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -297,16 +293,16 @@ export type JobGroupByOutputType = {
   id: string
   slug: string
   title: string
-  role: string | null
+  category: $Enums.JobCategory
   teaser: string
   description: string
   responsibilities: string[]
   qualifications: string[]
   benefits: string[]
-  employmentType: $Enums.JobEmploymentType
-  workloadNote: string | null
+  employmentTypes: $Enums.JobEmploymentType[]
   locations: $Enums.Location[]
   shift: string | null
+  workloadNote: string | null
   salaryMinCents: number | null
   salaryMaxCents: number | null
   salaryUnit: $Enums.JobSalaryUnit | null
@@ -315,9 +311,9 @@ export type JobGroupByOutputType = {
   startsAsap: boolean
   datePosted: Date
   validThrough: Date | null
-  contactEmail: string | null
-  contactPhone: string | null
+  applyEmail: string | null
   applyUrl: string | null
+  contactPhone: string | null
   createdAt: Date
   updatedAt: Date
   _count: JobCountAggregateOutputType | null
@@ -349,16 +345,16 @@ export type JobWhereInput = {
   id?: Prisma.StringFilter<"Job"> | string
   slug?: Prisma.StringFilter<"Job"> | string
   title?: Prisma.StringFilter<"Job"> | string
-  role?: Prisma.StringNullableFilter<"Job"> | string | null
+  category?: Prisma.EnumJobCategoryFilter<"Job"> | $Enums.JobCategory
   teaser?: Prisma.StringFilter<"Job"> | string
   description?: Prisma.StringFilter<"Job"> | string
   responsibilities?: Prisma.StringNullableListFilter<"Job">
   qualifications?: Prisma.StringNullableListFilter<"Job">
   benefits?: Prisma.StringNullableListFilter<"Job">
-  employmentType?: Prisma.EnumJobEmploymentTypeFilter<"Job"> | $Enums.JobEmploymentType
-  workloadNote?: Prisma.StringNullableFilter<"Job"> | string | null
+  employmentTypes?: Prisma.EnumJobEmploymentTypeNullableListFilter<"Job">
   locations?: Prisma.EnumLocationNullableListFilter<"Job">
   shift?: Prisma.StringNullableFilter<"Job"> | string | null
+  workloadNote?: Prisma.StringNullableFilter<"Job"> | string | null
   salaryMinCents?: Prisma.IntNullableFilter<"Job"> | number | null
   salaryMaxCents?: Prisma.IntNullableFilter<"Job"> | number | null
   salaryUnit?: Prisma.EnumJobSalaryUnitNullableFilter<"Job"> | $Enums.JobSalaryUnit | null
@@ -367,9 +363,9 @@ export type JobWhereInput = {
   startsAsap?: Prisma.BoolFilter<"Job"> | boolean
   datePosted?: Prisma.DateTimeFilter<"Job"> | Date | string
   validThrough?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
-  contactEmail?: Prisma.StringNullableFilter<"Job"> | string | null
-  contactPhone?: Prisma.StringNullableFilter<"Job"> | string | null
+  applyEmail?: Prisma.StringNullableFilter<"Job"> | string | null
   applyUrl?: Prisma.StringNullableFilter<"Job"> | string | null
+  contactPhone?: Prisma.StringNullableFilter<"Job"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Job"> | Date | string
 }
@@ -378,16 +374,16 @@ export type JobOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  role?: Prisma.SortOrderInput | Prisma.SortOrder
+  category?: Prisma.SortOrder
   teaser?: Prisma.SortOrder
   description?: Prisma.SortOrder
   responsibilities?: Prisma.SortOrder
   qualifications?: Prisma.SortOrder
   benefits?: Prisma.SortOrder
-  employmentType?: Prisma.SortOrder
-  workloadNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  employmentTypes?: Prisma.SortOrder
   locations?: Prisma.SortOrder
   shift?: Prisma.SortOrderInput | Prisma.SortOrder
+  workloadNote?: Prisma.SortOrderInput | Prisma.SortOrder
   salaryMinCents?: Prisma.SortOrderInput | Prisma.SortOrder
   salaryMaxCents?: Prisma.SortOrderInput | Prisma.SortOrder
   salaryUnit?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -396,9 +392,9 @@ export type JobOrderByWithRelationInput = {
   startsAsap?: Prisma.SortOrder
   datePosted?: Prisma.SortOrder
   validThrough?: Prisma.SortOrderInput | Prisma.SortOrder
-  contactEmail?: Prisma.SortOrderInput | Prisma.SortOrder
-  contactPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  applyEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   applyUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -410,16 +406,16 @@ export type JobWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.JobWhereInput[]
   NOT?: Prisma.JobWhereInput | Prisma.JobWhereInput[]
   title?: Prisma.StringFilter<"Job"> | string
-  role?: Prisma.StringNullableFilter<"Job"> | string | null
+  category?: Prisma.EnumJobCategoryFilter<"Job"> | $Enums.JobCategory
   teaser?: Prisma.StringFilter<"Job"> | string
   description?: Prisma.StringFilter<"Job"> | string
   responsibilities?: Prisma.StringNullableListFilter<"Job">
   qualifications?: Prisma.StringNullableListFilter<"Job">
   benefits?: Prisma.StringNullableListFilter<"Job">
-  employmentType?: Prisma.EnumJobEmploymentTypeFilter<"Job"> | $Enums.JobEmploymentType
-  workloadNote?: Prisma.StringNullableFilter<"Job"> | string | null
+  employmentTypes?: Prisma.EnumJobEmploymentTypeNullableListFilter<"Job">
   locations?: Prisma.EnumLocationNullableListFilter<"Job">
   shift?: Prisma.StringNullableFilter<"Job"> | string | null
+  workloadNote?: Prisma.StringNullableFilter<"Job"> | string | null
   salaryMinCents?: Prisma.IntNullableFilter<"Job"> | number | null
   salaryMaxCents?: Prisma.IntNullableFilter<"Job"> | number | null
   salaryUnit?: Prisma.EnumJobSalaryUnitNullableFilter<"Job"> | $Enums.JobSalaryUnit | null
@@ -428,9 +424,9 @@ export type JobWhereUniqueInput = Prisma.AtLeast<{
   startsAsap?: Prisma.BoolFilter<"Job"> | boolean
   datePosted?: Prisma.DateTimeFilter<"Job"> | Date | string
   validThrough?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
-  contactEmail?: Prisma.StringNullableFilter<"Job"> | string | null
-  contactPhone?: Prisma.StringNullableFilter<"Job"> | string | null
+  applyEmail?: Prisma.StringNullableFilter<"Job"> | string | null
   applyUrl?: Prisma.StringNullableFilter<"Job"> | string | null
+  contactPhone?: Prisma.StringNullableFilter<"Job"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Job"> | Date | string
 }, "id" | "slug">
@@ -439,16 +435,16 @@ export type JobOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  role?: Prisma.SortOrderInput | Prisma.SortOrder
+  category?: Prisma.SortOrder
   teaser?: Prisma.SortOrder
   description?: Prisma.SortOrder
   responsibilities?: Prisma.SortOrder
   qualifications?: Prisma.SortOrder
   benefits?: Prisma.SortOrder
-  employmentType?: Prisma.SortOrder
-  workloadNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  employmentTypes?: Prisma.SortOrder
   locations?: Prisma.SortOrder
   shift?: Prisma.SortOrderInput | Prisma.SortOrder
+  workloadNote?: Prisma.SortOrderInput | Prisma.SortOrder
   salaryMinCents?: Prisma.SortOrderInput | Prisma.SortOrder
   salaryMaxCents?: Prisma.SortOrderInput | Prisma.SortOrder
   salaryUnit?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -457,9 +453,9 @@ export type JobOrderByWithAggregationInput = {
   startsAsap?: Prisma.SortOrder
   datePosted?: Prisma.SortOrder
   validThrough?: Prisma.SortOrderInput | Prisma.SortOrder
-  contactEmail?: Prisma.SortOrderInput | Prisma.SortOrder
-  contactPhone?: Prisma.SortOrderInput | Prisma.SortOrder
+  applyEmail?: Prisma.SortOrderInput | Prisma.SortOrder
   applyUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactPhone?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.JobCountOrderByAggregateInput
@@ -476,16 +472,16 @@ export type JobScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Job"> | string
   slug?: Prisma.StringWithAggregatesFilter<"Job"> | string
   title?: Prisma.StringWithAggregatesFilter<"Job"> | string
-  role?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
+  category?: Prisma.EnumJobCategoryWithAggregatesFilter<"Job"> | $Enums.JobCategory
   teaser?: Prisma.StringWithAggregatesFilter<"Job"> | string
   description?: Prisma.StringWithAggregatesFilter<"Job"> | string
   responsibilities?: Prisma.StringNullableListFilter<"Job">
   qualifications?: Prisma.StringNullableListFilter<"Job">
   benefits?: Prisma.StringNullableListFilter<"Job">
-  employmentType?: Prisma.EnumJobEmploymentTypeWithAggregatesFilter<"Job"> | $Enums.JobEmploymentType
-  workloadNote?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
+  employmentTypes?: Prisma.EnumJobEmploymentTypeNullableListFilter<"Job">
   locations?: Prisma.EnumLocationNullableListFilter<"Job">
   shift?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
+  workloadNote?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
   salaryMinCents?: Prisma.IntNullableWithAggregatesFilter<"Job"> | number | null
   salaryMaxCents?: Prisma.IntNullableWithAggregatesFilter<"Job"> | number | null
   salaryUnit?: Prisma.EnumJobSalaryUnitNullableWithAggregatesFilter<"Job"> | $Enums.JobSalaryUnit | null
@@ -494,9 +490,9 @@ export type JobScalarWhereWithAggregatesInput = {
   startsAsap?: Prisma.BoolWithAggregatesFilter<"Job"> | boolean
   datePosted?: Prisma.DateTimeWithAggregatesFilter<"Job"> | Date | string
   validThrough?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
-  contactEmail?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
-  contactPhone?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
+  applyEmail?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
   applyUrl?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
+  contactPhone?: Prisma.StringNullableWithAggregatesFilter<"Job"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Job"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Job"> | Date | string
 }
@@ -505,16 +501,16 @@ export type JobCreateInput = {
   id?: string
   slug: string
   title: string
-  role?: string | null
+  category?: $Enums.JobCategory
   teaser: string
   description: string
   responsibilities?: Prisma.JobCreateresponsibilitiesInput | string[]
   qualifications?: Prisma.JobCreatequalificationsInput | string[]
   benefits?: Prisma.JobCreatebenefitsInput | string[]
-  employmentType: $Enums.JobEmploymentType
-  workloadNote?: string | null
+  employmentTypes?: Prisma.JobCreateemploymentTypesInput | $Enums.JobEmploymentType[]
   locations?: Prisma.JobCreatelocationsInput | $Enums.Location[]
   shift?: string | null
+  workloadNote?: string | null
   salaryMinCents?: number | null
   salaryMaxCents?: number | null
   salaryUnit?: $Enums.JobSalaryUnit | null
@@ -523,9 +519,9 @@ export type JobCreateInput = {
   startsAsap?: boolean
   datePosted?: Date | string
   validThrough?: Date | string | null
-  contactEmail?: string | null
-  contactPhone?: string | null
+  applyEmail?: string | null
   applyUrl?: string | null
+  contactPhone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -534,16 +530,16 @@ export type JobUncheckedCreateInput = {
   id?: string
   slug: string
   title: string
-  role?: string | null
+  category?: $Enums.JobCategory
   teaser: string
   description: string
   responsibilities?: Prisma.JobCreateresponsibilitiesInput | string[]
   qualifications?: Prisma.JobCreatequalificationsInput | string[]
   benefits?: Prisma.JobCreatebenefitsInput | string[]
-  employmentType: $Enums.JobEmploymentType
-  workloadNote?: string | null
+  employmentTypes?: Prisma.JobCreateemploymentTypesInput | $Enums.JobEmploymentType[]
   locations?: Prisma.JobCreatelocationsInput | $Enums.Location[]
   shift?: string | null
+  workloadNote?: string | null
   salaryMinCents?: number | null
   salaryMaxCents?: number | null
   salaryUnit?: $Enums.JobSalaryUnit | null
@@ -552,9 +548,9 @@ export type JobUncheckedCreateInput = {
   startsAsap?: boolean
   datePosted?: Date | string
   validThrough?: Date | string | null
-  contactEmail?: string | null
-  contactPhone?: string | null
+  applyEmail?: string | null
   applyUrl?: string | null
+  contactPhone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -563,16 +559,16 @@ export type JobUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.EnumJobCategoryFieldUpdateOperationsInput | $Enums.JobCategory
   teaser?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   responsibilities?: Prisma.JobUpdateresponsibilitiesInput | string[]
   qualifications?: Prisma.JobUpdatequalificationsInput | string[]
   benefits?: Prisma.JobUpdatebenefitsInput | string[]
-  employmentType?: Prisma.EnumJobEmploymentTypeFieldUpdateOperationsInput | $Enums.JobEmploymentType
-  workloadNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  employmentTypes?: Prisma.JobUpdateemploymentTypesInput | $Enums.JobEmploymentType[]
   locations?: Prisma.JobUpdatelocationsInput | $Enums.Location[]
   shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workloadNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salaryMinCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryMaxCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryUnit?: Prisma.NullableEnumJobSalaryUnitFieldUpdateOperationsInput | $Enums.JobSalaryUnit | null
@@ -581,9 +577,9 @@ export type JobUpdateInput = {
   startsAsap?: Prisma.BoolFieldUpdateOperationsInput | boolean
   datePosted?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   validThrough?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  contactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applyEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   applyUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -592,16 +588,16 @@ export type JobUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.EnumJobCategoryFieldUpdateOperationsInput | $Enums.JobCategory
   teaser?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   responsibilities?: Prisma.JobUpdateresponsibilitiesInput | string[]
   qualifications?: Prisma.JobUpdatequalificationsInput | string[]
   benefits?: Prisma.JobUpdatebenefitsInput | string[]
-  employmentType?: Prisma.EnumJobEmploymentTypeFieldUpdateOperationsInput | $Enums.JobEmploymentType
-  workloadNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  employmentTypes?: Prisma.JobUpdateemploymentTypesInput | $Enums.JobEmploymentType[]
   locations?: Prisma.JobUpdatelocationsInput | $Enums.Location[]
   shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workloadNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salaryMinCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryMaxCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryUnit?: Prisma.NullableEnumJobSalaryUnitFieldUpdateOperationsInput | $Enums.JobSalaryUnit | null
@@ -610,9 +606,9 @@ export type JobUncheckedUpdateInput = {
   startsAsap?: Prisma.BoolFieldUpdateOperationsInput | boolean
   datePosted?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   validThrough?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  contactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applyEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   applyUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -621,16 +617,16 @@ export type JobCreateManyInput = {
   id?: string
   slug: string
   title: string
-  role?: string | null
+  category?: $Enums.JobCategory
   teaser: string
   description: string
   responsibilities?: Prisma.JobCreateresponsibilitiesInput | string[]
   qualifications?: Prisma.JobCreatequalificationsInput | string[]
   benefits?: Prisma.JobCreatebenefitsInput | string[]
-  employmentType: $Enums.JobEmploymentType
-  workloadNote?: string | null
+  employmentTypes?: Prisma.JobCreateemploymentTypesInput | $Enums.JobEmploymentType[]
   locations?: Prisma.JobCreatelocationsInput | $Enums.Location[]
   shift?: string | null
+  workloadNote?: string | null
   salaryMinCents?: number | null
   salaryMaxCents?: number | null
   salaryUnit?: $Enums.JobSalaryUnit | null
@@ -639,9 +635,9 @@ export type JobCreateManyInput = {
   startsAsap?: boolean
   datePosted?: Date | string
   validThrough?: Date | string | null
-  contactEmail?: string | null
-  contactPhone?: string | null
+  applyEmail?: string | null
   applyUrl?: string | null
+  contactPhone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -650,16 +646,16 @@ export type JobUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.EnumJobCategoryFieldUpdateOperationsInput | $Enums.JobCategory
   teaser?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   responsibilities?: Prisma.JobUpdateresponsibilitiesInput | string[]
   qualifications?: Prisma.JobUpdatequalificationsInput | string[]
   benefits?: Prisma.JobUpdatebenefitsInput | string[]
-  employmentType?: Prisma.EnumJobEmploymentTypeFieldUpdateOperationsInput | $Enums.JobEmploymentType
-  workloadNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  employmentTypes?: Prisma.JobUpdateemploymentTypesInput | $Enums.JobEmploymentType[]
   locations?: Prisma.JobUpdatelocationsInput | $Enums.Location[]
   shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workloadNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salaryMinCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryMaxCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryUnit?: Prisma.NullableEnumJobSalaryUnitFieldUpdateOperationsInput | $Enums.JobSalaryUnit | null
@@ -668,9 +664,9 @@ export type JobUpdateManyMutationInput = {
   startsAsap?: Prisma.BoolFieldUpdateOperationsInput | boolean
   datePosted?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   validThrough?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  contactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applyEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   applyUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -679,16 +675,16 @@ export type JobUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   slug?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.EnumJobCategoryFieldUpdateOperationsInput | $Enums.JobCategory
   teaser?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.StringFieldUpdateOperationsInput | string
   responsibilities?: Prisma.JobUpdateresponsibilitiesInput | string[]
   qualifications?: Prisma.JobUpdatequalificationsInput | string[]
   benefits?: Prisma.JobUpdatebenefitsInput | string[]
-  employmentType?: Prisma.EnumJobEmploymentTypeFieldUpdateOperationsInput | $Enums.JobEmploymentType
-  workloadNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  employmentTypes?: Prisma.JobUpdateemploymentTypesInput | $Enums.JobEmploymentType[]
   locations?: Prisma.JobUpdatelocationsInput | $Enums.Location[]
   shift?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  workloadNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   salaryMinCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryMaxCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryUnit?: Prisma.NullableEnumJobSalaryUnitFieldUpdateOperationsInput | $Enums.JobSalaryUnit | null
@@ -697,27 +693,35 @@ export type JobUncheckedUpdateManyInput = {
   startsAsap?: Prisma.BoolFieldUpdateOperationsInput | boolean
   datePosted?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   validThrough?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  contactEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  applyEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   applyUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type EnumJobEmploymentTypeNullableListFilter<$PrismaModel = never> = {
+  equals?: $Enums.JobEmploymentType[] | Prisma.ListEnumJobEmploymentTypeFieldRefInput<$PrismaModel> | null
+  has?: $Enums.JobEmploymentType | Prisma.EnumJobEmploymentTypeFieldRefInput<$PrismaModel> | null
+  hasEvery?: $Enums.JobEmploymentType[] | Prisma.ListEnumJobEmploymentTypeFieldRefInput<$PrismaModel>
+  hasSome?: $Enums.JobEmploymentType[] | Prisma.ListEnumJobEmploymentTypeFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type JobCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  category?: Prisma.SortOrder
   teaser?: Prisma.SortOrder
   description?: Prisma.SortOrder
   responsibilities?: Prisma.SortOrder
   qualifications?: Prisma.SortOrder
   benefits?: Prisma.SortOrder
-  employmentType?: Prisma.SortOrder
-  workloadNote?: Prisma.SortOrder
+  employmentTypes?: Prisma.SortOrder
   locations?: Prisma.SortOrder
   shift?: Prisma.SortOrder
+  workloadNote?: Prisma.SortOrder
   salaryMinCents?: Prisma.SortOrder
   salaryMaxCents?: Prisma.SortOrder
   salaryUnit?: Prisma.SortOrder
@@ -726,9 +730,9 @@ export type JobCountOrderByAggregateInput = {
   startsAsap?: Prisma.SortOrder
   datePosted?: Prisma.SortOrder
   validThrough?: Prisma.SortOrder
-  contactEmail?: Prisma.SortOrder
-  contactPhone?: Prisma.SortOrder
+  applyEmail?: Prisma.SortOrder
   applyUrl?: Prisma.SortOrder
+  contactPhone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -742,12 +746,11 @@ export type JobMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  category?: Prisma.SortOrder
   teaser?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  employmentType?: Prisma.SortOrder
-  workloadNote?: Prisma.SortOrder
   shift?: Prisma.SortOrder
+  workloadNote?: Prisma.SortOrder
   salaryMinCents?: Prisma.SortOrder
   salaryMaxCents?: Prisma.SortOrder
   salaryUnit?: Prisma.SortOrder
@@ -756,9 +759,9 @@ export type JobMaxOrderByAggregateInput = {
   startsAsap?: Prisma.SortOrder
   datePosted?: Prisma.SortOrder
   validThrough?: Prisma.SortOrder
-  contactEmail?: Prisma.SortOrder
-  contactPhone?: Prisma.SortOrder
+  applyEmail?: Prisma.SortOrder
   applyUrl?: Prisma.SortOrder
+  contactPhone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -767,12 +770,11 @@ export type JobMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   slug?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  role?: Prisma.SortOrder
+  category?: Prisma.SortOrder
   teaser?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  employmentType?: Prisma.SortOrder
-  workloadNote?: Prisma.SortOrder
   shift?: Prisma.SortOrder
+  workloadNote?: Prisma.SortOrder
   salaryMinCents?: Prisma.SortOrder
   salaryMaxCents?: Prisma.SortOrder
   salaryUnit?: Prisma.SortOrder
@@ -781,9 +783,9 @@ export type JobMinOrderByAggregateInput = {
   startsAsap?: Prisma.SortOrder
   datePosted?: Prisma.SortOrder
   validThrough?: Prisma.SortOrder
-  contactEmail?: Prisma.SortOrder
-  contactPhone?: Prisma.SortOrder
+  applyEmail?: Prisma.SortOrder
   applyUrl?: Prisma.SortOrder
+  contactPhone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -805,8 +807,16 @@ export type JobCreatebenefitsInput = {
   set: string[]
 }
 
+export type JobCreateemploymentTypesInput = {
+  set: $Enums.JobEmploymentType[]
+}
+
 export type JobCreatelocationsInput = {
   set: $Enums.Location[]
+}
+
+export type EnumJobCategoryFieldUpdateOperationsInput = {
+  set?: $Enums.JobCategory
 }
 
 export type JobUpdateresponsibilitiesInput = {
@@ -824,8 +834,9 @@ export type JobUpdatebenefitsInput = {
   push?: string | string[]
 }
 
-export type EnumJobEmploymentTypeFieldUpdateOperationsInput = {
-  set?: $Enums.JobEmploymentType
+export type JobUpdateemploymentTypesInput = {
+  set?: $Enums.JobEmploymentType[]
+  push?: $Enums.JobEmploymentType | $Enums.JobEmploymentType[]
 }
 
 export type JobUpdatelocationsInput = {
@@ -843,16 +854,16 @@ export type JobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   id?: boolean
   slug?: boolean
   title?: boolean
-  role?: boolean
+  category?: boolean
   teaser?: boolean
   description?: boolean
   responsibilities?: boolean
   qualifications?: boolean
   benefits?: boolean
-  employmentType?: boolean
-  workloadNote?: boolean
+  employmentTypes?: boolean
   locations?: boolean
   shift?: boolean
+  workloadNote?: boolean
   salaryMinCents?: boolean
   salaryMaxCents?: boolean
   salaryUnit?: boolean
@@ -861,9 +872,9 @@ export type JobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   startsAsap?: boolean
   datePosted?: boolean
   validThrough?: boolean
-  contactEmail?: boolean
-  contactPhone?: boolean
+  applyEmail?: boolean
   applyUrl?: boolean
+  contactPhone?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["job"]>
@@ -872,16 +883,16 @@ export type JobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   id?: boolean
   slug?: boolean
   title?: boolean
-  role?: boolean
+  category?: boolean
   teaser?: boolean
   description?: boolean
   responsibilities?: boolean
   qualifications?: boolean
   benefits?: boolean
-  employmentType?: boolean
-  workloadNote?: boolean
+  employmentTypes?: boolean
   locations?: boolean
   shift?: boolean
+  workloadNote?: boolean
   salaryMinCents?: boolean
   salaryMaxCents?: boolean
   salaryUnit?: boolean
@@ -890,9 +901,9 @@ export type JobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   startsAsap?: boolean
   datePosted?: boolean
   validThrough?: boolean
-  contactEmail?: boolean
-  contactPhone?: boolean
+  applyEmail?: boolean
   applyUrl?: boolean
+  contactPhone?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["job"]>
@@ -901,16 +912,16 @@ export type JobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   id?: boolean
   slug?: boolean
   title?: boolean
-  role?: boolean
+  category?: boolean
   teaser?: boolean
   description?: boolean
   responsibilities?: boolean
   qualifications?: boolean
   benefits?: boolean
-  employmentType?: boolean
-  workloadNote?: boolean
+  employmentTypes?: boolean
   locations?: boolean
   shift?: boolean
+  workloadNote?: boolean
   salaryMinCents?: boolean
   salaryMaxCents?: boolean
   salaryUnit?: boolean
@@ -919,9 +930,9 @@ export type JobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   startsAsap?: boolean
   datePosted?: boolean
   validThrough?: boolean
-  contactEmail?: boolean
-  contactPhone?: boolean
+  applyEmail?: boolean
   applyUrl?: boolean
+  contactPhone?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["job"]>
@@ -930,16 +941,16 @@ export type JobSelectScalar = {
   id?: boolean
   slug?: boolean
   title?: boolean
-  role?: boolean
+  category?: boolean
   teaser?: boolean
   description?: boolean
   responsibilities?: boolean
   qualifications?: boolean
   benefits?: boolean
-  employmentType?: boolean
-  workloadNote?: boolean
+  employmentTypes?: boolean
   locations?: boolean
   shift?: boolean
+  workloadNote?: boolean
   salaryMinCents?: boolean
   salaryMaxCents?: boolean
   salaryUnit?: boolean
@@ -948,14 +959,14 @@ export type JobSelectScalar = {
   startsAsap?: boolean
   datePosted?: boolean
   validThrough?: boolean
-  contactEmail?: boolean
-  contactPhone?: boolean
+  applyEmail?: boolean
   applyUrl?: boolean
+  contactPhone?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type JobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "role" | "teaser" | "description" | "responsibilities" | "qualifications" | "benefits" | "employmentType" | "workloadNote" | "locations" | "shift" | "salaryMinCents" | "salaryMaxCents" | "salaryUnit" | "isActive" | "startsAt" | "startsAsap" | "datePosted" | "validThrough" | "contactEmail" | "contactPhone" | "applyUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["job"]>
+export type JobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "category" | "teaser" | "description" | "responsibilities" | "qualifications" | "benefits" | "employmentTypes" | "locations" | "shift" | "workloadNote" | "salaryMinCents" | "salaryMaxCents" | "salaryUnit" | "isActive" | "startsAt" | "startsAsap" | "datePosted" | "validThrough" | "applyEmail" | "applyUrl" | "contactPhone" | "createdAt" | "updatedAt", ExtArgs["result"]["job"]>
 
 export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Job"
@@ -964,16 +975,16 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     id: string
     slug: string
     title: string
-    role: string | null
+    category: $Enums.JobCategory
     teaser: string
     description: string
     responsibilities: string[]
     qualifications: string[]
     benefits: string[]
-    employmentType: $Enums.JobEmploymentType
-    workloadNote: string | null
+    employmentTypes: $Enums.JobEmploymentType[]
     locations: $Enums.Location[]
     shift: string | null
+    workloadNote: string | null
     salaryMinCents: number | null
     salaryMaxCents: number | null
     salaryUnit: $Enums.JobSalaryUnit | null
@@ -982,9 +993,9 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     startsAsap: boolean
     datePosted: Date
     validThrough: Date | null
-    contactEmail: string | null
-    contactPhone: string | null
+    applyEmail: string | null
     applyUrl: string | null
+    contactPhone: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["job"]>
@@ -1413,16 +1424,16 @@ export interface JobFieldRefs {
   readonly id: Prisma.FieldRef<"Job", 'String'>
   readonly slug: Prisma.FieldRef<"Job", 'String'>
   readonly title: Prisma.FieldRef<"Job", 'String'>
-  readonly role: Prisma.FieldRef<"Job", 'String'>
+  readonly category: Prisma.FieldRef<"Job", 'JobCategory'>
   readonly teaser: Prisma.FieldRef<"Job", 'String'>
   readonly description: Prisma.FieldRef<"Job", 'String'>
   readonly responsibilities: Prisma.FieldRef<"Job", 'String[]'>
   readonly qualifications: Prisma.FieldRef<"Job", 'String[]'>
   readonly benefits: Prisma.FieldRef<"Job", 'String[]'>
-  readonly employmentType: Prisma.FieldRef<"Job", 'JobEmploymentType'>
-  readonly workloadNote: Prisma.FieldRef<"Job", 'String'>
+  readonly employmentTypes: Prisma.FieldRef<"Job", 'JobEmploymentType[]'>
   readonly locations: Prisma.FieldRef<"Job", 'Location[]'>
   readonly shift: Prisma.FieldRef<"Job", 'String'>
+  readonly workloadNote: Prisma.FieldRef<"Job", 'String'>
   readonly salaryMinCents: Prisma.FieldRef<"Job", 'Int'>
   readonly salaryMaxCents: Prisma.FieldRef<"Job", 'Int'>
   readonly salaryUnit: Prisma.FieldRef<"Job", 'JobSalaryUnit'>
@@ -1431,9 +1442,9 @@ export interface JobFieldRefs {
   readonly startsAsap: Prisma.FieldRef<"Job", 'Boolean'>
   readonly datePosted: Prisma.FieldRef<"Job", 'DateTime'>
   readonly validThrough: Prisma.FieldRef<"Job", 'DateTime'>
-  readonly contactEmail: Prisma.FieldRef<"Job", 'String'>
-  readonly contactPhone: Prisma.FieldRef<"Job", 'String'>
+  readonly applyEmail: Prisma.FieldRef<"Job", 'String'>
   readonly applyUrl: Prisma.FieldRef<"Job", 'String'>
+  readonly contactPhone: Prisma.FieldRef<"Job", 'String'>
   readonly createdAt: Prisma.FieldRef<"Job", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Job", 'DateTime'>
 }
