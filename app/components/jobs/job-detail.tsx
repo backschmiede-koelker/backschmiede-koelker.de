@@ -7,7 +7,8 @@ import {
   categoryLabel,
   employmentLabel,
   locationLabel,
-  salaryLabel,
+  salaryChipLabel,
+  sortEmploymentTypes,
   startLabel,
 } from "./formatters";
 
@@ -27,12 +28,12 @@ function locShort(job: Job) {
 }
 
 export function JobDetail({ job }: { job: Job }) {
-  const salary = salaryLabel(job);
+  const salary = salaryChipLabel(job);
   const start = startLabel(job);
+  const employmentSorted = sortEmploymentTypes(job.employmentTypes);
 
   return (
     <article className="mx-auto w-full max-w-6xl px-3 py-6 sm:px-4 sm:py-8">
-      {/* Breadcrumbs */}
       <nav className="mb-4 flex flex-wrap items-center gap-1 text-xs text-zinc-600 dark:text-zinc-400 sm:text-sm">
         <Link className="hover:underline underline-offset-4" href="/">
           Home
@@ -51,7 +52,6 @@ export function JobDetail({ job }: { job: Job }) {
         </span>
       </nav>
 
-      {/* Header Card */}
       <header
         className="relative overflow-hidden rounded-3xl
           border border-zinc-300/90
@@ -60,7 +60,6 @@ export function JobDetail({ job }: { job: Job }) {
           backdrop-blur
           dark:border-white/10 dark:bg-white/5 dark:shadow-none dark:ring-0"
       >
-        {/* Accent + subtle glows */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-600" />
           <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-emerald-500/14 blur-3xl" />
@@ -69,9 +68,7 @@ export function JobDetail({ job }: { job: Job }) {
 
         <div className="relative p-4 sm:p-6 md:p-8">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-            {/* Left */}
             <div className="min-w-0">
-              {/* Top chips */}
               <div className="flex flex-wrap items-center gap-2 text-[11px] sm:text-xs">
                 <span
                   className="inline-flex max-w-full items-center gap-2 rounded-full
@@ -108,8 +105,9 @@ export function JobDetail({ job }: { job: Job }) {
                       border border-zinc-300 bg-zinc-50 px-2.5 py-1 text-zinc-900
                       shadow-sm shadow-zinc-900/10
                       dark:border-white/10 dark:bg-zinc-900/50 dark:text-zinc-200 dark:shadow-none"
+                    title={salary}
                   >
-                    <span className="truncate">{salary}</span>
+                    <span className="whitespace-nowrap">{salary}</span>
                   </span>
                 )}
               </div>
@@ -122,9 +120,8 @@ export function JobDetail({ job }: { job: Job }) {
                 {job.teaser}
               </p>
 
-              {/* Employment types: show all, wrap-safe */}
               <div className="mt-4 flex flex-wrap gap-2 text-[11px] sm:text-xs">
-                {job.employmentTypes.map((t) => (
+                {employmentSorted.map((t) => (
                   <span
                     key={t}
                     className="inline-flex max-w-full items-center rounded-full
@@ -148,7 +145,6 @@ export function JobDetail({ job }: { job: Job }) {
               </div>
             </div>
 
-            {/* Right: CTA Card */}
             <aside
               className="w-full lg:w-[360px]
                 rounded-2xl
@@ -159,7 +155,6 @@ export function JobDetail({ job }: { job: Job }) {
                 dark:border-white/10 dark:bg-zinc-900/60 dark:shadow-none dark:ring-0"
             >
               <div className="p-4 sm:p-5">
-                {/* Titel + Badge (entkoppelt, aber gut lesbar) */}
                 <div className="relative">
                   <div className="flex items-start justify-between gap-3">
                     <h2 className="text-base font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
@@ -177,7 +172,6 @@ export function JobDetail({ job }: { job: Job }) {
                     </div>
                   </div>
 
-                  {/* Text läuft immer über volle Breite */}
                   <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
                     Ein paar Zeilen + Lebenslauf (PDF) reichen.
                   </p>
@@ -237,12 +231,7 @@ export function JobDetail({ job }: { job: Job }) {
         </div>
       </header>
 
-      {/* Main content layout:
-          - 300px: 1 column
-          - md(768): still 1 column (sidebar eats width)
-          - lg: 2 columns */}
       <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
-        {/* Left column */}
         <section className="lg:col-span-2 space-y-4">
           <div
             className="rounded-2xl border border-zinc-300/90 bg-white/90 p-4 shadow-md shadow-zinc-900/10 ring-1 ring-zinc-900/15
@@ -298,7 +287,6 @@ export function JobDetail({ job }: { job: Job }) {
           )}
         </section>
 
-        {/* Right column */}
         <aside className="space-y-4">
           <div
             className="rounded-2xl border border-zinc-300/90 bg-white/90 p-4 shadow-md shadow-zinc-900/10 ring-1 ring-zinc-900/15
@@ -357,7 +345,7 @@ export function JobDetail({ job }: { job: Job }) {
               <div className="flex items-start gap-2">
                 <span className="mt-0.5">💼</span>
                 <span className="min-w-0 font-semibold text-zinc-900 dark:text-zinc-100">
-                  {job.employmentTypes.map(employmentLabel).join(" · ")}
+                  {employmentSorted.map(employmentLabel).join(" · ")}
                 </span>
               </div>
 
@@ -390,7 +378,6 @@ export function JobDetail({ job }: { job: Job }) {
             </div>
           </div>
 
-          {/* Optional hint box */}
           <div
             className="rounded-2xl border border-amber-300/70 bg-amber-100/60 p-4 text-sm text-zinc-800 shadow-sm
               dark:border-white/10 dark:bg-amber-900/10 dark:text-zinc-200 dark:shadow-none"

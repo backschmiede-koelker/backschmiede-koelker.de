@@ -14,6 +14,7 @@ import {
   employmentLabel,
   locationLabel,
   startLabel,
+  sortEmploymentTypes,
 } from "@/app/components/jobs/formatters";
 import SelectBox from "@/app/components/select-box";
 import MultiChipInput from "./multi-chip-input";
@@ -48,15 +49,21 @@ function centsToInput(v?: number | null) {
   if (!v) return "";
   return (v / 100).toLocaleString("de-DE");
 }
+
 function toCentsFromInput(v: string) {
-  const s = v.trim().replace(",", ".");
+  const s = v
+    .trim()
+    .replace(/\s/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
   if (!s) return null;
   const n = Number(s);
   if (!Number.isFinite(n)) return null;
   return Math.max(0, Math.round(n * 100));
 }
+
 function toIntOrZero(v: string) {
-  const n = Number(v);
+  const n = Number(String(v).trim());
   if (!Number.isFinite(n)) return 0;
   return Math.round(n);
 }
@@ -82,8 +89,14 @@ export default function JobEditorCard({
       benefits: JOB_PRESETS.flatMap((p) => p.benefits),
     };
     return {
-      responsibilities: uniq([...fromPresets.responsibilities, ...TAG_SUGGESTIONS.responsibilities]),
-      qualifications: uniq([...fromPresets.qualifications, ...TAG_SUGGESTIONS.qualifications]),
+      responsibilities: uniq([
+        ...fromPresets.responsibilities,
+        ...TAG_SUGGESTIONS.responsibilities,
+      ]),
+      qualifications: uniq([
+        ...fromPresets.qualifications,
+        ...TAG_SUGGESTIONS.qualifications,
+      ]),
       benefits: uniq([...fromPresets.benefits, ...TAG_SUGGESTIONS.benefits]),
     };
   }, []);
@@ -93,24 +106,34 @@ export default function JobEditorCard({
   const [teaser, setTeaser] = useState(job.teaser);
   const [description, setDescription] = useState(job.description);
 
-  const [priority, setPriority] = useState<string>(String(job.priority ?? 0));
+  const [priority, setPriority] = useState<number>(job.priority ?? 0);
 
-  const [employmentTypes, setEmploymentTypes] = useState<JobEmploymentType[]>(job.employmentTypes);
+  const [employmentTypes, setEmploymentTypes] = useState<JobEmploymentType[]>(
+    job.employmentTypes
+  );
   const [locations, setLocations] = useState<JobLocation[]>(job.locations);
 
-  const [responsibilities, setResponsibilities] = useState<string[]>(job.responsibilities ?? []);
-  const [qualifications, setQualifications] = useState<string[]>(job.qualifications ?? []);
+  const [responsibilities, setResponsibilities] = useState<string[]>(
+    job.responsibilities ?? []
+  );
+  const [qualifications, setQualifications] = useState<string[]>(
+    job.qualifications ?? []
+  );
   const [benefits, setBenefits] = useState<string[]>(job.benefits ?? []);
 
   const [salaryMin, setSalaryMin] = useState(centsToInput(job.salaryMinCents));
   const [salaryMax, setSalaryMax] = useState(centsToInput(job.salaryMaxCents));
-  const [salaryUnit, setSalaryUnit] = useState<JobSalaryUnit>((job.salaryUnit ?? "MONTH") as JobSalaryUnit);
+  const [salaryUnit, setSalaryUnit] = useState<JobSalaryUnit>(
+    (job.salaryUnit ?? "MONTH") as JobSalaryUnit
+  );
 
   const [shift, setShift] = useState(job.shift ?? "");
   const [workloadNote, setWorkloadNote] = useState(job.workloadNote ?? "");
 
   const [startsAsap, setStartsAsap] = useState(job.startsAsap);
-  const [startsAt, setStartsAt] = useState(job.startsAt ? new Date(job.startsAt).toISOString().slice(0, 10) : "");
+  const [startsAt, setStartsAt] = useState(
+    job.startsAt ? new Date(job.startsAt).toISOString().slice(0, 10) : ""
+  );
 
   const [applyEmail, setApplyEmail] = useState(job.applyEmail ?? "");
   const [applyUrl, setApplyUrl] = useState(job.applyUrl ?? "");
@@ -124,20 +147,32 @@ export default function JobEditorCard({
   const dateDisabledClass =
     "bg-zinc-200/90 text-zinc-700 border-zinc-400/80 shadow-inner cursor-not-allowed " +
     "opacity-80 saturate-0 " +
-    "dark:bg-zinc-900/85 dark:text-zinc-400 dark:border-zinc-800 dark:opacity-70";
+    "dark:bg-zinc-950/70 dark:text-zinc-500 dark:border-zinc-800 dark:opacity-70";
 
   const chipBase =
     "inline-flex max-w-full min-w-0 items-start rounded-2xl px-3 py-2 text-xs ring-1 transition " +
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30";
 
-  const chipWrap = "mt-2 flex flex-wrap gap-2 min-w-0 px-1 py-1";
+  const chipWrap =
+    "mt-2 flex flex-wrap gap-2 min-w-0 px-1 py-1 overflow-visible";
+
+  const secondaryBtn =
+    "inline-flex items-center justify-center rounded-xl " +
+    "border border-zinc-300/90 bg-white/80 px-3 py-2.5 text-sm font-semibold text-zinc-900 shadow-sm transition " +
+    "hover:bg-zinc-50 hover:shadow active:translate-y-[1px] " +
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30 " +
+    "dark:border-white/10 dark:bg-zinc-900/50 dark:text-zinc-100 dark:hover:bg-zinc-800/60";
 
   function toggleEmployment(t: JobEmploymentType) {
-    setEmploymentTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
+    setEmploymentTypes((prev) =>
+      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+    );
   }
 
   function toggleLocation(l: JobLocation) {
-    setLocations((prev) => (prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]));
+    setLocations((prev) =>
+      prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]
+    );
   }
 
   async function toggleActive() {
@@ -184,19 +219,19 @@ export default function JobEditorCard({
           category,
           teaser,
           description,
-          priority: toIntOrZero(priority),
-          employmentTypes,
+          priority: toIntOrZero(String(priority)),
+          employmentTypes: sortEmploymentTypes(employmentTypes),
           locations,
           responsibilities,
           qualifications,
           benefits,
           salaryMinCents: minC,
           salaryMaxCents: maxC,
-          salaryUnit: (minC || maxC) ? salaryUnit : null,
+          salaryUnit: minC || maxC ? salaryUnit : null,
           shift: shift.trim() || null,
           workloadNote: workloadNote.trim() || null,
           startsAsap,
-          startsAt: startsAsap ? null : (startsAt || null),
+          startsAt: startsAsap ? null : startsAt || null,
           applyEmail: applyEmail.trim() || null,
           applyUrl: applyUrl.trim() || null,
           contactPhone: contactPhone.trim() || null,
@@ -212,14 +247,16 @@ export default function JobEditorCard({
     }
   }
 
+  const listEmploymentSorted = sortEmploymentTypes(job.employmentTypes);
+
   return (
     <li className="rounded-2xl border border-zinc-300/80 bg-white/90 dark:border-white/10 dark:bg-white/5 p-4 sm:p-5 shadow-md shadow-zinc-900/10 ring-1 ring-zinc-900/10 dark:shadow-none dark:ring-0 min-w-0 overflow-x-hidden">
       <div className="flex flex-col gap-3 min-w-0">
         <div className="flex items-start justify-between gap-3 min-w-0">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2 min-w-0">
-              <h3 className="text-sm sm:text-base font-extrabold tracking-tight leading-snug min-w-0">
-                <span className="whitespace-normal break-words">{job.title}</span>
+              <h3 className="text-sm sm:text-base font-extrabold tracking-tight leading-snug min-w-0 truncate">
+                {job.title}
               </h3>
 
               <span
@@ -235,6 +272,15 @@ export default function JobEditorCard({
               >
                 {isActive ? "Aktiv" : "Inaktiv"}
               </span>
+
+              <span
+                className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] ring-1 font-semibold
+                  bg-amber-50 text-amber-900 ring-amber-200
+                  dark:bg-amber-900/20 dark:text-amber-200 dark:ring-amber-700"
+                title="Priorität (höher = weiter oben)"
+              >
+                Prio: {job.priority ?? 0}
+              </span>
             </div>
 
             <p className="mt-1 text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 line-clamp-2">
@@ -242,19 +288,20 @@ export default function JobEditorCard({
             </p>
 
             <p className="mt-2 text-[11px] text-zinc-600 dark:text-zinc-400">
-              {categoryLabel(job.category)} · {job.locations.map(locationLabel).join(" · ")} · {startLabel(job)}
+              {categoryLabel(job.category)} ·{" "}
+              {job.locations.map(locationLabel).join(" · ")} · {startLabel(job)}
             </p>
 
-            <div className="mt-2 flex flex-wrap gap-2 text-[11px] min-w-0 px-1 py-1">
-              {job.employmentTypes.map((t) => (
+            <div className="mt-2 flex flex-wrap gap-2 text-[11px] min-w-0 px-1 py-1 overflow-visible">
+              {listEmploymentSorted.map((t) => (
                 <span
                   key={t}
-                  className="inline-flex max-w-full min-w-0 items-start rounded-2xl border border-zinc-300/80 px-2.5 py-1.5
-                    bg-white/80 text-zinc-900
-                    dark:border-white/10 dark:bg-zinc-900/50 dark:text-zinc-100"
-                  title={employmentLabel(t)}
+                  className="inline-flex max-w-full min-w-0 items-center rounded-full border border-zinc-300/80 px-2.5 py-1 bg-white/80
+                    dark:border-white/10 dark:bg-zinc-900/50"
                 >
-                  <span className="whitespace-normal break-words leading-snug">💼 {employmentLabel(t)}</span>
+                  <span className="min-w-0 truncate">
+                    💼 {employmentLabel(t)}
+                  </span>
                 </span>
               ))}
             </div>
@@ -265,12 +312,7 @@ export default function JobEditorCard({
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
-            className="inline-flex w-full items-center justify-center rounded-xl
-              border border-zinc-300/90 bg-white/80 px-3 py-2.5 text-sm font-semibold text-zinc-900 shadow-sm transition
-              hover:bg-zinc-50 hover:shadow
-              active:translate-y-[1px]
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30
-              dark:border-white/10 dark:bg-zinc-900/50 dark:text-zinc-100 dark:hover:bg-zinc-800/60"
+            className={secondaryBtn}
           >
             {open ? "Schließen" : "Bearbeiten"}
           </button>
@@ -279,15 +321,15 @@ export default function JobEditorCard({
             type="button"
             onClick={toggleActive}
             disabled={togglingActive}
-            className="inline-flex w-full items-center justify-center rounded-xl
-              border border-zinc-300/90 bg-white/80 px-3 py-2.5 text-sm font-semibold text-zinc-900 shadow-sm transition
-              hover:bg-zinc-50 hover:shadow
-              active:translate-y-[1px]
-              focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30
-              disabled:opacity-60 disabled:cursor-not-allowed
-              dark:border-white/10 dark:bg-zinc-900/50 dark:text-zinc-100 dark:hover:bg-zinc-800/60"
+            className={
+              secondaryBtn + " disabled:opacity-60 disabled:cursor-not-allowed"
+            }
           >
-            {togglingActive ? "Bitte warten…" : isActive ? "Deaktivieren" : "Aktivieren"}
+            {togglingActive
+              ? "Bitte warten…"
+              : isActive
+                ? "Deaktivieren"
+                : "Aktivieren"}
           </button>
 
           <button
@@ -295,8 +337,7 @@ export default function JobEditorCard({
             onClick={onDelete}
             className="inline-flex w-full items-center justify-center rounded-xl
               border border-red-200 bg-red-50/70 px-3 py-2.5 text-sm font-semibold text-red-700 shadow-sm transition
-              hover:bg-red-100 hover:shadow
-              active:translate-y-[1px]
+              hover:bg-red-100 hover:shadow active:translate-y-[1px]
               focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500/30
               dark:border-red-400/20 dark:bg-red-900/15 dark:text-red-200 dark:hover:bg-red-900/25"
           >
@@ -309,47 +350,61 @@ export default function JobEditorCard({
             <div className="grid gap-4 lg:grid-cols-2 min-w-0">
               <div className="min-w-0">
                 <FieldLabel>Titel</FieldLabel>
-                <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputBase} />
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className={inputBase}
+                />
               </div>
+
               <div className="min-w-0">
                 <FieldLabel>Bereich</FieldLabel>
                 <div className="mt-1">
                   <SelectBox
-                    value={CATEGORY_OPTIONS.find((o) => o.value === category)?.label || "Sonstiges"}
+                    value={
+                      CATEGORY_OPTIONS.find((o) => o.value === category)
+                        ?.label || "Sonstiges"
+                    }
                     onChange={(label) => {
-                      const found = CATEGORY_OPTIONS.find((o) => o.label === label);
+                      const found = CATEGORY_OPTIONS.find(
+                        (o) => o.label === label
+                      );
                       if (found) setCategory(found.value);
                     }}
                     options={CATEGORY_OPTIONS.map((o) => o.label)}
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="min-w-0">
-              <FieldLabel>
-                Priorität <span className="text-xs text-zinc-500">(optional)</span>
-              </FieldLabel>
-              <input
-                inputMode="numeric"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className={inputBase}
-                placeholder="0"
-              />
-              <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                Höher = weiter oben. Gleiche Priorität → alphabetisch nach Titel.
-              </p>
+              <div className="min-w-0 lg:col-span-2">
+                <FieldLabel>Priorität</FieldLabel>
+                <input
+                  type="number"
+                  value={priority}
+                  onChange={(e) => setPriority(toIntOrZero(e.target.value))}
+                  className={inputBase + " mt-1"}
+                />
+              </div>
             </div>
 
             <div className="min-w-0">
               <FieldLabel>Kurzer Teaser</FieldLabel>
-              <textarea value={teaser} onChange={(e) => setTeaser(e.target.value)} rows={2} className={inputBase} />
+              <textarea
+                value={teaser}
+                onChange={(e) => setTeaser(e.target.value)}
+                rows={2}
+                className={inputBase}
+              />
             </div>
 
             <div className="min-w-0">
               <FieldLabel>Beschreibung</FieldLabel>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={6} className={inputBase} />
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={6}
+                className={inputBase}
+              />
             </div>
 
             <div className="min-w-0">
@@ -371,7 +426,9 @@ export default function JobEditorCard({
                             "dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/70",
                       ].join(" ")}
                     >
-                      <span className="whitespace-normal break-words leading-snug">{o.label}</span>
+                      <span className="whitespace-normal break-words leading-snug">
+                        {o.label}
+                      </span>
                     </button>
                   );
                 })}
@@ -400,29 +457,60 @@ export default function JobEditorCard({
                             "dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/70",
                       ].join(" ")}
                     >
-                      <span className="whitespace-normal break-words leading-snug">{o.label}</span>
+                      <span className="whitespace-normal break-words leading-snug">
+                        {o.label}
+                      </span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <MultiChipInput label="Aufgaben" suggestions={suggestions.responsibilities} value={responsibilities} onChange={setResponsibilities} />
-            <MultiChipInput label="Profil" suggestions={suggestions.qualifications} value={qualifications} onChange={setQualifications} />
-            <MultiChipInput label="Benefits" suggestions={suggestions.benefits} value={benefits} onChange={setBenefits} />
+            <MultiChipInput
+              label="Aufgaben"
+              suggestions={suggestions.responsibilities}
+              value={responsibilities}
+              onChange={setResponsibilities}
+            />
+            <MultiChipInput
+              label="Profil"
+              suggestions={suggestions.qualifications}
+              value={qualifications}
+              onChange={setQualifications}
+            />
+            <MultiChipInput
+              label="Benefits"
+              suggestions={suggestions.benefits}
+              value={benefits}
+              onChange={setBenefits}
+            />
 
+            {/* ✅ Wie im New-Form: Einheit + Datum auf lg in gleicher Zeile */}
             <div className="grid gap-4 lg:grid-cols-2 min-w-0">
-              <div className="min-w-0">
+              {/* Gehalt (inputs) */}
+              <div className="min-w-0 order-1">
                 <FieldLabel>
-                  Gehalt <span className="text-xs text-zinc-500">(optional)</span>
+                  Gehalt{" "}
+                  <span className="text-xs text-zinc-500">(optional)</span>
                 </FieldLabel>
                 <div className="mt-1 grid grid-cols-2 gap-2 min-w-0">
-                  <input value={salaryMin} onChange={(e) => setSalaryMin(e.target.value)} className={inputBase} placeholder="Min." />
-                  <input value={salaryMax} onChange={(e) => setSalaryMax(e.target.value)} className={inputBase} placeholder="Max." />
+                  <input
+                    value={salaryMin}
+                    onChange={(e) => setSalaryMin(e.target.value)}
+                    className={inputBase}
+                    placeholder="Min."
+                  />
+                  <input
+                    value={salaryMax}
+                    onChange={(e) => setSalaryMax(e.target.value)}
+                    className={inputBase}
+                    placeholder="Max."
+                  />
                 </div>
               </div>
 
-              <div className="min-w-0">
+              {/* Start (Checkbox) */}
+              <div className="min-w-0 order-3 lg:order-2">
                 <FieldLabel>Start</FieldLabel>
                 <div className="mt-2 flex items-center gap-2">
                   <input
@@ -438,72 +526,123 @@ export default function JobEditorCard({
                 </div>
               </div>
 
-              <div className="min-w-0">
-                <FieldLabel>
-                  Gehaltseinheit <span className="text-xs text-zinc-500">(optional)</span>
-                </FieldLabel>
-                <div className="mt-1">
-                  <SelectBox
-                    value={salaryUnit === "HOUR" ? "pro Stunde" : salaryUnit === "MONTH" ? "pro Monat" : "pro Jahr"}
-                    onChange={(v) => setSalaryUnit(v === "pro Stunde" ? "HOUR" : v === "pro Monat" ? "MONTH" : "YEAR")}
-                    options={["pro Stunde", "pro Monat", "pro Jahr"]}
-                  />
+              {/* Einheit (links) */}
+              <div className="min-w-0 order-2 lg:order-3">
+                <div className="sr-only" id={`salaryUnitLabel-${job.id}`}>
+                  Gehaltseinheit
                 </div>
+                <SelectBox
+                  aria-labelledby={`salaryUnitLabel-${job.id}`}
+                  value={
+                    salaryUnit === "HOUR"
+                      ? "pro Stunde"
+                      : salaryUnit === "MONTH"
+                        ? "pro Monat"
+                        : "pro Jahr"
+                  }
+                  onChange={(v) =>
+                    setSalaryUnit(
+                      v === "pro Stunde"
+                        ? "HOUR"
+                        : v === "pro Monat"
+                          ? "MONTH"
+                          : "YEAR"
+                    )
+                  }
+                  options={["pro Stunde", "pro Monat", "pro Jahr"]}
+                />
               </div>
 
-              <div className="min-w-0">
-                <FieldLabel>
-                  Startdatum <span className="text-xs text-zinc-500">(optional)</span>
-                </FieldLabel>
-                <div className="mt-1 min-w-0">
-                  <input
-                    type="date"
-                    value={startsAt}
-                    onChange={(e) => setStartsAt(e.target.value)}
-                    disabled={startsAsap}
-                    className={[inputBase, startsAsap ? dateDisabledClass : ""].join(" ")}
-                  />
+              {/* Datum (rechts) */}
+              <div className="min-w-0 order-4 lg:order-4">
+                <div className="sr-only" id={`startDateLabel-${job.id}`}>
+                  Startdatum
                 </div>
+                <input
+                  aria-labelledby={`startDateLabel-${job.id}`}
+                  type="date"
+                  value={startsAt}
+                  onChange={(e) => setStartsAt(e.target.value)}
+                  disabled={startsAsap}
+                  className={[
+                    inputBase,
+                    startsAsap ? dateDisabledClass : "",
+                  ].join(" ")}
+                />
               </div>
 
               <div className="min-w-0">
                 <FieldLabel>
-                  Schicht / Zeiten <span className="text-xs text-zinc-500">(optional)</span>
+                  Schicht / Zeiten{" "}
+                  <span className="text-xs text-zinc-500">(optional)</span>
                 </FieldLabel>
-                <input value={shift} onChange={(e) => setShift(e.target.value)} className={inputBase} />
+                <input
+                  value={shift}
+                  onChange={(e) => setShift(e.target.value)}
+                  className={inputBase}
+                />
               </div>
 
               <div className="min-w-0">
                 <FieldLabel>
-                  Zusatzinfo <span className="text-xs text-zinc-500">(optional)</span>
+                  Zusatzinfo{" "}
+                  <span className="text-xs text-zinc-500">(optional)</span>
                 </FieldLabel>
-                <input value={workloadNote} onChange={(e) => setWorkloadNote(e.target.value)} className={inputBase} />
+                <input
+                  value={workloadNote}
+                  onChange={(e) => setWorkloadNote(e.target.value)}
+                  className={inputBase}
+                />
               </div>
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2 min-w-0">
               <div className="min-w-0">
                 <FieldLabel>
-                  Bewerbungs-E-Mail <span className="text-xs text-zinc-500">(optional)</span>
+                  Bewerbungs-E-Mail{" "}
+                  <span className="text-xs text-zinc-500">(optional)</span>
                 </FieldLabel>
-                <input value={applyEmail} onChange={(e) => setApplyEmail(e.target.value)} className={inputBase} />
-              </div>
-              <div className="min-w-0">
-                <FieldLabel>
-                  Bewerbungs-URL <span className="text-xs text-zinc-500">(optional)</span>
-                </FieldLabel>
-                <input value={applyUrl} onChange={(e) => setApplyUrl(e.target.value)} className={inputBase} />
+                <input
+                  value={applyEmail}
+                  onChange={(e) => setApplyEmail(e.target.value)}
+                  className={inputBase}
+                />
               </div>
 
               <div className="min-w-0">
                 <FieldLabel>
-                  Telefon für Rückfragen <span className="text-xs text-zinc-500">(optional)</span>
+                  Bewerbungs-URL{" "}
+                  <span className="text-xs text-zinc-500">(optional)</span>
                 </FieldLabel>
-                <input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} className={inputBase} />
+                <input
+                  value={applyUrl}
+                  onChange={(e) => setApplyUrl(e.target.value)}
+                  className={inputBase}
+                />
+              </div>
+
+              <div className="min-w-0">
+                <FieldLabel>
+                  Telefon für Rückfragen{" "}
+                  <span className="text-xs text-zinc-500">(optional)</span>
+                </FieldLabel>
+                <input
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                  className={inputBase}
+                />
               </div>
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className={secondaryBtn}
+              >
+                Schließen
+              </button>
+
               <button
                 type="button"
                 onClick={save}

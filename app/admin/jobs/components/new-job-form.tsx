@@ -13,6 +13,7 @@ import type {
 import { JOB_PRESETS } from "./presets";
 import MultiChipInput from "./multi-chip-input";
 import { TAG_SUGGESTIONS } from "./tag-suggestions";
+import { sortEmploymentTypes } from "@/app/components/jobs/formatters";
 
 const DEFAULT_APPLY_EMAIL = "info@backschmiede-koelker.de";
 const DEFAULT_APPLY_URL: string | null = null;
@@ -38,7 +39,11 @@ const CATEGORY_OPTIONS: { value: JobCategory; label: string }[] = [
 ];
 
 function toCentsFromInput(v: string) {
-  const s = v.trim().replace(",", ".");
+  const s = v
+    .trim()
+    .replace(/\s/g, "")
+    .replace(/\./g, "")
+    .replace(",", ".");
   if (!s) return null;
   const n = Number(s);
   if (!Number.isFinite(n)) return null;
@@ -47,6 +52,12 @@ function toCentsFromInput(v: string) {
 
 function uniq(arr: string[]) {
   return Array.from(new Set(arr.map((x) => x.trim()).filter(Boolean)));
+}
+
+function toIntOrZero(v: string) {
+  const n = Number(String(v).trim());
+  if (!Number.isFinite(n)) return 0;
+  return Math.round(n);
 }
 
 export default function NewJobForm({
@@ -126,7 +137,7 @@ export default function NewJobForm({
     setCategory(p.category);
     setTeaser(p.teaser);
     setDescription(p.description);
-    setEmploymentTypes(p.employmentTypes);
+    setEmploymentTypes(sortEmploymentTypes(p.employmentTypes));
     setResponsibilities(p.responsibilities);
     setQualifications(p.qualifications);
     setBenefits(p.benefits);
@@ -168,8 +179,8 @@ export default function NewJobForm({
           category,
           teaser,
           description,
-          priority,
-          employmentTypes,
+          priority: toIntOrZero(String(priority)),
+          employmentTypes: sortEmploymentTypes(employmentTypes),
           locations,
           responsibilities,
           qualifications,
@@ -230,13 +241,14 @@ export default function NewJobForm({
   const dateDisabledClass =
     "bg-zinc-200/90 text-zinc-700 border-zinc-400/80 shadow-inner cursor-not-allowed " +
     "opacity-80 saturate-0 " +
-    "dark:bg-zinc-900/85 dark:text-zinc-400 dark:border-zinc-800 dark:opacity-70";
+    "dark:bg-zinc-950/70 dark:text-zinc-500 dark:border-zinc-800 dark:opacity-70";
 
   const chipBase =
     "inline-flex max-w-full min-w-0 items-start rounded-2xl px-3 py-2 text-xs ring-1 transition " +
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30";
 
-  const chipWrap = "mt-2 flex flex-wrap gap-2 min-w-0 px-1 py-1";
+  const chipWrap =
+    "mt-2 flex flex-wrap gap-2 min-w-0 px-1 py-1 overflow-visible";
 
   return (
     <section className="mt-6 rounded-2xl border border-zinc-300/80 bg-white/90 dark:border-white/10 dark:bg-white/5 p-4 sm:p-5 shadow-md shadow-zinc-900/10 ring-1 ring-zinc-900/10 dark:shadow-none dark:ring-0 min-w-0 overflow-x-hidden">
@@ -299,24 +311,21 @@ export default function NewJobForm({
           </div>
         </div>
 
-        {/* ✅ Priorität-Feld: optisch identisch zu allen anderen Inputs */}
         <div className="min-w-0">
           <FieldLabel>Priorität</FieldLabel>
           <input
             type="number"
             value={priority}
-            onChange={(e) => setPriority(Number(e.target.value))}
-            className={inputBase}
+            onChange={(e) => setPriority(toIntOrZero(e.target.value))}
+            className={inputBase + " mt-1"}
           />
-
-          {/* ✅ Anzeige NUR der höchsten Prio */}
-          {highestPriority ? (
+          {highestPriority && (
             <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
               Aktuell höchste Priorität:{" "}
-              <span className="font-medium">{highestPriority.value}</span>{" "}
-              ({highestPriority.title})
+              <span className="font-medium">{highestPriority.value}</span> (
+              {highestPriority.title})
             </p>
-          ) : null}
+          )}
         </div>
 
         <div className="min-w-0">
@@ -422,8 +431,15 @@ export default function NewJobForm({
           placeholder="Benefit hinzufügen…"
         />
 
+        {/* ✅ Grid so umgebaut, dass auf lg:
+              - Zeile 1: Gehalt (links)  | Start (Checkbox) (rechts)
+              - Zeile 2: Gehaltseinheit  | Startdatum (rechts)  => gleiche Höhe/Zeile
+              - Zeile 3: Schicht (links) | Zusatzinfo (rechts)
+            Und auf Mobile bleibt:
+              Gehalt -> Einheit -> Start(Checkbox) -> Startdatum */}
         <div className="grid gap-4 lg:grid-cols-2 min-w-0">
-          <div className="min-w-0">
+          {/* Gehalt (inputs) */}
+          <div className="min-w-0 order-1">
             <FieldLabel>
               Gehalt <span className="text-xs text-zinc-500">(optional)</span>
             </FieldLabel>
@@ -459,7 +475,8 @@ export default function NewJobForm({
             </div>
           </div>
 
-          <div className="min-w-0">
+          {/* Start (Checkbox) */}
+          <div className="min-w-0 order-3 lg:order-2">
             <FieldLabel>Start</FieldLabel>
             <div className="mt-2 flex items-center gap-2">
               <input
@@ -475,45 +492,48 @@ export default function NewJobForm({
             </div>
           </div>
 
-          <div className="min-w-0">
-            <FieldLabel>
-              Gehaltseinheit{" "}
-              <span className="text-xs text-zinc-500">(optional)</span>
-            </FieldLabel>
-            <div className="mt-1">
-              <SelectBox
-                value={
-                  salaryUnit === "HOUR"
-                    ? "pro Stunde"
-                    : salaryUnit === "MONTH"
+          {/* Gehaltseinheit (unter Gehalt, aber auf lg auf gleicher Zeile wie Datum) */}
+          <div className="min-w-0 order-2 lg:order-3">
+            <div className="sr-only" id="salaryUnitLabel">
+              Gehaltseinheit
+            </div>
+            <SelectBox
+              aria-labelledby="salaryUnitLabel"
+              value={
+                salaryUnit === "HOUR"
+                  ? "pro Stunde"
+                  : salaryUnit === "MONTH"
                     ? "pro Monat"
                     : "pro Jahr"
-                }
-                onChange={(v) =>
-                  setSalaryUnit(
-                    v === "pro Stunde" ? "HOUR" : v === "pro Monat" ? "MONTH" : "YEAR"
-                  )
-                }
-                options={["pro Stunde", "pro Monat", "pro Jahr"]}
-              />
-            </div>
+              }
+              onChange={(v) =>
+                setSalaryUnit(
+                  v === "pro Stunde"
+                    ? "HOUR"
+                    : v === "pro Monat"
+                      ? "MONTH"
+                      : "YEAR"
+                )
+              }
+              options={["pro Stunde", "pro Monat", "pro Jahr"]}
+            />
           </div>
 
-          <div className="min-w-0">
-            <FieldLabel>
-              Startdatum <span className="text-xs text-zinc-500">(optional)</span>
-            </FieldLabel>
-            <div className="mt-1 min-w-0">
-              <input
-                type="date"
-                value={startsAt}
-                onChange={(e) => setStartsAt(e.target.value)}
-                disabled={startsAsap}
-                className={[inputBase, startsAsap ? dateDisabledClass : ""].join(
-                  " "
-                )}
-              />
+          {/* Startdatum (unter Start, aber auf lg auf gleicher Zeile wie Einheit) */}
+          <div className="min-w-0 order-4 lg:order-4">
+            <div className="sr-only" id="startDateLabel">
+              Startdatum
             </div>
+            <input
+              aria-labelledby="startDateLabel"
+              type="date"
+              value={startsAt}
+              onChange={(e) => setStartsAt(e.target.value)}
+              disabled={startsAsap}
+              className={[inputBase, startsAsap ? dateDisabledClass : ""].join(
+                " "
+              )}
+            />
           </div>
 
           <div className="min-w-0">
@@ -592,7 +612,8 @@ export default function NewJobForm({
             className="h-4 w-4"
           />
           <label htmlFor="isActive" className="text-sm">
-            Aktiv erstellen <span className="text-xs text-zinc-500">(optional)</span>
+            Aktiv erstellen{" "}
+            <span className="text-xs text-zinc-500">(optional)</span>
           </label>
         </div>
 

@@ -7,7 +7,8 @@ import {
   categoryLabel,
   employmentLabel,
   locationLabel,
-  salaryLabel,
+  salaryChipLabel,
+  sortEmploymentTypes,
   startLabel,
 } from "./formatters";
 
@@ -18,10 +19,12 @@ function joinLocations(job: Job) {
 }
 
 export function JobCard({ job }: { job: Job }) {
-  const salary = salaryLabel(job);
+  const salary = salaryChipLabel(job);
   const locations = joinLocations(job);
   const category = categoryLabel(job.category);
   const start = startLabel(job);
+
+  const employmentSorted = sortEmploymentTypes(job.employmentTypes);
 
   return (
     <article
@@ -41,13 +44,11 @@ export function JobCard({ job }: { job: Job }) {
 
         sm:p-5"
     >
-      {/* Accent (wie bei dir) */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-500 via-amber-400 to-emerald-600 opacity-90" />
       <div className="pointer-events-none absolute -top-20 -right-20 h-48 w-48 rounded-full bg-amber-400/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
 
       <div className="relative flex flex-col gap-2">
-        {/* Top row */}
         <div className="flex flex-wrap items-center gap-2 text-[11px] sm:text-xs">
           <span
             className="inline-flex max-w-full items-center gap-2 rounded-full
@@ -112,13 +113,14 @@ export function JobCard({ job }: { job: Job }) {
                 dark:bg-zinc-900/50
                 dark:text-zinc-200
                 dark:shadow-none"
+              title={salary}
             >
-              <span className="truncate">{salary}</span>
+              {/* ✅ nicht truncate → wir liefern jetzt ohnehin „35T“, damit nichts “35” wird */}
+              <span className="whitespace-nowrap">{salary}</span>
             </span>
           )}
         </div>
 
-        {/* Title (wie bei dir) */}
         <h3 className="text-base font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-lg">
           <Link
             href={`/jobs/${job.slug}`}
@@ -129,14 +131,12 @@ export function JobCard({ job }: { job: Job }) {
           </Link>
         </h3>
 
-        {/* Teaser */}
         <p className="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 line-clamp-2">
           {job.teaser}
         </p>
 
-        {/* Employment pills: ALLE anzeigen (max 4) */}
         <div className="mt-1 flex flex-wrap gap-2 text-[11px] sm:text-xs">
-          {job.employmentTypes.map((t) => (
+          {employmentSorted.map((t) => (
             <span
               key={t}
               className="inline-flex max-w-full items-center rounded-full
@@ -175,7 +175,6 @@ export function JobCard({ job }: { job: Job }) {
           )}
         </div>
 
-        {/* Footer */}
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 text-xs text-zinc-700 dark:text-zinc-400">
             {job.benefits?.length

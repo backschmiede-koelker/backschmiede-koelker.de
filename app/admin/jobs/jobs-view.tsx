@@ -7,8 +7,8 @@ import NewJobForm from "./components/new-job-form";
 import JobEditorCard from "./components/job-editor-card";
 import {
   categoryLabel,
-  locationLabel,
   employmentLabel,
+  locationLabel,
 } from "@/app/components/jobs/formatters";
 
 export default function JobsView() {
@@ -19,17 +19,11 @@ export default function JobsView() {
 
   const highestPriority = useMemo(() => {
     if (!items.length) return null;
-
-    const top = [...items].reduce((best, cur) => {
-      const bp = best?.priority ?? 0;
-      const cp = cur?.priority ?? 0;
-      return cp > bp ? cur : best;
-    }, items[0]);
-
-    return {
-      value: top.priority ?? 0,
-      title: top.title,
-    };
+    const sorted = [...items].sort(
+      (a, b) => (b.priority ?? 0) - (a.priority ?? 0)
+    );
+    const top = sorted[0];
+    return { value: top.priority ?? 0, title: top.title };
   }, [items]);
 
   const categories = useMemo(() => {
@@ -41,7 +35,7 @@ export default function JobsView() {
   const filtered = useMemo(() => {
     const qq = q.trim().toLowerCase();
 
-    return items.filter((j) => {
+    const base = items.filter((j) => {
       const matchesCat = filterCat === "ALLE" || j.category === filterCat;
       if (!matchesCat) return false;
 
@@ -61,11 +55,20 @@ export default function JobsView() {
         j.applyEmail ?? "",
         j.applyUrl ?? "",
         j.contactPhone ?? "",
+        String(j.priority ?? 0),
       ]
         .join(" • ")
         .toLowerCase();
 
       return haystack.includes(qq);
+    });
+
+    const collator = new Intl.Collator("de-DE", { sensitivity: "base" });
+    return base.sort((a, b) => {
+      const pa = a.priority ?? 0;
+      const pb = b.priority ?? 0;
+      if (pb !== pa) return pb - pa;
+      return collator.compare(a.title, b.title);
     });
   }, [items, q, filterCat]);
 
@@ -77,12 +80,16 @@ export default function JobsView() {
     <main className="mx-auto w-full max-w-5xl px-3 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 min-w-0 overflow-x-hidden">
       <h1 className="text-2xl font-extrabold tracking-tight">Jobs</h1>
 
-      <NewJobForm
-        onCreated={reload}
-        highestPriority={highestPriority}
-      />
+      <NewJobForm onCreated={reload} highestPriority={highestPriority} />
 
-      <div className="h-8 sm:h-10" />
+      {/* ✅ Bereichs-Trenner + Titel */}
+      <div className="mt-10 flex items-center justify-between">
+        <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100">
+          Aktuelle Stellenausschreibungen
+        </h2>
+      </div>
+
+      <div className="h-3 sm:h-4" />
 
       <div className="space-y-4 min-w-0">
         <div className="rounded-2xl border border-zinc-300/80 bg-white/90 p-3 shadow-md shadow-zinc-900/10 ring-1 ring-zinc-900/10 dark:border-white/10 dark:bg-white/5 dark:shadow-none dark:ring-0 sm:p-4 min-w-0 overflow-x-hidden">
@@ -97,7 +104,7 @@ export default function JobsView() {
               onChange={(e) => setQ(e.target.value)}
             />
 
-            <div className="flex flex-wrap gap-2 min-w-0 px-1 py-1">
+            <div className="flex flex-wrap gap-2 min-w-0 px-1 py-1 overflow-visible">
               <button
                 type="button"
                 onClick={() => setFilterCat("ALLE")}
@@ -110,9 +117,7 @@ export default function JobsView() {
                       "dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/70",
                 ].join(" ")}
               >
-                <span className="whitespace-normal break-words leading-snug">
-                  Alle
-                </span>
+                <span className="min-w-0 truncate">Alle</span>
               </button>
 
               {categories.map((c) => (
@@ -129,9 +134,7 @@ export default function JobsView() {
                         "dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/70",
                   ].join(" ")}
                 >
-                  <span className="whitespace-normal break-words leading-snug">
-                    {categoryLabel(c as any)}
-                  </span>
+                  <span className="min-w-0 truncate">{categoryLabel(c as any)}</span>
                 </button>
               ))}
             </div>
