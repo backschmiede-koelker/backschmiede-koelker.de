@@ -1,7 +1,7 @@
 // app/admin/jobs/components/job-editor-card.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type {
   Job,
   JobCategory,
@@ -81,6 +81,8 @@ export default function JobEditorCard({
   const [saving, setSaving] = useState(false);
   const [togglingActive, setTogglingActive] = useState(false);
   const [isActive, setIsActive] = useState(job.isActive);
+
+  const cardRef = useRef<HTMLLIElement | null>(null);
 
   const suggestions = useMemo(() => {
     const fromPresets = {
@@ -162,6 +164,18 @@ export default function JobEditorCard({
     "hover:bg-zinc-50 hover:shadow active:translate-y-[1px] " +
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30 " +
     "dark:border-white/10 dark:bg-zinc-900/50 dark:text-zinc-100 dark:hover:bg-zinc-800/60";
+
+  function closeAndKeepView() {
+    const el = cardRef.current;
+    const topBefore = el ? el.getBoundingClientRect().top + window.scrollY : null;
+
+    setOpen(false);
+
+    requestAnimationFrame(() => {
+      if (topBefore == null) return;
+      window.scrollTo({ top: Math.max(0, topBefore - 100), behavior: "smooth" });
+    });
+  }
 
   function toggleEmployment(t: JobEmploymentType) {
     setEmploymentTypes((prev) =>
@@ -250,7 +264,7 @@ export default function JobEditorCard({
   const listEmploymentSorted = sortEmploymentTypes(job.employmentTypes);
 
   return (
-    <li className="rounded-2xl border border-zinc-300/80 bg-white/90 dark:border-white/10 dark:bg-white/5 p-4 sm:p-5 shadow-md shadow-zinc-900/10 ring-1 ring-zinc-900/10 dark:shadow-none dark:ring-0 min-w-0 overflow-x-hidden">
+    <li ref={cardRef} className="rounded-2xl border border-zinc-300/80 bg-white/90 dark:border-white/10 dark:bg-white/5 p-4 sm:p-5 shadow-md shadow-zinc-900/10 ring-1 ring-zinc-900/10 dark:shadow-none dark:ring-0 min-w-0 overflow-x-hidden">
       <div className="flex flex-col gap-3 min-w-0">
         <div className="flex items-start justify-between gap-3 min-w-0">
           <div className="min-w-0">
@@ -637,7 +651,7 @@ export default function JobEditorCard({
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={closeAndKeepView}
                 className={secondaryBtn}
               >
                 Schließen
