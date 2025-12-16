@@ -192,7 +192,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           <div className="flex-1" />
 
           {/* Standorte & Social - unten andocken, durch Border optisch abgeschlossen */}
-          <div className="mt-auto space-y-3 pb-4 pt-5 xl:space-y-4 2xl:space-y-5 2xl:pt-6 2xl:pb-6 border-t border-emerald-800/10 dark:border-emerald-300/10">
+          <div className="mt-auto space-y-2 pb-4 pt-5 xl:space-y-2 2xl:space-y-3 2xl:pt-6 2xl:pb-6 border-t border-emerald-800/10 dark:border-emerald-300/10">
             <p className="text-xs uppercase tracking-wider opacity-60">Standorte & Social</p>
 
             <GlowTile href="https://www.instagram.com/backschmiede_koelker" external>
