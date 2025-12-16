@@ -36,6 +36,8 @@ function mapJob(j: PrismaJob): Job {
 
     isActive: j.isActive,
 
+    priority: j.priority ?? 0,
+
     datePosted: j.datePosted,
     validThrough: j.validThrough ?? null,
 
@@ -114,7 +116,11 @@ export async function fetchJobs(filter?: {
 
   const jobs = await prisma.job.findMany({
     where,
-    orderBy: { datePosted: "desc" },
+    orderBy: [
+      { priority: "desc" },
+      { title: "asc" },
+      { id: "asc" },
+    ],
   });
 
   return jobs.map(mapJob);
@@ -122,7 +128,11 @@ export async function fetchJobs(filter?: {
 
 export async function allJobsAdmin() {
   const jobs = await prisma.job.findMany({
-    orderBy: { datePosted: "desc" },
+    orderBy: [
+      { priority: "desc" },
+      { title: "asc" },
+      { id: "asc" },
+    ],
   });
   return jobs.map(mapJob);
 }

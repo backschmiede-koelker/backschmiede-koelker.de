@@ -49,6 +49,13 @@ function parseCategory(input: unknown): JobCategory {
   return JobCategory.SONSTIGES;
 }
 
+function parsePriority(input: unknown): number {
+  if (input === null || input === undefined) return 0;
+  const n = Number(input);
+  if (!Number.isFinite(n)) return 0;
+  return Math.round(n);
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
@@ -81,8 +88,7 @@ export async function GET(req: Request) {
   }
 
   if (cat) {
-    const c = parseCategory(cat);
-    if (c) where.category = c;
+    where.category = parseCategory(cat);
   }
 
   if (emp) {
@@ -98,7 +104,11 @@ export async function GET(req: Request) {
 
   const jobs = await prisma.job.findMany({
     where,
-    orderBy: { datePosted: "desc" },
+    orderBy: [
+      { priority: "desc" },
+      { title: "asc" },
+      { id: "asc" },
+    ],
     ...(take ? { take } : {}),
   });
 
@@ -136,6 +146,8 @@ export async function POST(req: Request) {
     contactPhone?: string | null;
 
     isActive?: boolean;
+
+    priority?: number | null;
   };
 
   const baseSlug = slugify(b.title || "");
@@ -172,7 +184,7 @@ export async function POST(req: Request) {
       salaryUnit: b.salaryUnit ?? null,
 
       startsAsap: b.startsAsap ?? true,
-      startsAt: (b.startsAsap ?? true) ? null : b.startsAt ? new Date(b.startsAt) : null,
+      startsAt: b.startsAsap ? null : b.startsAt ? new Date(b.startsAt) : null,
 
       validThrough: b.validThrough ? new Date(b.validThrough) : null,
 
@@ -181,6 +193,8 @@ export async function POST(req: Request) {
       contactPhone: b.contactPhone ? String(b.contactPhone) : null,
 
       isActive: b.isActive ?? true,
+
+      priority: parsePriority(b.priority),
     },
   });
 

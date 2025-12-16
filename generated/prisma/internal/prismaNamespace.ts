@@ -1433,6 +1433,7 @@ export const JobScalarFieldEnum = {
   salaryMaxCents: 'salaryMaxCents',
   salaryUnit: 'salaryUnit',
   isActive: 'isActive',
+  priority: 'priority',
   startsAt: 'startsAt',
   startsAsap: 'startsAsap',
   datePosted: 'datePosted',

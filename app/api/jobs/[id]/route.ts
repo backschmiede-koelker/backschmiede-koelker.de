@@ -37,6 +37,14 @@ function parseCategory(input: unknown): JobCategory | undefined {
   return undefined;
 }
 
+function parsePriority(input: unknown): number | undefined {
+  if (input === undefined) return undefined;
+  if (input === null) return 0;
+  const n = Number(input);
+  if (!Number.isFinite(n)) return 0;
+  return Math.round(n);
+}
+
 export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const job = await prisma.job.findUnique({ where: { id } });
@@ -94,6 +102,9 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   if (typeof body.contactPhone === "string" || body.contactPhone === null) data.contactPhone = body.contactPhone ? String(body.contactPhone) : null;
 
   if (typeof body.isActive === "boolean") data.isActive = body.isActive;
+
+  const pr = parsePriority(body.priority);
+  if (pr !== undefined) data.priority = pr;
 
   if (!Object.keys(data).length) return NextResponse.json({ error: "No fields" }, { status: 400 });
 

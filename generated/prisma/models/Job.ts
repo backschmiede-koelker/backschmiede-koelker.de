@@ -29,11 +29,13 @@ export type AggregateJob = {
 export type JobAvgAggregateOutputType = {
   salaryMinCents: number | null
   salaryMaxCents: number | null
+  priority: number | null
 }
 
 export type JobSumAggregateOutputType = {
   salaryMinCents: number | null
   salaryMaxCents: number | null
+  priority: number | null
 }
 
 export type JobMinAggregateOutputType = {
@@ -49,6 +51,7 @@ export type JobMinAggregateOutputType = {
   salaryMaxCents: number | null
   salaryUnit: $Enums.JobSalaryUnit | null
   isActive: boolean | null
+  priority: number | null
   startsAt: Date | null
   startsAsap: boolean | null
   datePosted: Date | null
@@ -73,6 +76,7 @@ export type JobMaxAggregateOutputType = {
   salaryMaxCents: number | null
   salaryUnit: $Enums.JobSalaryUnit | null
   isActive: boolean | null
+  priority: number | null
   startsAt: Date | null
   startsAsap: boolean | null
   datePosted: Date | null
@@ -102,6 +106,7 @@ export type JobCountAggregateOutputType = {
   salaryMaxCents: number
   salaryUnit: number
   isActive: number
+  priority: number
   startsAt: number
   startsAsap: number
   datePosted: number
@@ -118,11 +123,13 @@ export type JobCountAggregateOutputType = {
 export type JobAvgAggregateInputType = {
   salaryMinCents?: true
   salaryMaxCents?: true
+  priority?: true
 }
 
 export type JobSumAggregateInputType = {
   salaryMinCents?: true
   salaryMaxCents?: true
+  priority?: true
 }
 
 export type JobMinAggregateInputType = {
@@ -138,6 +145,7 @@ export type JobMinAggregateInputType = {
   salaryMaxCents?: true
   salaryUnit?: true
   isActive?: true
+  priority?: true
   startsAt?: true
   startsAsap?: true
   datePosted?: true
@@ -162,6 +170,7 @@ export type JobMaxAggregateInputType = {
   salaryMaxCents?: true
   salaryUnit?: true
   isActive?: true
+  priority?: true
   startsAt?: true
   startsAsap?: true
   datePosted?: true
@@ -191,6 +200,7 @@ export type JobCountAggregateInputType = {
   salaryMaxCents?: true
   salaryUnit?: true
   isActive?: true
+  priority?: true
   startsAt?: true
   startsAsap?: true
   datePosted?: true
@@ -307,6 +317,7 @@ export type JobGroupByOutputType = {
   salaryMaxCents: number | null
   salaryUnit: $Enums.JobSalaryUnit | null
   isActive: boolean
+  priority: number
   startsAt: Date | null
   startsAsap: boolean
   datePosted: Date
@@ -359,6 +370,7 @@ export type JobWhereInput = {
   salaryMaxCents?: Prisma.IntNullableFilter<"Job"> | number | null
   salaryUnit?: Prisma.EnumJobSalaryUnitNullableFilter<"Job"> | $Enums.JobSalaryUnit | null
   isActive?: Prisma.BoolFilter<"Job"> | boolean
+  priority?: Prisma.IntFilter<"Job"> | number
   startsAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   startsAsap?: Prisma.BoolFilter<"Job"> | boolean
   datePosted?: Prisma.DateTimeFilter<"Job"> | Date | string
@@ -388,6 +400,7 @@ export type JobOrderByWithRelationInput = {
   salaryMaxCents?: Prisma.SortOrderInput | Prisma.SortOrder
   salaryUnit?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   startsAt?: Prisma.SortOrderInput | Prisma.SortOrder
   startsAsap?: Prisma.SortOrder
   datePosted?: Prisma.SortOrder
@@ -420,6 +433,7 @@ export type JobWhereUniqueInput = Prisma.AtLeast<{
   salaryMaxCents?: Prisma.IntNullableFilter<"Job"> | number | null
   salaryUnit?: Prisma.EnumJobSalaryUnitNullableFilter<"Job"> | $Enums.JobSalaryUnit | null
   isActive?: Prisma.BoolFilter<"Job"> | boolean
+  priority?: Prisma.IntFilter<"Job"> | number
   startsAt?: Prisma.DateTimeNullableFilter<"Job"> | Date | string | null
   startsAsap?: Prisma.BoolFilter<"Job"> | boolean
   datePosted?: Prisma.DateTimeFilter<"Job"> | Date | string
@@ -449,6 +463,7 @@ export type JobOrderByWithAggregationInput = {
   salaryMaxCents?: Prisma.SortOrderInput | Prisma.SortOrder
   salaryUnit?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   startsAt?: Prisma.SortOrderInput | Prisma.SortOrder
   startsAsap?: Prisma.SortOrder
   datePosted?: Prisma.SortOrder
@@ -486,6 +501,7 @@ export type JobScalarWhereWithAggregatesInput = {
   salaryMaxCents?: Prisma.IntNullableWithAggregatesFilter<"Job"> | number | null
   salaryUnit?: Prisma.EnumJobSalaryUnitNullableWithAggregatesFilter<"Job"> | $Enums.JobSalaryUnit | null
   isActive?: Prisma.BoolWithAggregatesFilter<"Job"> | boolean
+  priority?: Prisma.IntWithAggregatesFilter<"Job"> | number
   startsAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Job"> | Date | string | null
   startsAsap?: Prisma.BoolWithAggregatesFilter<"Job"> | boolean
   datePosted?: Prisma.DateTimeWithAggregatesFilter<"Job"> | Date | string
@@ -515,6 +531,7 @@ export type JobCreateInput = {
   salaryMaxCents?: number | null
   salaryUnit?: $Enums.JobSalaryUnit | null
   isActive?: boolean
+  priority?: number
   startsAt?: Date | string | null
   startsAsap?: boolean
   datePosted?: Date | string
@@ -544,6 +561,7 @@ export type JobUncheckedCreateInput = {
   salaryMaxCents?: number | null
   salaryUnit?: $Enums.JobSalaryUnit | null
   isActive?: boolean
+  priority?: number
   startsAt?: Date | string | null
   startsAsap?: boolean
   datePosted?: Date | string
@@ -573,6 +591,7 @@ export type JobUpdateInput = {
   salaryMaxCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryUnit?: Prisma.NullableEnumJobSalaryUnitFieldUpdateOperationsInput | $Enums.JobSalaryUnit | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priority?: Prisma.IntFieldUpdateOperationsInput | number
   startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startsAsap?: Prisma.BoolFieldUpdateOperationsInput | boolean
   datePosted?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -602,6 +621,7 @@ export type JobUncheckedUpdateInput = {
   salaryMaxCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryUnit?: Prisma.NullableEnumJobSalaryUnitFieldUpdateOperationsInput | $Enums.JobSalaryUnit | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priority?: Prisma.IntFieldUpdateOperationsInput | number
   startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startsAsap?: Prisma.BoolFieldUpdateOperationsInput | boolean
   datePosted?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -631,6 +651,7 @@ export type JobCreateManyInput = {
   salaryMaxCents?: number | null
   salaryUnit?: $Enums.JobSalaryUnit | null
   isActive?: boolean
+  priority?: number
   startsAt?: Date | string | null
   startsAsap?: boolean
   datePosted?: Date | string
@@ -660,6 +681,7 @@ export type JobUpdateManyMutationInput = {
   salaryMaxCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryUnit?: Prisma.NullableEnumJobSalaryUnitFieldUpdateOperationsInput | $Enums.JobSalaryUnit | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priority?: Prisma.IntFieldUpdateOperationsInput | number
   startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startsAsap?: Prisma.BoolFieldUpdateOperationsInput | boolean
   datePosted?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -689,6 +711,7 @@ export type JobUncheckedUpdateManyInput = {
   salaryMaxCents?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   salaryUnit?: Prisma.NullableEnumJobSalaryUnitFieldUpdateOperationsInput | $Enums.JobSalaryUnit | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  priority?: Prisma.IntFieldUpdateOperationsInput | number
   startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   startsAsap?: Prisma.BoolFieldUpdateOperationsInput | boolean
   datePosted?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -726,6 +749,7 @@ export type JobCountOrderByAggregateInput = {
   salaryMaxCents?: Prisma.SortOrder
   salaryUnit?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   startsAsap?: Prisma.SortOrder
   datePosted?: Prisma.SortOrder
@@ -740,6 +764,7 @@ export type JobCountOrderByAggregateInput = {
 export type JobAvgOrderByAggregateInput = {
   salaryMinCents?: Prisma.SortOrder
   salaryMaxCents?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
 }
 
 export type JobMaxOrderByAggregateInput = {
@@ -755,6 +780,7 @@ export type JobMaxOrderByAggregateInput = {
   salaryMaxCents?: Prisma.SortOrder
   salaryUnit?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   startsAsap?: Prisma.SortOrder
   datePosted?: Prisma.SortOrder
@@ -779,6 +805,7 @@ export type JobMinOrderByAggregateInput = {
   salaryMaxCents?: Prisma.SortOrder
   salaryUnit?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
   startsAt?: Prisma.SortOrder
   startsAsap?: Prisma.SortOrder
   datePosted?: Prisma.SortOrder
@@ -793,6 +820,7 @@ export type JobMinOrderByAggregateInput = {
 export type JobSumOrderByAggregateInput = {
   salaryMinCents?: Prisma.SortOrder
   salaryMaxCents?: Prisma.SortOrder
+  priority?: Prisma.SortOrder
 }
 
 export type JobCreateresponsibilitiesInput = {
@@ -868,6 +896,7 @@ export type JobSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = ru
   salaryMaxCents?: boolean
   salaryUnit?: boolean
   isActive?: boolean
+  priority?: boolean
   startsAt?: boolean
   startsAsap?: boolean
   datePosted?: boolean
@@ -897,6 +926,7 @@ export type JobSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extension
   salaryMaxCents?: boolean
   salaryUnit?: boolean
   isActive?: boolean
+  priority?: boolean
   startsAt?: boolean
   startsAsap?: boolean
   datePosted?: boolean
@@ -926,6 +956,7 @@ export type JobSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extension
   salaryMaxCents?: boolean
   salaryUnit?: boolean
   isActive?: boolean
+  priority?: boolean
   startsAt?: boolean
   startsAsap?: boolean
   datePosted?: boolean
@@ -955,6 +986,7 @@ export type JobSelectScalar = {
   salaryMaxCents?: boolean
   salaryUnit?: boolean
   isActive?: boolean
+  priority?: boolean
   startsAt?: boolean
   startsAsap?: boolean
   datePosted?: boolean
@@ -966,7 +998,7 @@ export type JobSelectScalar = {
   updatedAt?: boolean
 }
 
-export type JobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "category" | "teaser" | "description" | "responsibilities" | "qualifications" | "benefits" | "employmentTypes" | "locations" | "shift" | "workloadNote" | "salaryMinCents" | "salaryMaxCents" | "salaryUnit" | "isActive" | "startsAt" | "startsAsap" | "datePosted" | "validThrough" | "applyEmail" | "applyUrl" | "contactPhone" | "createdAt" | "updatedAt", ExtArgs["result"]["job"]>
+export type JobOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "slug" | "title" | "category" | "teaser" | "description" | "responsibilities" | "qualifications" | "benefits" | "employmentTypes" | "locations" | "shift" | "workloadNote" | "salaryMinCents" | "salaryMaxCents" | "salaryUnit" | "isActive" | "priority" | "startsAt" | "startsAsap" | "datePosted" | "validThrough" | "applyEmail" | "applyUrl" | "contactPhone" | "createdAt" | "updatedAt", ExtArgs["result"]["job"]>
 
 export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Job"
@@ -989,6 +1021,7 @@ export type $JobPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     salaryMaxCents: number | null
     salaryUnit: $Enums.JobSalaryUnit | null
     isActive: boolean
+    priority: number
     startsAt: Date | null
     startsAsap: boolean
     datePosted: Date
@@ -1438,6 +1471,7 @@ export interface JobFieldRefs {
   readonly salaryMaxCents: Prisma.FieldRef<"Job", 'Int'>
   readonly salaryUnit: Prisma.FieldRef<"Job", 'JobSalaryUnit'>
   readonly isActive: Prisma.FieldRef<"Job", 'Boolean'>
+  readonly priority: Prisma.FieldRef<"Job", 'Int'>
   readonly startsAt: Prisma.FieldRef<"Job", 'DateTime'>
   readonly startsAsap: Prisma.FieldRef<"Job", 'Boolean'>
   readonly datePosted: Prisma.FieldRef<"Job", 'DateTime'>

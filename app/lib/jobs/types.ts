@@ -49,6 +49,8 @@ export type Job = {
 
   isActive: boolean;
 
+  priority: number;
+
   datePosted: Date;
   validThrough?: Date | null;
 

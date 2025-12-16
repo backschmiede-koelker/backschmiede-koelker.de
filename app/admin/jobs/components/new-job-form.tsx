@@ -49,6 +49,12 @@ function uniq(arr: string[]) {
   return Array.from(new Set(arr.map((x) => x.trim()).filter(Boolean)));
 }
 
+function toIntOrZero(v: string) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return 0;
+  return Math.round(n);
+}
+
 export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
   const [saving, setSaving] = useState(false);
   const [presetKey, setPresetKey] = useState<string>("");
@@ -57,6 +63,8 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
   const [category, setCategory] = useState<JobCategory>("SONSTIGES");
   const [teaser, setTeaser] = useState("");
   const [description, setDescription] = useState("");
+
+  const [priority, setPriority] = useState<string>("0");
 
   const [employmentTypes, setEmploymentTypes] = useState<JobEmploymentType[]>([
     "FULL_TIME",
@@ -145,6 +153,7 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
           category,
           teaser,
           description,
+          priority: toIntOrZero(priority),
           employmentTypes,
           locations,
           responsibilities,
@@ -174,6 +183,7 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
       setCategory("SONSTIGES");
       setTeaser("");
       setDescription("");
+      setPriority("0");
       setEmploymentTypes(["FULL_TIME", "PART_TIME"]);
       setLocations(["METTINGEN", "RECKE"]);
       setResponsibilities([]);
@@ -202,7 +212,6 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
     "outline-none transition focus-visible:ring-2 focus-visible:ring-emerald-500/40 " +
     "dark:border-white/10 dark:text-zinc-100";
 
-  // ✅ Darkmode: deutlich “disabled” (stärker als vorher)
   const dateDisabledClass =
     "bg-zinc-200/90 text-zinc-700 border-zinc-400/80 shadow-inner cursor-not-allowed " +
     "opacity-80 saturate-0 " +
@@ -212,7 +221,6 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
     "inline-flex max-w-full min-w-0 items-start rounded-2xl px-3 py-2 text-xs ring-1 transition " +
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30";
 
-  // ✅ Extra Innen-Padding für Chip-Wrapper (gegen abgeschnittene Ränder)
   const chipWrap = "mt-2 flex flex-wrap gap-2 min-w-0 px-1 py-1";
 
   return (
@@ -268,6 +276,22 @@ export default function NewJobForm({ onCreated }: { onCreated: () => void }) {
               options={CATEGORY_OPTIONS.map((o) => o.label)}
             />
           </div>
+        </div>
+
+        <div className="min-w-0">
+          <FieldLabel>
+            Priorität <span className="text-xs text-zinc-500">(optional)</span>
+          </FieldLabel>
+          <input
+            inputMode="numeric"
+            value={priority}
+            onChange={(e) => setPriority(e.target.value)}
+            className={inputBase}
+            placeholder="0"
+          />
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            Höher = weiter oben. Gleiche Priorität → alphabetisch nach Titel.
+          </p>
         </div>
 
         <div className="min-w-0">
