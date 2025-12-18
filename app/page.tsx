@@ -92,6 +92,7 @@ export default function HomePage() {
       </h1>
       <p style={{ fontSize: '1.2rem', maxWidth: '600px', color: '#ccc' }}>
         Diese Seite ist noch in Arbeit. Wir freuen uns, dich bald hier begrüßen zu dürfen!
+        Test
       </p>
     </main>
   );
