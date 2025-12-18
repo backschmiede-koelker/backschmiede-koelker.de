@@ -304,6 +304,40 @@ export type EnumJobSalaryUnitNullableWithAggregatesFilter<$PrismaModel = never> 
   _max?: Prisma.NestedEnumJobSalaryUnitNullableFilter<$PrismaModel>
 }
 
+export type EnumAboutSectionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AboutSectionType | Prisma.EnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AboutSectionType[] | Prisma.ListEnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AboutSectionType[] | Prisma.ListEnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAboutSectionTypeFilter<$PrismaModel> | $Enums.AboutSectionType
+}
+
+export type EnumAboutSectionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AboutSectionType | Prisma.EnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AboutSectionType[] | Prisma.ListEnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AboutSectionType[] | Prisma.ListEnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAboutSectionTypeWithAggregatesFilter<$PrismaModel> | $Enums.AboutSectionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAboutSectionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAboutSectionTypeFilter<$PrismaModel>
+}
+
+export type EnumAboutPersonKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.AboutPersonKind | Prisma.EnumAboutPersonKindFieldRefInput<$PrismaModel>
+  in?: $Enums.AboutPersonKind[] | Prisma.ListEnumAboutPersonKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AboutPersonKind[] | Prisma.ListEnumAboutPersonKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAboutPersonKindFilter<$PrismaModel> | $Enums.AboutPersonKind
+}
+
+export type EnumAboutPersonKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AboutPersonKind | Prisma.EnumAboutPersonKindFieldRefInput<$PrismaModel>
+  in?: $Enums.AboutPersonKind[] | Prisma.ListEnumAboutPersonKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AboutPersonKind[] | Prisma.ListEnumAboutPersonKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAboutPersonKindWithAggregatesFilter<$PrismaModel> | $Enums.AboutPersonKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAboutPersonKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAboutPersonKindFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -605,6 +639,40 @@ export type NestedEnumJobSalaryUnitNullableWithAggregatesFilter<$PrismaModel = n
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumJobSalaryUnitNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumJobSalaryUnitNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumAboutSectionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.AboutSectionType | Prisma.EnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AboutSectionType[] | Prisma.ListEnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AboutSectionType[] | Prisma.ListEnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAboutSectionTypeFilter<$PrismaModel> | $Enums.AboutSectionType
+}
+
+export type NestedEnumAboutSectionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AboutSectionType | Prisma.EnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.AboutSectionType[] | Prisma.ListEnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AboutSectionType[] | Prisma.ListEnumAboutSectionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAboutSectionTypeWithAggregatesFilter<$PrismaModel> | $Enums.AboutSectionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAboutSectionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAboutSectionTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumAboutPersonKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.AboutPersonKind | Prisma.EnumAboutPersonKindFieldRefInput<$PrismaModel>
+  in?: $Enums.AboutPersonKind[] | Prisma.ListEnumAboutPersonKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AboutPersonKind[] | Prisma.ListEnumAboutPersonKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAboutPersonKindFilter<$PrismaModel> | $Enums.AboutPersonKind
+}
+
+export type NestedEnumAboutPersonKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AboutPersonKind | Prisma.EnumAboutPersonKindFieldRefInput<$PrismaModel>
+  in?: $Enums.AboutPersonKind[] | Prisma.ListEnumAboutPersonKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AboutPersonKind[] | Prisma.ListEnumAboutPersonKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAboutPersonKindWithAggregatesFilter<$PrismaModel> | $Enums.AboutPersonKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAboutPersonKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAboutPersonKindFilter<$PrismaModel>
 }
 
 

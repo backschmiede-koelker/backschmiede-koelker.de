@@ -72,3 +72,38 @@ export type News = Prisma.NewsModel
  * 
  */
 export type Job = Prisma.JobModel
+/**
+ * Model AboutSection
+ * 
+ */
+export type AboutSection = Prisma.AboutSectionModel
+/**
+ * Model AboutStatItem
+ * 
+ */
+export type AboutStatItem = Prisma.AboutStatItemModel
+/**
+ * Model AboutValueItem
+ * 
+ */
+export type AboutValueItem = Prisma.AboutValueItemModel
+/**
+ * Model AboutTimelineItem
+ * 
+ */
+export type AboutTimelineItem = Prisma.AboutTimelineItemModel
+/**
+ * Model AboutFaqItem
+ * 
+ */
+export type AboutFaqItem = Prisma.AboutFaqItemModel
+/**
+ * Model AboutGalleryItem
+ * 
+ */
+export type AboutGalleryItem = Prisma.AboutGalleryItemModel
+/**
+ * Model AboutPerson
+ * 
+ */
+export type AboutPerson = Prisma.AboutPersonModel

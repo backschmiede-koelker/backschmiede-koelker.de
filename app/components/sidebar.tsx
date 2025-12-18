@@ -9,7 +9,7 @@ import {
   FaHouse,
   FaListUl,
   FaCalendarDays,
-  FaUser,
+  FaPeopleGroup,
   FaBriefcase,
 } from 'react-icons/fa6';
 
@@ -26,11 +26,11 @@ type NavItem = {
 };
 
 const NAV: NavItem[] = [
-  { href: '/',          label: 'Start',         sub: 'Willkommen',                 Icon: FaHouse },
-  { href: '/products',  label: 'Produkte',      sub: 'Brote · Brötchen · Kuchen', Icon: FaListUl },
-  { href: '/events',    label: 'Veranstaltungen', sub: 'Events & Termine',        Icon: FaCalendarDays },
-  { href: '/owner',     label: 'Inhaber',       sub: 'Lerne Josua kennen',        Icon: FaUser },
-  { href: '/jobs',      label: 'Jobs',          sub: 'Werde Teil des Teams',      Icon: FaBriefcase },
+  { href: '/',          label: 'Start',           sub: 'Willkommen',                Icon: FaHouse },
+  { href: '/products',  label: 'Produkte',        sub: 'Brote · Brötchen · Kuchen', Icon: FaListUl },
+  { href: '/events',    label: 'Veranstaltungen', sub: 'Events & Termine',          Icon: FaCalendarDays },
+  { href: '/about',     label: 'Über uns',        sub: 'Lerne das Team kennen',     Icon: FaPeopleGroup },
+  { href: '/jobs',      label: 'Jobs',            sub: 'Werde Teil des Teams',      Icon: FaBriefcase },
 ];
 
 function GlowTile({

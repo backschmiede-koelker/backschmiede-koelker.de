@@ -313,3 +313,145 @@ model Job {
 
   @@schema("backschmiede_koelker")
 }
+
+enum AboutSectionType {
+  HERO
+  STORY
+  VALUES
+  STATS
+  TIMELINE
+  TEAM
+  GALLERY
+  FAQ
+  CTA
+  CUSTOM_TEXT
+
+  @@schema("backschmiede_koelker")
+}
+
+enum AboutPersonKind {
+  OWNER
+  MANAGER
+  TEAM_MEMBER
+
+  @@schema("backschmiede_koelker")
+}
+
+model AboutSection {
+  id        String           @id @default(cuid())
+  type      AboutSectionType
+  slug      String           @unique
+
+  title     String?
+  subtitle  String?
+  body      String?
+  imageUrl  String?        
+
+  isActive  Boolean          @default(true)
+  sortOrder Int              @default(0)
+
+  stats     AboutStatItem[]
+  values    AboutValueItem[]
+  timeline  AboutTimelineItem[]
+  faqs      AboutFaqItem[]
+  gallery   AboutGalleryItem[]
+
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([isActive, sortOrder])
+  @@index([type])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutStatItem {
+  id        String      @id @default(cuid())
+  sectionId String
+  label     String
+  value     String
+  sortOrder Int         @default(0)
+
+  section   AboutSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutValueItem {
+  id        String      @id @default(cuid())
+  sectionId String
+  title     String
+  description String?
+  sortOrder Int         @default(0)
+
+  section   AboutSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutTimelineItem {
+  id        String      @id @default(cuid())
+  sectionId String
+  year      String
+  title     String
+  description String?
+  sortOrder Int         @default(0)
+
+  section   AboutSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutFaqItem {
+  id        String      @id @default(cuid())
+  sectionId String
+  question  String
+  answer    String
+  sortOrder Int         @default(0)
+
+  section   AboutSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutGalleryItem {
+  id        String      @id @default(cuid())
+  sectionId String
+  imageUrl  String   
+  alt       String?
+  sortOrder Int         @default(0)
+
+  section   AboutSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutPerson {
+  id              String           @id @default(cuid())
+  kind            AboutPersonKind  @default(TEAM_MEMBER)
+
+  name            String
+  roleLabel       String?
+  shortBio        String?
+  longBio         String?
+
+  avatarUrl       String?        
+  phone           String?
+  email           String?
+  instagramHandle String?
+
+  isShownOnAbout  Boolean          @default(true)
+  isShownInHero   Boolean          @default(false)
+  sortOrder       Int              @default(0)
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([isShownOnAbout, sortOrder])
+  @@index([isShownInHero])
+  @@schema("backschmiede_koelker")
+}

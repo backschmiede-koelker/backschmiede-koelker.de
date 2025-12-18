@@ -3,23 +3,24 @@ import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { v4 as uuid } from "uuid";
 
-type NextRequestWithSession = NextRequest & {
+type ReqWithAuth = NextRequest & {
   auth?: { user?: { role?: string | null } } | null;
 };
 
-export default auth((req: NextRequestWithSession) => {
+export default auth((req: ReqWithAuth) => {
   const url = req.nextUrl;
   const { pathname } = url;
 
   const base = NextResponse.next();
 
+  // sid Cookie
   const existingSid = req.cookies.get("sid")?.value;
   if (!existingSid) {
     base.cookies.set("sid", uuid(), {
       httpOnly: true,
       sameSite: "lax",
       secure: true,
-      maxAge: 60 * 60 * 24, // 24h
+      maxAge: 60 * 60 * 24,
       path: "/",
     });
   }
@@ -31,22 +32,35 @@ export default auth((req: NextRequestWithSession) => {
     return r;
   };
 
+  const isAdmin = req.auth?.user?.role === "ADMIN";
+
+  // Upload: immer Admin
   if (pathname.startsWith("/api/upload")) {
-    return req.auth?.user?.role === "ADMIN" ? base : redirectWithCookies("/login");
+    return isAdmin ? base : redirectWithCookies("/login");
   }
 
+  // Admin pages: immer Admin
   if (pathname.startsWith("/admin")) {
-    return req.auth?.user?.role === "ADMIN" ? base : redirectWithCookies("/login");
+    return isAdmin ? base : redirectWithCookies("/login");
   }
 
+  // Products / Jobs: GET öffentlich, sonst Admin
   if (pathname.startsWith("/api/products")) {
     if (req.method === "GET") return base;
-    return req.auth?.user?.role === "ADMIN" ? base : redirectWithCookies("/login");
+    return isAdmin ? base : redirectWithCookies("/login");
   }
 
   if (pathname.startsWith("/api/jobs")) {
     if (req.method === "GET") return base;
-    return req.auth?.user?.role === "ADMIN" ? base : redirectWithCookies("/login");
+    return isAdmin ? base : redirectWithCookies("/login");
+  }
+
+  // About API:
+  // - /api/about (GET) ist öffentlich
+  // - alles andere unter /api/about/* nur Admin
+  if (pathname.startsWith("/api/about")) {
+    if (pathname === "/api/about" && req.method === "GET") return base;
+    return isAdmin ? base : redirectWithCookies("/login");
   }
 
   return base;
@@ -56,5 +70,5 @@ export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|images|fonts).*)",
   ],
-  runtime: "nodejs", 
+  runtime: "nodejs",
 };

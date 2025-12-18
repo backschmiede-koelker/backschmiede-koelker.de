@@ -6,6 +6,7 @@ import {
   FaTag,
   FaChevronRight,
   FaShieldHalved,
+  FaPeopleGroup,
   FaRightFromBracket,
   FaChartLine,
   FaNewspaper,
@@ -235,6 +236,13 @@ export default function AdminHome() {
           subtitle="Aktuelles erstellen & verwalten"
           Icon={FaNewspaper}
           accent="sky"
+        />
+        <AdminTile
+          href="/admin/about"
+          title="Über uns"
+          subtitle="Inhaber, Team & Bereiche der Über-uns-Seite"
+          Icon={FaPeopleGroup}
+          accent="rose"
         />
         <AdminTile
           href="/admin/jobs"

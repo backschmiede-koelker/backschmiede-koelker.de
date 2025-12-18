@@ -8,7 +8,7 @@ export const KNOWN_PAGES: KnownPage[] = [
   { label: "Produkte", href: "/products" },
   { label: "Events", href: "/events" },
   { label: "Jobs", href: "/jobs" },
-  { label: "Inhaber", href: "/owner" },
+  { label: "Über uns", href: "/about" },
   { label: "Impressum", href: "/imprint" },
   { label: "Datenschutz", href: "/privacy" },
 ];

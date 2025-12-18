@@ -88,3 +88,28 @@ export const JobSalaryUnit = {
 } as const
 
 export type JobSalaryUnit = (typeof JobSalaryUnit)[keyof typeof JobSalaryUnit]
+
+
+export const AboutSectionType = {
+  HERO: 'HERO',
+  STORY: 'STORY',
+  VALUES: 'VALUES',
+  STATS: 'STATS',
+  TIMELINE: 'TIMELINE',
+  TEAM: 'TEAM',
+  GALLERY: 'GALLERY',
+  FAQ: 'FAQ',
+  CTA: 'CTA',
+  CUSTOM_TEXT: 'CUSTOM_TEXT'
+} as const
+
+export type AboutSectionType = (typeof AboutSectionType)[keyof typeof AboutSectionType]
+
+
+export const AboutPersonKind = {
+  OWNER: 'OWNER',
+  MANAGER: 'MANAGER',
+  TEAM_MEMBER: 'TEAM_MEMBER'
+} as const
+
+export type AboutPersonKind = (typeof AboutPersonKind)[keyof typeof AboutPersonKind]

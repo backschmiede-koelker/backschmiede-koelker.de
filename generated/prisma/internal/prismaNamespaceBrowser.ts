@@ -61,7 +61,14 @@ export const ModelName = {
   ContentBlock: 'ContentBlock',
   Pageview: 'Pageview',
   News: 'News',
-  Job: 'Job'
+  Job: 'Job',
+  AboutSection: 'AboutSection',
+  AboutStatItem: 'AboutStatItem',
+  AboutValueItem: 'AboutValueItem',
+  AboutTimelineItem: 'AboutTimelineItem',
+  AboutFaqItem: 'AboutFaqItem',
+  AboutGalleryItem: 'AboutGalleryItem',
+  AboutPerson: 'AboutPerson'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -259,6 +266,100 @@ export const JobScalarFieldEnum = {
 } as const
 
 export type JobScalarFieldEnum = (typeof JobScalarFieldEnum)[keyof typeof JobScalarFieldEnum]
+
+
+export const AboutSectionScalarFieldEnum = {
+  id: 'id',
+  type: 'type',
+  slug: 'slug',
+  title: 'title',
+  subtitle: 'subtitle',
+  body: 'body',
+  imageUrl: 'imageUrl',
+  isActive: 'isActive',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AboutSectionScalarFieldEnum = (typeof AboutSectionScalarFieldEnum)[keyof typeof AboutSectionScalarFieldEnum]
+
+
+export const AboutStatItemScalarFieldEnum = {
+  id: 'id',
+  sectionId: 'sectionId',
+  label: 'label',
+  value: 'value',
+  sortOrder: 'sortOrder'
+} as const
+
+export type AboutStatItemScalarFieldEnum = (typeof AboutStatItemScalarFieldEnum)[keyof typeof AboutStatItemScalarFieldEnum]
+
+
+export const AboutValueItemScalarFieldEnum = {
+  id: 'id',
+  sectionId: 'sectionId',
+  title: 'title',
+  description: 'description',
+  sortOrder: 'sortOrder'
+} as const
+
+export type AboutValueItemScalarFieldEnum = (typeof AboutValueItemScalarFieldEnum)[keyof typeof AboutValueItemScalarFieldEnum]
+
+
+export const AboutTimelineItemScalarFieldEnum = {
+  id: 'id',
+  sectionId: 'sectionId',
+  year: 'year',
+  title: 'title',
+  description: 'description',
+  sortOrder: 'sortOrder'
+} as const
+
+export type AboutTimelineItemScalarFieldEnum = (typeof AboutTimelineItemScalarFieldEnum)[keyof typeof AboutTimelineItemScalarFieldEnum]
+
+
+export const AboutFaqItemScalarFieldEnum = {
+  id: 'id',
+  sectionId: 'sectionId',
+  question: 'question',
+  answer: 'answer',
+  sortOrder: 'sortOrder'
+} as const
+
+export type AboutFaqItemScalarFieldEnum = (typeof AboutFaqItemScalarFieldEnum)[keyof typeof AboutFaqItemScalarFieldEnum]
+
+
+export const AboutGalleryItemScalarFieldEnum = {
+  id: 'id',
+  sectionId: 'sectionId',
+  imageUrl: 'imageUrl',
+  alt: 'alt',
+  sortOrder: 'sortOrder'
+} as const
+
+export type AboutGalleryItemScalarFieldEnum = (typeof AboutGalleryItemScalarFieldEnum)[keyof typeof AboutGalleryItemScalarFieldEnum]
+
+
+export const AboutPersonScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  name: 'name',
+  roleLabel: 'roleLabel',
+  shortBio: 'shortBio',
+  longBio: 'longBio',
+  avatarUrl: 'avatarUrl',
+  phone: 'phone',
+  email: 'email',
+  instagramHandle: 'instagramHandle',
+  isShownOnAbout: 'isShownOnAbout',
+  isShownInHero: 'isShownInHero',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AboutPersonScalarFieldEnum = (typeof AboutPersonScalarFieldEnum)[keyof typeof AboutPersonScalarFieldEnum]
 
 
 export const SortOrder = {
