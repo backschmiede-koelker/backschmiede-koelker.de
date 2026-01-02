@@ -3,7 +3,6 @@ import type { AboutSectionDTO, AboutPersonDTO } from "../types";
 
 export const SECTION_TYPE_OPTIONS = [
   { value: "HERO", label: "Hero (Startbereich)" },
-  { value: "STORY", label: "Text-Block" },
   { value: "CUSTOM_TEXT", label: "Text (frei)" },
   { value: "VALUES", label: "Unsere Werte" },
   { value: "STATS", label: "Zahlen / Stats" },

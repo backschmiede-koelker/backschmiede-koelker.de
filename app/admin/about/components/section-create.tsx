@@ -11,9 +11,7 @@ import OptionSelect from "./option-select";
 type SectionType = AboutSectionDTO["type"];
 
 const TYPE_OPTIONS = [
-  { value: "STORY", label: "Text-Block", singleton: false },
   { value: "CUSTOM_TEXT", label: "Text (frei)", singleton: false },
-
   { value: "VALUES", label: "Unsere Werte", singleton: true },
   { value: "STATS", label: "Zahlen / Stats", singleton: true },
   { value: "TIMELINE", label: "Timeline / Meilensteine", singleton: true },
@@ -37,7 +35,7 @@ export default function SectionCreate({
   onCreated: (created: AboutSectionDTO) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [type, setType] = useState<SectionType>("STORY");
+  const [type, setType] = useState<SectionType>("CUSTOM_TEXT");
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [body, setBody] = useState("");

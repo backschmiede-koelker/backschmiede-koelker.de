@@ -15,8 +15,6 @@ import GalleryEditor from "./items/gallery-editor";
 
 function typeLabel(t: AboutSectionDTO["type"]) {
   switch (t) {
-    case "STORY":
-      return "Text-Block";
     case "CUSTOM_TEXT":
       return "Text (frei)";
     case "VALUES":

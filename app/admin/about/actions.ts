@@ -18,7 +18,6 @@ async function adminGuard() {
 
 type SectionType =
   | "HERO"
-  | "STORY"
   | "VALUES"
   | "STATS"
   | "TIMELINE"

@@ -92,7 +92,6 @@ export type JobSalaryUnit = (typeof JobSalaryUnit)[keyof typeof JobSalaryUnit]
 
 export const AboutSectionType = {
   HERO: 'HERO',
-  STORY: 'STORY',
   VALUES: 'VALUES',
   STATS: 'STATS',
   TIMELINE: 'TIMELINE',

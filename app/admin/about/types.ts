@@ -3,7 +3,6 @@ import type { Prisma } from "@/generated/prisma/client";
 
 export type AboutSectionType =
   | "HERO"
-  | "STORY"
   | "VALUES"
   | "STATS"
   | "TIMELINE"

@@ -316,7 +316,6 @@ model Job {
 
 enum AboutSectionType {
   HERO
-  STORY
   VALUES
   STATS
   TIMELINE

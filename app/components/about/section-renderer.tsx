@@ -22,7 +22,6 @@ export default function AboutSectionRenderer({ section, persons }: Props) {
       return <AboutHeroSection section={section} persons={persons} />;
     case "STATS":
       return <AboutStatsSection section={section} />;
-    case "STORY":
     case "CUSTOM_TEXT":
       return <AboutTextSection section={section} />;
     case "VALUES":
