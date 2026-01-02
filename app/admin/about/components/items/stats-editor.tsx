@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { AboutSectionDTO } from "../../types";
 import { Button, TextInput } from "../inputs";
 import DeleteButton from "../delete-button";
-import { createStat, deleteStat, updateStat, updateSection } from "../../actions";
+import { createStat, deleteStat, updateStat, getSectionById } from "../../actions";
 
 export default function StatsEditor({
   section,
@@ -20,19 +20,7 @@ export default function StatsEditor({
   const [busy, setBusy] = useState(false);
 
   async function refreshSection() {
-    // quickest: section neu laden via updateSection mit aktuellen Werten (no-op),
-    // damit include-lists wieder korrekt kommen.
-    const next = await updateSection({
-      id: section.id,
-      type: section.type,
-      slug: section.slug,
-      title: section.title ?? null,
-      subtitle: section.subtitle ?? null,
-      body: section.body ?? null,
-      imageUrl: section.imageUrl ?? null,
-      isActive: section.isActive,
-      sortOrder: section.sortOrder,
-    });
+    const next = await getSectionById(section.id);
     onUpdated(next);
   }
 

@@ -52,10 +52,26 @@ export function Button({
 }) {
   const cls =
     variant === "primary"
-      ? "rounded-xl bg-emerald-600 px-3 py-2 text-sm text-white shadow hover:bg-emerald-700 disabled:opacity-60"
+      ? `
+        rounded-xl bg-emerald-600 px-3 py-2 text-sm text-white shadow-sm
+        hover:bg-emerald-700 active:scale-[0.99]
+        dark:bg-emerald-500/90 dark:hover:bg-emerald-500
+        disabled:opacity-60 disabled:cursor-not-allowed
+      `
       : variant === "danger"
-      ? "rounded-xl border border-red-500/30 px-3 py-2 text-sm text-red-700 hover:bg-red-50 dark:text-red-200 dark:hover:bg-red-950/30 disabled:opacity-60"
-      : "rounded-xl border border-zinc-200 dark:border-zinc-800 px-3 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/50 disabled:opacity-60";
+      ? `
+        rounded-xl border border-red-500/40 px-3 py-2 text-sm text-red-700
+        hover:bg-red-50 active:scale-[0.99]
+        dark:text-red-200 dark:border-red-500/30 dark:hover:bg-red-950/40
+        disabled:opacity-60 disabled:cursor-not-allowed
+      `
+      : `
+        rounded-xl border border-zinc-300/80 bg-white/70 px-3 py-2 text-sm text-zinc-900 shadow-sm
+        hover:bg-zinc-50 hover:border-zinc-400/80 active:scale-[0.99]
+        dark:border-zinc-700/80 dark:bg-zinc-900/60 dark:text-zinc-100
+        dark:hover:bg-zinc-800/70 dark:hover:border-zinc-600/90
+        disabled:opacity-60 disabled:cursor-not-allowed
+      `;
 
   return (
     <button type={type} onClick={onClick} disabled={disabled} className={cls}>

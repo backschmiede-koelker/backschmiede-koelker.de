@@ -5,7 +5,7 @@ import { useState } from "react";
 import type { AboutSectionDTO } from "../../types";
 import { Button, TextInput } from "../inputs";
 import DeleteButton from "../delete-button";
-import { createFaq, deleteFaq, updateFaq, updateSection } from "../../actions";
+import { createFaq, deleteFaq, updateFaq, getSectionById } from "../../actions";
 
 export default function FaqEditor({
   section,
@@ -20,17 +20,7 @@ export default function FaqEditor({
   const [busy, setBusy] = useState(false);
 
   async function refreshSection() {
-    const next = await updateSection({
-      id: section.id,
-      type: section.type,
-      slug: section.slug,
-      title: section.title ?? null,
-      subtitle: section.subtitle ?? null,
-      body: section.body ?? null,
-      imageUrl: section.imageUrl ?? null,
-      isActive: section.isActive,
-      sortOrder: section.sortOrder,
-    });
+    const next = await getSectionById(section.id);
     onUpdated(next);
   }
 

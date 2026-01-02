@@ -3,6 +3,19 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import AboutView from "./about-view";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Admin - Über uns | Backschmiede Kölker",
+  description: "Beschreibe hier die verschiedenen Abschnitte der 'Über uns'-Seite.",
+  alternates: { canonical: "/admin/about" },
+  openGraph: {
+    title: "Admin - Über uns | Backschmiede Kölker",
+    description: "Beschreibe hier die verschiedenen Abschnitte der 'Über uns'-Seite.",
+    url: "/admin/about",
+    type: "website",
+  },
+};
 
 type SessionLike = { user?: { role?: string | null } | null } | null | undefined;
 
@@ -35,7 +48,7 @@ async function ensureHero() {
 async function getData() {
   const [sections, people] = await Promise.all([
     prisma.aboutSection.findMany({
-      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
       include: {
         stats: { orderBy: { sortOrder: "asc" } },
         values: { orderBy: { sortOrder: "asc" } },
@@ -44,7 +57,13 @@ async function getData() {
         gallery: { orderBy: { sortOrder: "asc" } },
       },
     }),
-    prisma.aboutPerson.findMany({ orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }] }),
+    prisma.aboutPerson.findMany({
+      orderBy: [
+        { sortOrder: "desc" },
+        { name: "asc" },
+        { id: "asc" },
+      ],
+    }),
   ]);
 
   return { sections, people };

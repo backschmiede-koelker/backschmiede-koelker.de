@@ -6,7 +6,7 @@ import type { AboutSectionDTO } from "../../types";
 import { Button, TextInput } from "../inputs";
 import DeleteButton from "../delete-button";
 import ImageUploader from "@/app/components/image-uploader";
-import { createGallery, deleteGallery, updateGallery, updateSection } from "../../actions";
+import { createGallery, deleteGallery, updateGallery, getSectionById } from "../../actions";
 
 export default function GalleryEditor({
   section,
@@ -21,17 +21,7 @@ export default function GalleryEditor({
   const [busy, setBusy] = useState(false);
 
   async function refreshSection() {
-    const next = await updateSection({
-      id: section.id,
-      type: section.type,
-      slug: section.slug,
-      title: section.title ?? null,
-      subtitle: section.subtitle ?? null,
-      body: section.body ?? null,
-      imageUrl: section.imageUrl ?? null,
-      isActive: section.isActive,
-      sortOrder: section.sortOrder,
-    });
+    const next = await getSectionById(section.id);
     onUpdated(next);
   }
 

@@ -2,32 +2,43 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { AboutSectionDTO, AboutSectionType } from "../types";
+import type { AboutSectionDTO } from "../types";
 import ImageUploader from "@/app/components/image-uploader";
-import SelectBox from "@/app/components/select-box";
 import { Button, Checkbox, TextArea, TextInput } from "./inputs";
 import DeleteButton from "./delete-button";
-import {
-  deleteSection,
-  updateSection,
-} from "../actions";
+import { deleteSection, updateSection } from "../actions";
 import StatsEditor from "./items/stats-editor";
 import ValuesEditor from "./items/values-editor";
 import TimelineEditor from "./items/timeline-editor";
 import FaqEditor from "./items/faq-editor";
 import GalleryEditor from "./items/gallery-editor";
 
-const TYPES: AboutSectionType[] = [
-  "STORY",
-  "VALUES",
-  "STATS",
-  "TIMELINE",
-  "TEAM",
-  "GALLERY",
-  "FAQ",
-  "CTA",
-  "CUSTOM_TEXT",
-];
+function typeLabel(t: AboutSectionDTO["type"]) {
+  switch (t) {
+    case "STORY":
+      return "Text-Block";
+    case "CUSTOM_TEXT":
+      return "Text (frei)";
+    case "VALUES":
+      return "Unsere Werte";
+    case "STATS":
+      return "Zahlen / Stats";
+    case "TIMELINE":
+      return "Timeline / Meilensteine";
+    case "GALLERY":
+      return "Galerie";
+    case "FAQ":
+      return "FAQ";
+    case "CTA":
+      return "Call-to-Action";
+    case "TEAM":
+      return "Team-Bereich";
+    case "HERO":
+      return "Hero";
+    default:
+      return t;
+  }
+}
 
 export default function SectionEditor({
   section,
@@ -42,8 +53,6 @@ export default function SectionEditor({
 }) {
   const [draft, setDraft] = useState(() => ({
     id: section.id,
-    type: section.type,
-    slug: section.slug,
     title: section.title ?? "",
     subtitle: section.subtitle ?? "",
     body: section.body ?? "",
@@ -54,6 +63,7 @@ export default function SectionEditor({
 
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [open, setOpen] = useState(false); 
 
   const itemBlock = useMemo(() => {
     if (section.type === "STATS") return <StatsEditor section={section} onUpdated={onUpdated} />;
@@ -65,12 +75,23 @@ export default function SectionEditor({
   }, [section, onUpdated]);
 
   return (
-    <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-white/5 p-4 space-y-4">
+    <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-white/5 p-4">
+      {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-xs opacity-70">{section.type} · {section.slug}</div>
-          <div className="font-semibold truncate">{section.title || "—"}</div>
-        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="min-w-0 text-left"
+        >
+          <div className="text-xs opacity-70">{typeLabel(section.type)}</div>
+          <div className="font-semibold truncate">
+            {draft.title || "—"}{" "}
+            <span className="text-xs font-normal opacity-60">
+              {open ? "• geöffnet" : "• zugeklappt"}
+            </span>
+          </div>
+        </button>
+
         <div className="flex items-center gap-2">
           <Button
             disabled={saving}
@@ -80,8 +101,6 @@ export default function SectionEditor({
               try {
                 const next = await updateSection({
                   id: draft.id,
-                  type: draft.type,
-                  slug: draft.slug,
                   title: draft.title || null,
                   subtitle: draft.subtitle || null,
                   body: draft.body || null,
@@ -100,6 +119,10 @@ export default function SectionEditor({
             {saving ? "Speichert…" : "Speichern"}
           </Button>
 
+          <Button variant="ghost" onClick={() => setOpen((o) => !o)}>
+            {open ? "Schließen" : "Öffnen"}
+          </Button>
+
           {canDelete && (
             <DeleteButton
               confirmText="Bereich wirklich löschen?"
@@ -112,72 +135,97 @@ export default function SectionEditor({
         </div>
       </div>
 
+      {/* ERROR */}
       {err && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
+        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
           {err}
         </div>
       )}
 
-      <div className="grid gap-3 md:grid-cols-3">
-        <div className="md:col-span-1">
-          <div className="text-xs font-medium mb-1">Typ</div>
-          <SelectBox
-            value={draft.type}
-            onChange={(v) => setDraft((d) => ({ ...d, type: v as any }))}
-            options={TYPES}
-          />
+      {/* COLLAPSED SUMMARY */}
+      {!open && (
+        <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400 space-y-1">
+          {draft.subtitle ? <div className="truncate">{draft.subtitle}</div> : null}
+          {draft.body ? <div className="line-clamp-2">{draft.body}</div> : null}
         </div>
+      )}
 
-        <div className="md:col-span-1">
-          <div className="text-xs font-medium mb-1">Slug</div>
-          <TextInput value={draft.slug} onChange={(e) => setDraft((d) => ({ ...d, slug: e.target.value }))} />
-        </div>
+      {/* BODY (nur wenn open) */}
+      {open && (
+        <div className="mt-4 space-y-4">
+          <div className="grid gap-3 md:grid-cols-3">
+            <div>
+              <div className="text-xs font-medium mb-1">
+                Sortierung <span className="text-zinc-500">(optional)</span>
+              </div>
+              <TextInput
+                type="number"
+                value={String(draft.sortOrder)}
+                onChange={(e) =>
+                  setDraft((d) => ({ ...d, sortOrder: Number(e.target.value) }))
+                }
+              />
+            </div>
 
-        <div className="md:col-span-1">
-          <div className="text-xs font-medium mb-1">SortOrder</div>
-          <TextInput
-            type="number"
-            value={String(draft.sortOrder)}
-            onChange={(e) => setDraft((d) => ({ ...d, sortOrder: Number(e.target.value) }))}
-          />
-        </div>
+            <div className="md:col-span-2 flex items-end">
+              <Checkbox
+                checked={draft.isActive}
+                onChange={(v) => setDraft((d) => ({ ...d, isActive: v }))}
+                label="Aktiv"
+              />
+            </div>
 
-        <div className="md:col-span-2">
-          <div className="text-xs font-medium mb-1">Titel</div>
-          <TextInput value={draft.title} onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))} />
-        </div>
+            <div className="md:col-span-3">
+              <div className="text-xs font-medium mb-1">
+                Titel <span className="text-zinc-500">(optional)</span>
+              </div>
+              <TextInput
+                value={draft.title}
+                onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
+              />
+            </div>
 
-        <div className="md:col-span-1 flex items-end">
-          <Checkbox
-            checked={draft.isActive}
-            onChange={(v) => setDraft((d) => ({ ...d, isActive: v }))}
-            label="Aktiv"
-          />
-        </div>
+            <div className="md:col-span-3">
+              <div className="text-xs font-medium mb-1">
+                Untertitel <span className="text-zinc-500">(optional)</span>
+              </div>
+              <TextInput
+                value={draft.subtitle}
+                onChange={(e) =>
+                  setDraft((d) => ({ ...d, subtitle: e.target.value }))
+                }
+              />
+            </div>
 
-        <div className="md:col-span-3">
-          <div className="text-xs font-medium mb-1">Untertitel</div>
-          <TextInput value={draft.subtitle} onChange={(e) => setDraft((d) => ({ ...d, subtitle: e.target.value }))} />
-        </div>
+            <div className="md:col-span-3">
+              <div className="text-xs font-medium mb-1">
+                Text / Inhalt <span className="text-zinc-500">(optional)</span>
+              </div>
+              <TextArea
+                value={draft.body}
+                onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
+              />
+            </div>
 
-        <div className="md:col-span-3">
-          <div className="text-xs font-medium mb-1">Body</div>
-          <TextArea value={draft.body} onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))} />
-        </div>
+            <div className="md:col-span-3">
+              <div className="text-xs font-medium mb-2">
+                Bild <span className="text-zinc-500">(optional)</span>
+              </div>
+              <ImageUploader
+                folder="about"
+                imageUrl={draft.imageUrl}
+                onChange={(storedOrEmpty) =>
+                  setDraft((d) => ({ ...d, imageUrl: storedOrEmpty }))
+                }
+              />
+            </div>
+          </div>
 
-        <div className="md:col-span-3">
-          <div className="text-xs font-medium mb-2">Bild</div>
-          <ImageUploader
-            folder="about"
-            imageUrl={draft.imageUrl}
-            onChange={(storedOrEmpty) => setDraft((d) => ({ ...d, imageUrl: storedOrEmpty }))}
-          />
-        </div>
-      </div>
-
-      {itemBlock && (
-        <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-3">
-          {itemBlock}
+          {itemBlock && (
+            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-3">
+              {itemBlock}
+            </div>
+          )}
         </div>
       )}
     </div>

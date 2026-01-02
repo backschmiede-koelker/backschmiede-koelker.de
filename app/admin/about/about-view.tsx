@@ -2,11 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type {
-  AboutPersonDTO,
-  AboutSectionDTO,
-  AboutSectionType,
-} from "./types";
+import type { AboutPersonDTO, AboutSectionDTO } from "./types";
 import AdminHeader from "./components/admin-header";
 import SectionBox from "./components/section-box";
 import HeroEditor from "./components/hero-editor";
@@ -24,96 +20,90 @@ export default function AboutView({
   const [sections, setSections] = useState<AboutSectionDTO[]>(initialSections);
   const [people, setPeople] = useState<AboutPersonDTO[]>(initialPeople);
 
-  const hero = useMemo(
-    () => sections.find((s) => s.type === "HERO"),
+  const hero = useMemo(() => sections.find((s) => s.type === "HERO"), [sections]);
+  const teamSection = useMemo(() => sections.find((s) => s.type === "TEAM"), [sections]);
+
+  const editableSections = useMemo(
+    () => sections.filter((s) => s.type !== "HERO" && s.type !== "TEAM"),
     [sections]
-  );
-
-  const otherSections = useMemo(
-    () => sections.filter((s) => s.type !== "HERO"),
-    [sections]
-  );
-
-  const countsByType = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const s of otherSections) m.set(s.type, (m.get(s.type) ?? 0) + 1);
-    return m;
-  }, [otherSections]);
-
-  // Typen, die i.d.R. nur 1x Sinn machen (du kannst die Liste jederzeit erweitern).
-  const uniqueTypes = useMemo<Set<AboutSectionType>>(
-    () => new Set(["VALUES", "STATS", "TIMELINE", "TEAM", "GALLERY", "FAQ"] as any),
-    []
   );
 
   return (
     <main className="mx-auto w-full max-w-6xl px-3.5 sm:px-6 md:px-8 py-6 md:py-10 min-w-0 space-y-8">
       <AdminHeader
         title="Über uns"
-        subtitle="Hero ist fest (genau 1x). Weitere Bereiche + Personen/Team verwalten."
+        subtitle="Beschreibe hier die verschiedenen Abschnitte der 'Über uns'-Seite."
       />
 
-      {/* HERO (immer vorhanden, nicht löschbar, nicht erstellbar) */}
-      <SectionBox title="Hero (immer genau 1)">
+      <SectionBox
+        title="Hero Bereich"
+        collapsible
+        defaultOpen={false}
+        summary={
+          hero ? (
+            <div className="text-sm text-zinc-600 dark:text-zinc-400">
+              <div className="font-medium text-zinc-900 dark:text-zinc-100">
+                {hero.title || "—"}
+              </div>
+              <div className="truncate">{hero.subtitle || "—"}</div>
+            </div>
+          ) : null
+        }
+      >
         {hero ? (
           <HeroEditor
             section={hero}
-            onUpdated={(next) =>
-              setSections((prev) => prev.map((s) => (s.id === next.id ? next : s)))
-            }
+            onUpdated={(next) => setSections((prev) => prev.map((s) => (s.id === next.id ? next : s)))}
           />
         ) : (
           <div className="text-sm text-zinc-600 dark:text-zinc-400">
-            Hero wird beim Laden automatisch angelegt. Reload, falls er hier gerade fehlt.
+            Hero wird beim Laden automatisch angelegt. Reload, falls er fehlt.
           </div>
         )}
       </SectionBox>
 
-      {/* SECTIONS */}
-      <SectionBox
-        title="Bereiche"
-        right={
-          <div className="text-xs text-zinc-600 dark:text-zinc-400">
-            Reihenfolge über „SortOrder“ (kleiner = weiter oben)
-          </div>
-        }
-      >
+      <SectionBox title="Bereiche">
         <div className="space-y-5">
           <SectionCreate
-            sections={otherSections}
-            countsByType={countsByType}
-            uniqueTypes={uniqueTypes}
+            sections={editableSections}
             onCreated={(created) => setSections((prev) => [...prev, created])}
           />
 
-          <div className="space-y-4">
-            {otherSections.map((s) => (
-              <SectionEditor
-                key={s.id}
-                section={s}
-                canDelete={s.type !== "HERO"}
-                onUpdated={(next) =>
-                  setSections((prev) => prev.map((x) => (x.id === next.id ? next : x)))
-                }
-                onDeleted={() =>
-                  setSections((prev) => prev.filter((x) => x.id !== s.id))
-                }
-              />
-            ))}
-            {otherSections.length === 0 && (
-              <div className="text-sm text-zinc-600 dark:text-zinc-400">
-                Noch keine Bereiche (außer Hero).
-              </div>
-            )}
+          <div className="rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 overflow-hidden bg-white/60 dark:bg-zinc-950/30">
+            <div className="divide-y divide-zinc-200/70 dark:divide-zinc-800/80">
+              {editableSections.map((s) => (
+                <div key={s.id} className="p-4">
+                  <SectionEditor
+                    section={s}
+                    canDelete={true}
+                    onUpdated={(next) =>
+                      setSections((prev) => prev.map((x) => (x.id === next.id ? next : x)))
+                    }
+                    onDeleted={() => setSections((prev) => prev.filter((x) => x.id !== s.id))}
+                  />
+                </div>
+              ))}
+              {editableSections.length === 0 && (
+                <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">
+                  Noch keine Bereiche.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </SectionBox>
 
-      {/* PEOPLE */}
       <SectionBox title="Personen & Team">
         <PeopleEditor
           people={people}
-          onChange={(next) => setPeople(next)}
+          teamSection={teamSection ?? null}
+          onTeamSectionChange={(nextTeamOrNull) => {
+            setSections((prev) => {
+              const without = prev.filter((s) => s.type !== "TEAM");
+              return nextTeamOrNull ? [...without, nextTeamOrNull] : without;
+            });
+          }}
+          onChange={(nextPeople) => setPeople(nextPeople)}
         />
       </SectionBox>
     </main>

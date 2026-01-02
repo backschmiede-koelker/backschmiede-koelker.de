@@ -20,7 +20,6 @@ export default function HeroEditor({
     subtitle: section.subtitle ?? "",
     body: section.body ?? "",
     imageUrl: section.imageUrl ?? "",
-    isActive: !!section.isActive,
     sortOrder: section.sortOrder ?? -1000,
   }));
 
@@ -34,7 +33,6 @@ export default function HeroEditor({
           {err}
         </div>
       )}
-
       <div className="grid gap-3 md:grid-cols-2">
         <div>
           <div className="text-xs font-medium mb-1">Titel</div>
@@ -74,22 +72,7 @@ export default function HeroEditor({
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-4">
-          <Checkbox
-            checked={draft.isActive}
-            onChange={(v) => setDraft((d) => ({ ...d, isActive: v }))}
-            label="Aktiv"
-          />
-          <div className="flex items-center gap-2">
-            <span className="text-xs opacity-70">SortOrder</span>
-            <TextInput
-              className="w-28"
-              type="number"
-              value={String(draft.sortOrder)}
-              onChange={(e) => setDraft((d) => ({ ...d, sortOrder: Number(e.target.value) }))}
-            />
-          </div>
-        </div>
+        <div className="flex flex-wrap items-center gap-4"></div>
 
         <div className="flex items-center justify-end">
           <Button
@@ -104,7 +87,6 @@ export default function HeroEditor({
                   subtitle: draft.subtitle || null,
                   body: draft.body || null,
                   imageUrl: draft.imageUrl || null,
-                  isActive: draft.isActive,
                   sortOrder: draft.sortOrder,
                 });
                 onUpdated(next);

@@ -18,8 +18,12 @@ export async function GET() {
     }),
     prisma.aboutPerson.findMany({
       where: { isShownOnAbout: true },
-      orderBy: { sortOrder: "asc" },
-    }),
+      orderBy: [
+        { sortOrder: "desc" },
+        { name: "asc" },
+        { id: "asc" },
+      ],
+    })
   ]);
 
   const mappedSections = sections.map((s) => ({
@@ -30,7 +34,7 @@ export async function GET() {
 
   const mappedPeople = people.map((p) => ({
     ...p,
-    avatarUrl: toAbsoluteAssetUrlServer(p.avatarUrl),
+    avatarUrl: p.avatarUrl ? toAbsoluteAssetUrlServer(p.avatarUrl) : null,
   }));
 
   return NextResponse.json({ sections: mappedSections, people: mappedPeople });
