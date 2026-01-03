@@ -152,19 +152,6 @@ export default function SectionEditor({
       {open && (
         <div className="mt-4 space-y-4">
           <div className="grid gap-3 md:grid-cols-3">
-            <div>
-              <div className="text-xs font-medium mb-1">
-                Sortierung <span className="text-zinc-500">(optional)</span>
-              </div>
-              <TextInput
-                type="number"
-                value={String(draft.sortOrder)}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, sortOrder: Number(e.target.value) }))
-                }
-              />
-            </div>
-
             <div className="md:col-span-2 flex items-end">
               <Checkbox
                 checked={draft.isActive}

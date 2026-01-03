@@ -355,3 +355,52 @@ export async function deletePerson(id: string) {
   await prisma.aboutPerson.delete({ where: { id } });
   return { ok: true };
 }
+
+export async function reorderMiddleSections(input: { idsInOrder: string[] }) {
+  await adminGuard();
+
+  const ids = Array.from(new Set(input.idsInOrder)).filter(Boolean);
+  if (ids.length === 0) return { ok: true };
+
+  // Nur "mittlere" Bereiche dürfen reorderbar sein
+  const rows = await prisma.aboutSection.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, type: true },
+  });
+
+  const forbidden = rows.filter((r) => r.type === ("HERO" as any) || r.type === ("TEAM" as any));
+  if (forbidden.length) {
+    throw new Error("HERO/TEAM dürfen nicht umsortiert werden.");
+  }
+
+  // Sicherstellen, dass alle IDs wirklich existieren
+  const foundIds = new Set(rows.map((r) => r.id));
+  const missing = ids.filter((id) => !foundIds.has(id));
+  if (missing.length) {
+    throw new Error("Mindestens ein Bereich existiert nicht (mehr).");
+  }
+
+  // Stabil neu nummerieren: 0, 10, 20, ...
+  await prisma.$transaction(async (tx) => {
+    for (let i = 0; i < ids.length; i++) {
+      await tx.aboutSection.update({
+        where: { id: ids[i] },
+        data: { sortOrder: i * 10 },
+      });
+    }
+  });
+
+  // Aktualisierte Sections inkl. Items zurückgeben (damit Client State sauber wird)
+  const updated = await prisma.aboutSection.findMany({
+    orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+    include: {
+      stats: { orderBy: { sortOrder: "asc" } },
+      values: { orderBy: { sortOrder: "asc" } },
+      timeline: { orderBy: { sortOrder: "asc" } },
+      faqs: { orderBy: { sortOrder: "asc" } },
+      gallery: { orderBy: { sortOrder: "asc" } },
+    },
+  });
+
+  return { ok: true, sections: updated as any };
+}

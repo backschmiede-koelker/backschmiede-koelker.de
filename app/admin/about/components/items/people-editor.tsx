@@ -15,6 +15,18 @@ import {
   updateSection,
 } from "../../actions";
 import { PERSON_KIND_OPTIONS } from "../options";
+import { useSortableList } from "../dnd/useSortableList";
+import { GripVertical, ArrowUp, ArrowDown, Users } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+
+type Kind = "OWNER" | "MANAGER" | "TEAM_MEMBER";
+
+function isLead(kind: unknown) {
+  return kind === "OWNER" || kind === "MANAGER";
+}
+function isStaff(kind: unknown) {
+  return kind === "TEAM_MEMBER";
+}
 
 export default function PeopleEditor({
   people,
@@ -30,31 +42,99 @@ export default function PeopleEditor({
 }) {
   const [createOpen, setCreateOpen] = useState(false);
   const [teamOpen, setTeamOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const { lead, staff } = useMemo(() => {
-    const norm = (s: unknown) => String(s ?? "").trim().toLowerCase();
-    const aNum = (n: any) => (Number.isFinite(n) ? n : 0);
+    const aNum = (n: any) => (Number.isFinite(n) ? (n as number) : 0);
 
-    const bySortThenName = (a: AboutPersonDTO, b: AboutPersonDTO) => {
-      const sa = aNum((a as any).sortOrder);
-      const sb = aNum((b as any).sortOrder);
-      if (sb !== sa) return sb - sa; // DESC (höher = weiter oben)
-      const na = norm(a.name);
-      const nb = norm(b.name);
-      if (na < nb) return -1;
-      if (na > nb) return 1;
-      return String(a.id).localeCompare(String(b.id));
-    };
+    const bySort = (a: AboutPersonDTO, b: AboutPersonDTO) =>
+      aNum((a as any).sortOrder) - aNum((b as any).sortOrder) ||
+      String(a.id).localeCompare(String(b.id));
 
-    const sortedAll = [...people].sort(bySortThenName);
-
-    const lead = sortedAll.filter((p) => p.kind === "OWNER" || p.kind === "MANAGER");
-    const staff = sortedAll.filter((p) => p.kind === "TEAM_MEMBER");
+    const lead = people.filter((p) => isLead(p.kind)).slice().sort(bySort);
+    const staff = people.filter((p) => isStaff(p.kind)).slice().sort(bySort);
 
     return { lead, staff };
   }, [people]);
 
   const total = lead.length + staff.length;
+
+  async function persistGroupOrder(nextLocal: AboutPersonDTO[], _group: "lead" | "staff") {
+    setBusy(true);
+    try {
+      await Promise.all(
+        nextLocal.map((p, i) =>
+          updatePerson({
+            id: p.id,
+            kind: String(p.kind),
+            name: p.name,
+            roleLabel: p.roleLabel ?? null,
+            shortBio: p.shortBio ?? null,
+            longBio: p.longBio ?? null,
+            avatarUrl: p.avatarUrl ?? null,
+            email: p.email ?? null,
+            phone: p.phone ?? null,
+            instagramHandle: p.instagramHandle ?? null,
+            isShownOnAbout: !!p.isShownOnAbout,
+            sortOrder: i,
+          })
+        )
+      );
+
+      const ids = new Set(nextLocal.map((x) => x.id));
+      const nextPeople = people.map((p) => {
+        if (!ids.has(p.id)) return p;
+        const idx = nextLocal.findIndex((x) => x.id === p.id);
+        return { ...p, sortOrder: idx };
+      });
+
+      onChange(nextPeople);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const leadSortable = useSortableList({
+    items: lead,
+    onReorderPersist: async (next) => {
+      const idToIndex = new Map(next.map((n: any) => [n.id, n.sortOrder]));
+      const nextLocal = lead
+        .slice()
+        .sort((a, b) => (idToIndex.get(a.id) ?? 0) - (idToIndex.get(b.id) ?? 0));
+      await persistGroupOrder(nextLocal, "lead");
+    },
+  });
+
+  const staffSortable = useSortableList({
+    items: staff,
+    onReorderPersist: async (next) => {
+      const idToIndex = new Map(next.map((n: any) => [n.id, n.sortOrder]));
+      const nextLocal = staff
+        .slice()
+        .sort((a, b) => (idToIndex.get(a.id) ?? 0) - (idToIndex.get(b.id) ?? 0));
+      await persistGroupOrder(nextLocal, "staff");
+    },
+  });
+
+  async function moveByArrowInGroup(group: "lead" | "staff", id: string, dir: -1 | 1) {
+    if (busy) return;
+
+    const sortable = group === "lead" ? leadSortable : staffSortable;
+    const items: AboutPersonDTO[] = sortable.items;
+
+    const idx = items.findIndex((x) => x.id === id);
+    if (idx < 0) return;
+
+    const j = idx + dir;
+    if (j < 0 || j >= items.length) return;
+
+    const nextLocal = items.slice();
+    const [moved] = nextLocal.splice(idx, 1);
+    nextLocal.splice(j, 0, moved);
+
+    sortable.setLocalOrder(nextLocal);
+    await persistGroupOrder(nextLocal, group);
+  }
 
   return (
     <div className="space-y-6">
@@ -70,12 +150,10 @@ export default function PeopleEditor({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Öffnen/Schließen statt aktivieren/deaktivieren */}
             <Button variant="ghost" onClick={() => setTeamOpen((o) => !o)}>
               {teamOpen ? "Schließen" : "Öffnen"}
             </Button>
 
-            {/* TEAM SECTION EXISTENCE: falls noch nicht existiert, kannst du sie anlegen */}
             {!teamSection && (
               <Button
                 onClick={async () => {
@@ -99,7 +177,6 @@ export default function PeopleEditor({
           </div>
         </div>
 
-        {/* Zusammenfassung wenn zugeklappt */}
         {!teamOpen && (
           <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
             {teamSection ? (
@@ -110,7 +187,7 @@ export default function PeopleEditor({
                 <div className="truncate">{teamSection.subtitle || "—"}</div>
                 <div className="text-xs opacity-80">
                   Status:{" "}
-                  <span className={teamSection.isActive ? "font-semibold" : "font-semibold"}>
+                  <span className="font-semibold">
                     {teamSection.isActive ? "Aktiv" : "Inaktiv"}
                   </span>
                 </div>
@@ -123,7 +200,6 @@ export default function PeopleEditor({
           </div>
         )}
 
-        {/* Editor nur wenn offen */}
         {teamOpen && teamSection && (
           <TeamSectionEditor
             section={teamSection}
@@ -154,6 +230,7 @@ export default function PeopleEditor({
 
         {createOpen && (
           <CreatePersonForm
+            existingPeople={people}
             onCreated={(p) => {
               onChange([...people, p]);
               setCreateOpen(false);
@@ -162,73 +239,243 @@ export default function PeopleEditor({
         )}
       </div>
 
-      {/* LIST – jetzt wie auf der Über-uns-Seite gruppiert */}
+      {/* LIST */}
       {total === 0 ? (
         <div className="rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-950/30 p-4 text-sm text-zinc-600 dark:text-zinc-400">
           Noch keine Personen angelegt.
         </div>
       ) : (
         <div className="space-y-6">
-          {lead.length > 0 && (
-            <GroupBlock title="Verantwortung & Leitung">
-              {lead.map((p) => (
-                <div key={p.id} className="p-4">
-                  <PersonCard
-                    person={p}
-                    onUpdated={(next) =>
-                      onChange(people.map((x) => (x.id === next.id ? next : x)))
-                    }
-                    onDeleted={() => onChange(people.filter((x) => x.id !== p.id))}
-                  />
-                </div>
-              ))}
-            </GroupBlock>
-          )}
+          <GroupBlock
+            title="Verantwortung & Leitung"
+            subtitle="Drag & Drop oder Pfeile – nur innerhalb dieser Gruppe."
+            icon={<Users size={16} />}
+          >
+            {leadSortable.items.length === 0 ? (
+              <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">
+                Keine Personen in „Verantwortung & Leitung“.
+              </div>
+            ) : (
+              <motion.div layout transition={{ duration: 0.22 }} className="p-3 space-y-3">
+                <AnimatePresence initial={false}>
+                  {leadSortable.items.map((p: AboutPersonDTO, index: number) => (
+                    <motion.div
+                      key={p.id}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.18 }}
+                      className="
+                        rounded-2xl border border-zinc-200/80 bg-white shadow-sm
+                        dark:border-zinc-800 dark:bg-zinc-900/40
+                        p-3
+                      "
+                      {...leadSortable.bindDropTarget(p.id)}
+                    >
+                      <div className="flex gap-3">
+                        <ReorderControls
+                          disabled={busy}
+                          isFirst={index === 0}
+                          isLast={index === leadSortable.items.length - 1}
+                          bindDragHandle={leadSortable.bindDragHandle(p.id)}
+                          onUp={() => void moveByArrowInGroup("lead", p.id, -1)}
+                          onDown={() => void moveByArrowInGroup("lead", p.id, 1)}
+                        />
+                        <div className="flex-1">
+                          <PersonCard
+                            person={p}
+                            disableKindChangeToOtherGroup
+                            onUpdated={(next) =>
+                              onChange(people.map((x) => (x.id === next.id ? next : x)))
+                            }
+                            onDeleted={() => onChange(people.filter((x) => x.id !== p.id))}
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            )}
+          </GroupBlock>
 
-          {staff.length > 0 && (
-            <GroupBlock title="Mitarbeiter">
-              {staff.map((p) => (
-                <div key={p.id} className="p-4">
-                  <PersonCard
-                    person={p}
-                    onUpdated={(next) =>
-                      onChange(people.map((x) => (x.id === next.id ? next : x)))
-                    }
-                    onDeleted={() => onChange(people.filter((x) => x.id !== p.id))}
-                  />
-                </div>
-              ))}
-            </GroupBlock>
-          )}
+          <GroupBlock
+            title="Mitarbeiter"
+            subtitle="Drag & Drop oder Pfeile – nur innerhalb dieser Gruppe."
+            icon={<Users size={16} />}
+          >
+            {staffSortable.items.length === 0 ? (
+              <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">
+                Keine Personen in „Mitarbeiter“.
+              </div>
+            ) : (
+              <motion.div layout transition={{ duration: 0.22 }} className="p-3 space-y-3">
+                <AnimatePresence initial={false}>
+                  {staffSortable.items.map((p: AboutPersonDTO, index: number) => (
+                    <motion.div
+                      key={p.id}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.18 }}
+                      className="
+                        rounded-2xl border border-zinc-200/80 bg-white shadow-sm
+                        dark:border-zinc-800 dark:bg-zinc-900/40
+                        p-3
+                      "
+                      {...staffSortable.bindDropTarget(p.id)}
+                    >
+                      <div className="flex gap-3">
+                        <ReorderControls
+                          disabled={busy}
+                          isFirst={index === 0}
+                          isLast={index === staffSortable.items.length - 1}
+                          bindDragHandle={staffSortable.bindDragHandle(p.id)}
+                          onUp={() => void moveByArrowInGroup("staff", p.id, -1)}
+                          onDown={() => void moveByArrowInGroup("staff", p.id, 1)}
+                        />
+                        <div className="flex-1">
+                          <PersonCard
+                            person={p}
+                            disableKindChangeToOtherGroup
+                            onUpdated={(next) =>
+                              onChange(people.map((x) => (x.id === next.id ? next : x)))
+                            }
+                            onDeleted={() => onChange(people.filter((x) => x.id !== p.id))}
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            )}
+          </GroupBlock>
         </div>
       )}
     </div>
   );
 }
 
+/* ---------------- UI blocks ---------------- */
+
 function GroupBlock({
   title,
+  subtitle,
+  icon,
   children,
 }: {
   title: string;
+  subtitle?: string;
+  icon?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-          {title}
-        </h3>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            {icon ? (
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
+                {icon}
+              </span>
+            ) : null}
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              {title}
+            </h3>
+          </div>
+          {subtitle ? (
+            <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{subtitle}</div>
+          ) : null}
+        </div>
       </div>
 
-      <div className="rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 overflow-hidden bg-white/60 dark:bg-zinc-950/30">
-        <div className="divide-y divide-zinc-200/70 dark:divide-zinc-800/80">
-          {children}
-        </div>
+      <div
+        className="
+          rounded-2xl border border-zinc-200/70 bg-white/70 shadow-sm
+          dark:border-zinc-800/80 dark:bg-zinc-950/30
+          overflow-hidden
+        "
+      >
+        {children}
       </div>
     </div>
   );
 }
+
+function ReorderControls({
+  disabled,
+  isFirst,
+  isLast,
+  bindDragHandle,
+  onUp,
+  onDown,
+}: {
+  disabled: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  bindDragHandle: any;
+  onUp: () => void;
+  onDown: () => void;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-2 pt-1">
+      <div
+        {...bindDragHandle}
+        className="
+          cursor-grab active:cursor-grabbing rounded-lg p-2
+          border border-zinc-200 bg-zinc-50 hover:bg-zinc-100
+          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
+        "
+        title="Ziehen"
+      >
+        <GripVertical size={18} />
+      </div>
+
+      <button
+        type="button"
+        disabled={disabled || isFirst}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onUp();
+        }}
+        className="
+          w-10 h-10 flex items-center justify-center rounded-lg
+          border border-zinc-200 bg-white hover:bg-zinc-50
+          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
+          disabled:opacity-30 disabled:cursor-not-allowed
+        "
+        title="Nach oben"
+      >
+        <ArrowUp size={16} />
+      </button>
+
+      <button
+        type="button"
+        disabled={disabled || isLast}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDown();
+        }}
+        className="
+          w-10 h-10 flex items-center justify-center rounded-lg
+          border border-zinc-200 bg-white hover:bg-zinc-50
+          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
+          disabled:opacity-30 disabled:cursor-not-allowed
+        "
+        title="Nach unten"
+      >
+        <ArrowDown size={16} />
+      </button>
+    </div>
+  );
+}
+
+/* ---------------- Team section editor ---------------- */
 
 function TeamSectionEditor({
   section,
@@ -239,15 +486,11 @@ function TeamSectionEditor({
 }) {
   const [title, setTitle] = useState(section.title ?? "");
   const [subtitle, setSubtitle] = useState(section.subtitle ?? "");
-
-  // Aktiv -> erst beim Speichern persistieren
   const [active, setActive] = useState(!!section.isActive);
-
   const [saving, setSaving] = useState(false);
 
   return (
     <div className="mt-4 space-y-4">
-      {/* Auffälliger Aktiv-Schalter (UI), speichert aber erst nach Button-Klick */}
       <div className="rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-900/30 p-3 flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold">Team-Bereich Status</div>
@@ -256,7 +499,6 @@ function TeamSectionEditor({
           </div>
         </div>
 
-        {/* Toggle-Button ersetzt kleine Checkbox */}
         <button
           type="button"
           onClick={() => setActive((v) => !v)}
@@ -315,8 +557,16 @@ function TeamSectionEditor({
   );
 }
 
-function CreatePersonForm({ onCreated }: { onCreated: (p: AboutPersonDTO) => void }) {
-  const [kind, setKind] = useState("TEAM_MEMBER");
+/* ---------------- Create person ---------------- */
+
+function CreatePersonForm({
+  existingPeople,
+  onCreated,
+}: {
+  existingPeople: AboutPersonDTO[];
+  onCreated: (p: AboutPersonDTO) => void;
+}) {
+  const [kind, setKind] = useState<Kind>("TEAM_MEMBER");
   const [name, setName] = useState("");
   const [roleLabel, setRoleLabel] = useState("");
   const [shortBio, setShortBio] = useState("");
@@ -325,13 +575,17 @@ function CreatePersonForm({ onCreated }: { onCreated: (p: AboutPersonDTO) => voi
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [instagramHandle, setInstagramHandle] = useState("");
-
-  // UI nennt es "Aktiv" – mapped auf isShownOnAbout
   const [active, setActive] = useState(true);
 
-  const [sortOrder, setSortOrder] = useState(0);
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  const nextSortOrder = useMemo(() => {
+    const groupItems = existingPeople.filter((p) =>
+      isLead(kind) ? isLead(p.kind) : isStaff(p.kind)
+    );
+    return groupItems.length;
+  }, [existingPeople, kind]);
 
   return (
     <div className="mt-4 space-y-3">
@@ -349,7 +603,10 @@ function CreatePersonForm({ onCreated }: { onCreated: (p: AboutPersonDTO) => voi
 
         <div>
           <div className="text-xs font-medium mb-1">Kategorie</div>
-          <OptionSelect value={kind} onChange={setKind} options={PERSON_KIND_OPTIONS} />
+          <OptionSelect value={kind} onChange={(v) => setKind(v as Kind)} options={PERSON_KIND_OPTIONS} />
+          <div className="mt-1 text-[11px] text-zinc-600 dark:text-zinc-400">
+            Sortierung wird automatisch ans Ende der Gruppe gesetzt.
+          </div>
         </div>
 
         <div>
@@ -402,24 +659,9 @@ function CreatePersonForm({ onCreated }: { onCreated: (p: AboutPersonDTO) => voi
           />
         </div>
 
-        <div>
-          <div className="text-xs font-medium mb-1">
-            Sortierung <span className="text-zinc-500">(optional)</span>
-          </div>
-          <TextInput
-            type="number"
-            value={String(sortOrder)}
-            onChange={(e) => setSortOrder(Number(e.target.value))}
-          />
-        </div>
-
         <div className="md:col-span-2 flex flex-wrap gap-4">
           <label className="inline-flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={active}
-              onChange={(e) => setActive(e.target.checked)}
-            />
+            <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
             Aktiv{" "}
             <span className="text-xs text-zinc-600 dark:text-zinc-400">
               (wird auf der Über-uns-Seite angezeigt)
@@ -445,7 +687,7 @@ function CreatePersonForm({ onCreated }: { onCreated: (p: AboutPersonDTO) => voi
                   phone: phone || null,
                   instagramHandle: instagramHandle || null,
                   isShownOnAbout: active,
-                  sortOrder,
+                  sortOrder: nextSortOrder,
                 });
                 onCreated(created);
               } catch (e: any) {
@@ -463,14 +705,18 @@ function CreatePersonForm({ onCreated }: { onCreated: (p: AboutPersonDTO) => voi
   );
 }
 
+/* ---------------- Person card ---------------- */
+
 function PersonCard({
   person,
   onUpdated,
   onDeleted,
+  disableKindChangeToOtherGroup,
 }: {
   person: AboutPersonDTO;
   onUpdated: (p: AboutPersonDTO) => void;
   onDeleted: () => void;
+  disableKindChangeToOtherGroup?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -485,9 +731,7 @@ function PersonCard({
     email: person.email ?? "",
     phone: person.phone ?? "",
     instagramHandle: person.instagramHandle ?? "",
-    // UI nennt es Aktiv, wir speichern es in isShownOnAbout
     active: !!person.isShownOnAbout,
-    sortOrder: person.sortOrder ?? 0,
   }));
 
   const [saving, setSaving] = useState(false);
@@ -496,15 +740,20 @@ function PersonCard({
   const kindLabel =
     PERSON_KIND_OPTIONS.find((o) => o.value === draft.kind)?.label ?? draft.kind;
 
+  const originalGroup: "lead" | "staff" = isLead(person.kind) ? "lead" : "staff";
+
+  function clampKind(nextKind: string) {
+    if (!disableKindChangeToOtherGroup) return nextKind;
+
+    const nextGroup: "lead" | "staff" = isLead(nextKind) ? "lead" : "staff";
+    if (nextGroup !== originalGroup) return String(person.kind);
+    return nextKind;
+  }
+
   return (
     <div className="rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/20 p-4">
-      {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className="min-w-0 text-left"
-        >
+        <button type="button" onClick={() => setOpen((o) => !o)} className="min-w-0 text-left">
           <div className="text-xs opacity-70">{kindLabel}</div>
           <div className="font-semibold truncate">
             {draft.name || "—"}{" "}
@@ -523,7 +772,7 @@ function PersonCard({
               try {
                 const next = await updatePerson({
                   id: draft.id,
-                  kind: draft.kind,
+                  kind: clampKind(draft.kind),
                   name: draft.name,
                   roleLabel: draft.roleLabel || null,
                   shortBio: draft.shortBio || null,
@@ -533,7 +782,7 @@ function PersonCard({
                   phone: draft.phone || null,
                   instagramHandle: draft.instagramHandle || null,
                   isShownOnAbout: draft.active,
-                  sortOrder: draft.sortOrder,
+                  sortOrder: person.sortOrder ?? 0,
                 });
                 onUpdated(next);
               } catch (e: any) {
@@ -566,138 +815,85 @@ function PersonCard({
         </div>
       )}
 
-      {/* COLLAPSED SUMMARY */}
       {!open && (
         <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400 space-y-1">
           <div className="text-xs">
             Status:{" "}
-            <span className="font-semibold">
-              {draft.active ? "Aktiv" : "Inaktiv"}
-            </span>{" "}
-            <span className="opacity-80">
-              (Über-uns-Seite)
-            </span>
+            <span className="font-semibold">{draft.active ? "Aktiv" : "Inaktiv"}</span>{" "}
+            <span className="opacity-80">(Über-uns-Seite)</span>
           </div>
           {draft.roleLabel ? <div className="truncate">{draft.roleLabel}</div> : null}
           {draft.shortBio ? <div className="line-clamp-2">{draft.shortBio}</div> : null}
         </div>
       )}
 
-      {/* BODY */}
       {open && (
         <div className="mt-4 space-y-4">
           <div className="grid gap-3 md:grid-cols-2">
             <div>
               <div className="text-xs font-medium mb-1">Name</div>
-              <TextInput
-                value={draft.name}
-                onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
-              />
+              <TextInput value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} />
             </div>
 
             <div>
               <div className="text-xs font-medium mb-1">Kategorie</div>
               <OptionSelect
                 value={draft.kind}
-                onChange={(v) => setDraft((d) => ({ ...d, kind: v }))}
+                onChange={(v) => setDraft((d) => ({ ...d, kind: clampKind(v) }))}
                 options={PERSON_KIND_OPTIONS}
               />
+              {disableKindChangeToOtherGroup ? (
+                <div className="mt-1 text-[11px] text-zinc-600 dark:text-zinc-400">
+                  Hinweis: Wechsel zwischen „Leitung“ ↔ „Mitarbeiter“ ist hier deaktiviert.
+                </div>
+              ) : null}
             </div>
 
             <div>
               <div className="text-xs font-medium mb-1">
                 Rollen-Label <span className="text-zinc-500">(optional)</span>
               </div>
-              <TextInput
-                value={draft.roleLabel}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, roleLabel: e.target.value }))
-                }
-              />
-            </div>
-
-            <div>
-              <div className="text-xs font-medium mb-1">
-                Sortierung <span className="text-zinc-500">(optional)</span>
-              </div>
-              <TextInput
-                type="number"
-                value={String(draft.sortOrder)}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, sortOrder: Number(e.target.value) }))
-                }
-              />
+              <TextInput value={draft.roleLabel} onChange={(e) => setDraft((d) => ({ ...d, roleLabel: e.target.value }))} />
             </div>
 
             <div className="md:col-span-2">
               <div className="text-xs font-medium mb-1">
                 Kurz-Bio <span className="text-zinc-500">(optional)</span>
               </div>
-              <TextArea
-                value={draft.shortBio}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, shortBio: e.target.value }))
-                }
-              />
+              <TextArea value={draft.shortBio} onChange={(e) => setDraft((d) => ({ ...d, shortBio: e.target.value }))} />
             </div>
 
             <div className="md:col-span-2">
               <div className="text-xs font-medium mb-2">
                 Portrait <span className="text-zinc-500">(optional)</span>
               </div>
-              <ImageUploader
-                folder="about"
-                imageUrl={draft.avatarUrl}
-                onChange={(v) => setDraft((d) => ({ ...d, avatarUrl: v }))}
-              />
+              <ImageUploader folder="about" imageUrl={draft.avatarUrl} onChange={(v) => setDraft((d) => ({ ...d, avatarUrl: v }))} />
             </div>
 
             <div>
               <div className="text-xs font-medium mb-1">
                 E-Mail <span className="text-zinc-500">(optional)</span>
               </div>
-              <TextInput
-                type="email"
-                value={draft.email}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, email: e.target.value }))
-                }
-              />
+              <TextInput type="email" value={draft.email} onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))} />
             </div>
 
             <div>
               <div className="text-xs font-medium mb-1">
                 Telefon <span className="text-zinc-500">(optional)</span>
               </div>
-              <TextInput
-                value={draft.phone}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, phone: e.target.value }))
-                }
-              />
+              <TextInput value={draft.phone} onChange={(e) => setDraft((d) => ({ ...d, phone: e.target.value }))} />
             </div>
 
             <div>
               <div className="text-xs font-medium mb-1">
                 Instagram <span className="text-zinc-500">(optional)</span>
               </div>
-              <TextInput
-                value={draft.instagramHandle}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, instagramHandle: e.target.value }))
-                }
-              />
+              <TextInput value={draft.instagramHandle} onChange={(e) => setDraft((d) => ({ ...d, instagramHandle: e.target.value }))} />
             </div>
 
             <div className="md:col-span-2 flex flex-wrap gap-4">
               <label className="inline-flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={draft.active}
-                  onChange={(e) =>
-                    setDraft((d) => ({ ...d, active: e.target.checked }))
-                  }
-                />
+                <input type="checkbox" checked={draft.active} onChange={(e) => setDraft((d) => ({ ...d, active: e.target.checked }))} />
                 Aktiv{" "}
                 <span className="text-xs text-zinc-600 dark:text-zinc-400">
                   (wird auf der Über-uns-Seite angezeigt)
