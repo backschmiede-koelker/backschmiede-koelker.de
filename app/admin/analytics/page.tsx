@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 import AnalyticsFilters from "./filters";
 import LineChart from "./line-chart";
+import AdminPageHeaderServer from "../components/admin-page-header-server";
 
 export const metadata: Metadata = {
   title: "Admin - Analytics | Backschmiede Kölker",
@@ -197,13 +198,10 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0 overflow-x-hidden">
-      <header className="mb-4">
-        <h1 className="text-xl font-bold tracking-tight sm:text-3xl">Analytics</h1>
-        <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
-          Übersichtliche, anonyme Zahlen für Deine Website. Zeitraum:{" "}
-          <span className="font-medium">{rangeLabel(range, start, end)}</span>
-        </p>
-      </header>
+      <AdminPageHeaderServer
+        title="Analytics"
+        subtitle="Übersichtliche, anonyme Zahlen für Deine Website."
+      />
 
       {/* Filter */}
       <section className="mb-5">

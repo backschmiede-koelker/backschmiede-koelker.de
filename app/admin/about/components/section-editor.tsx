@@ -13,6 +13,17 @@ import TimelineEditor from "./items/timeline-editor";
 import FaqEditor from "./items/faq-editor";
 import GalleryEditor from "./items/gallery-editor";
 
+const SINGLETON_TYPES = new Set<AboutSectionDTO["type"]>([
+  "HERO",
+  "TEAM",
+  "VALUES",
+  "STATS",
+  "TIMELINE",
+  "GALLERY",
+  "FAQ",
+  "CTA",
+]);
+
 function typeLabel(t: AboutSectionDTO["type"]) {
   switch (t) {
     case "CUSTOM_TEXT":
@@ -55,6 +66,8 @@ export default function SectionEditor({
   onDeleted: () => void;
   canDelete: boolean;
 }) {
+  const isSingleton = SINGLETON_TYPES.has(section.type);
+
   const [draft, setDraft] = useState(() => ({
     id: section.id,
     title: section.title ?? "",
@@ -81,7 +94,7 @@ export default function SectionEditor({
   const isCta = section.type === "CTA";
 
   return (
-    <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-white/5 p-4">
+    <div className="rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-white/5 p-4">
       {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
@@ -136,14 +149,48 @@ export default function SectionEditor({
             {open ? "Schließen" : "Öffnen"}
           </Button>
 
-          {canDelete && (
+          {!isSingleton && canDelete && (
             <DeleteButton
               confirmText="Bereich wirklich löschen?"
               onDelete={async () => {
-                await deleteSection(section.id);
-                onDeleted();
+                try {
+                  await deleteSection(section.id);
+                  onDeleted();
+                } catch (e: any) {
+                  setErr(e?.message || "Fehler beim Löschen");
+                }
               }}
             />
+          )}
+
+          {isSingleton && section.type !== "HERO" && (
+            <Button
+              variant="ghost"
+              disabled={saving}
+              onClick={async () => {
+                setErr(null);
+                setSaving(true);
+                try {
+                  const next = await updateSection({
+                    id: draft.id,
+                    title: draft.title || null,
+                    subtitle: draft.subtitle || null,
+                    body: draft.body || null,
+                    imageUrl: draft.imageUrl || null,
+                    isActive: !draft.isActive,
+                    sortOrder: draft.sortOrder,
+                  });
+                  setDraft((d) => ({ ...d, isActive: !!next.isActive }));
+                  onUpdated(next);
+                } catch (e: any) {
+                  setErr(e?.message || "Fehler beim Ändern des Status");
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              {draft.isActive ? "Deaktivieren" : "Aktivieren"}
+            </Button>
           )}
         </div>
       </div>
@@ -157,7 +204,7 @@ export default function SectionEditor({
 
       {/* COLLAPSED SUMMARY */}
       {!open && (
-        <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400 space-y-1">
+        <div className="mt-3 text-sm text-zinc-700 dark:text-zinc-400 space-y-1">
           {isCta ? (
             <>
               {draft.subtitle ? <div className="truncate">Button: {draft.subtitle}</div> : null}

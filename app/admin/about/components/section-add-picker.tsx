@@ -20,7 +20,7 @@ const SINGLETONS: { type: SingletonType; title: string; desc: string }[] = [
   { type: "TIMELINE", title: "Timeline / Meilensteine", desc: "Historie als Meilensteine." },
   { type: "GALLERY", title: "Galerie", desc: "Bilderstrecke." },
   { type: "FAQ", title: "FAQ", desc: "Häufige Fragen." },
-  { type: "CTA", title: "Call-to-Action", desc: "Kontakt/Jobs/Angebote Hinweis." },
+  { type: "CTA", title: "Call-to-Action", desc: "Jobs/Produkte oder externe URLs bewerben." },
 ];
 
 function isExisting(sections: AboutSectionDTO[], type: SingletonType) {

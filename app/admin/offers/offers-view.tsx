@@ -20,6 +20,7 @@ import { useOffers } from "./hooks/use-offers";
 import { useOfferUnits } from "./hooks/use-offer-units";
 import { useOfferForm } from "./hooks/use-offer-form";
 import OfferList from "./components/offer-list";
+import AdminPageHeader from "../components/admin-page-header";
 
 export default function AdminOffersView() {
   const { items, loading, reload } = useOffers();
@@ -28,14 +29,12 @@ export default function AdminOffersView() {
   const form = useOfferForm({ allUnits, onCreated: reload });
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-3 sm:px-4 lg:px-8 py-6 lg:py-10 min-w-0">
-      <header className="mb-4">
-        <h1 className="text-2xl font-semibold">Angebote</h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-          Wähle unten einen <b>Typ</b> und fülle nur die wenigen Felder aus. Fertig.
-        </p>
-      </header>
-
+    <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0 overflow-x-clip">
+      <AdminPageHeader
+        title="Angebote"
+        subtitle="Wähle unten einen Typ und fülle nur die wenigen Felder aus. Fertig."
+      /> 
+          
       <SectionCard className="relative z-30 overflow-visible">
         {/* Typ-Auswahl */}
         <OfferTypeSelector

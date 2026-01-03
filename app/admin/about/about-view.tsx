@@ -3,7 +3,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { AboutPersonDTO, AboutSectionDTO } from "./types";
-import AdminHeader from "./components/admin-header";
 import SectionBox from "./components/section-box";
 import HeroEditor from "./components/hero-editor";
 import SectionEditor from "./components/section-editor";
@@ -15,6 +14,7 @@ import { reorderMiddleSections } from "./actions";
 import { useSortableList } from "./components/dnd/useSortableList";
 import { AnimatePresence, motion } from "framer-motion";
 import { GripVertical, ArrowUp, ArrowDown } from "lucide-react";
+import AdminPageHeader from "../components/admin-page-header";
 
 function sectionAnchorId(id: string) {
   return `admin-about-section-${id}`;
@@ -119,11 +119,11 @@ export default function AboutView({
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-3.5 sm:px-6 md:px-8 py-6 md:py-10 min-w-0 space-y-8">
-      <AdminHeader
+    <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0 overflow-x-clip">
+      <AdminPageHeader
         title="Über uns"
-        subtitle="Beschreibe hier die verschiedenen Abschnitte der 'Über uns'-Seite."
-      />
+        subtitle="Verwalte Inhalte, Texte und Informationen der Über uns Seite."
+      /> 
 
       <SectionBox
         title="Hero Bereich"
@@ -164,8 +164,8 @@ export default function AboutView({
             </div>
           )}
 
-          <div className="rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 overflow-hidden bg-white/60 dark:bg-zinc-950/30">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200/70 dark:border-zinc-800/80">
+          <div className="rounded-2xl border border-zinc-300 dark:border-zinc-800/80 overflow-hidden bg-white dark:bg-zinc-950/30">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800/80">
               <div className="text-sm font-semibold">Reihenfolge (Mitte)</div>
               <div className="text-xs text-zinc-600 dark:text-zinc-400">
                 {savingOrder ? "Speichert Sortierung…" : "Drag & Drop oder Pfeile nutzen"}
@@ -193,7 +193,7 @@ export default function AboutView({
                         transition={{ duration: 0.18 }}
                         id={sectionAnchorId(s.id)}
                         className="
-                          rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-sm
+                          rounded-2xl border border-zinc-300 bg-white p-4 shadow-sm
                           dark:border-zinc-800 dark:bg-zinc-900/40
                         "
                         {...sortable.bindDropTarget(s.id)}
@@ -204,7 +204,7 @@ export default function AboutView({
                               {...sortable.bindDragHandle(s.id)}
                               className="
                                 cursor-grab active:cursor-grabbing select-none rounded-lg p-2
-                                border border-zinc-200 bg-zinc-50 hover:bg-zinc-100
+                                border border-zinc-300 bg-zinc-50 hover:bg-zinc-100
                                 dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
                               "
                               title="Ziehen zum Sortieren"
@@ -231,7 +231,7 @@ export default function AboutView({
                               }}
                               className="
                                 w-10 h-10 flex items-center justify-center rounded-lg
-                                border border-zinc-200 bg-white hover:bg-zinc-50
+                                border border-zinc-300 bg-white hover:bg-zinc-100
                                 dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
                                 disabled:opacity-30 disabled:cursor-not-allowed
                               "
@@ -250,7 +250,7 @@ export default function AboutView({
                               }}
                               className="
                                 w-10 h-10 flex items-center justify-center rounded-lg
-                                border border-zinc-200 bg-white hover:bg-zinc-50
+                                border border-zinc-300 bg-white hover:bg-zinc-100
                                 dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
                                 disabled:opacity-30 disabled:cursor-not-allowed
                               "

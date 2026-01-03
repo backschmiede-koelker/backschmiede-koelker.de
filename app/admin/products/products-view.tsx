@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useProducts } from "../../hooks/use-products";
 import NewProductForm from "../../components/new-product-form";
 import ProductCard from "../../components/product-card";
+import AdminPageHeader from "../components/admin-page-header";
 
 export default function AdminProductsView() {
   const { items, loading, reload, remove } = useProducts();
@@ -41,7 +42,10 @@ export default function AdminProductsView() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0 overflow-x-clip">
-      <h1 className="text-2xl font-semibold">Produkte</h1>
+      <AdminPageHeader
+        title="Produkte"
+        subtitle="Artikel, Preise, Einheiten & Bilder verwalten"
+      />
 
       {/* Neues Produkt */}
       <NewProductForm allUnits={allUnits} allTags={allTags} onCreated={reload} />

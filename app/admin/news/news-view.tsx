@@ -5,6 +5,7 @@ import { useNews } from "../../hooks/use-news";
 import ImageUploader from "../../components/image-uploader";
 import SelectBox from "../../components/select-box";
 import { KNOWN_PAGES } from "../../lib/known-pages";
+import AdminPageHeader from "../components/admin-page-header";
 
 const PREDEFINED_TAGS = ["Kein Tag ausgewählt", "Aktion", "Event", "Info"];
 const LABEL = "block text-sm font-medium leading-5 h-5 mb-1";
@@ -91,7 +92,10 @@ export default function AdminNewsView() {
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0 overflow-x-clip">
-      <h1 className="text-2xl font-semibold">News</h1>
+      <AdminPageHeader
+        title="News"
+        subtitle="Neuigkeiten, Änderungen und Ankündigungen."
+      /> 
 
       {/* Create-Form */}
       <div className="min-w-0 space-y-6 rounded-2xl border bg-white/90 p-4 ring-1 ring-black/5 shadow-sm dark:bg-zinc-900/80 dark:ring-white/10 sm:p-6">

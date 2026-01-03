@@ -23,8 +23,8 @@ export default function SectionBox({
   return (
     <section
       className="
-        rounded-2xl border border-zinc-200/70 bg-white/80 shadow-sm
-        dark:border-zinc-800/80 dark:bg-zinc-950/40
+        rounded-2xl border border-zinc-300 bg-white shadow-[0_1px_0_rgba(0,0,0,0.04)]
+        dark:shadow-none dark:border-zinc-800/80 dark:bg-zinc-950/40
         p-4 md:p-5
       "
     >

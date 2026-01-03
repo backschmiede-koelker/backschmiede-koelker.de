@@ -10,6 +10,7 @@ import {
   employmentLabel,
   locationLabel,
 } from "@/app/components/jobs/formatters";
+import AdminPageHeader from "../components/admin-page-header";
 
 export default function JobsView() {
   const { items, loading, reload, remove } = useJobs();
@@ -77,8 +78,11 @@ export default function JobsView() {
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30";
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-3 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 min-w-0 overflow-x-hidden">
-      <h1 className="text-2xl font-extrabold tracking-tight">Jobs</h1>
+    <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0 overflow-x-clip">
+      <AdminPageHeader
+        title="Jobs"
+        subtitle="Erstelle, bearbeite und veröffentliche offene Stellen."
+      /> 
 
       <NewJobForm onCreated={reload} highestPriority={highestPriority} />
 

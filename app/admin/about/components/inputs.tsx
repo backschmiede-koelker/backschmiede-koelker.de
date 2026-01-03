@@ -5,8 +5,12 @@ import * as React from "react";
 
 const base =
   "w-full rounded-xl border px-3 py-2 text-sm shadow-sm transition " +
-  "border-zinc-200 bg-white/80 hover:bg-white " +
-  "dark:border-zinc-800 dark:bg-zinc-900/60 dark:hover:bg-zinc-900";
+  "border-zinc-300 bg-white text-zinc-900 placeholder:text-zinc-400 " +
+  "hover:bg-zinc-50 hover:border-zinc-400 " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/25 focus-visible:border-emerald-500 " +
+  "dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-100 dark:placeholder:text-zinc-500 " +
+  "dark:hover:bg-zinc-900 dark:hover:border-zinc-600 " +
+  "dark:focus-visible:ring-emerald-400/25 dark:focus-visible:border-emerald-400";
 
 export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${base} ${props.className || ""}`} />;
@@ -26,7 +30,7 @@ export function Checkbox({
   label: string;
 }) {
   return (
-    <label className="inline-flex items-center gap-2 text-sm">
+    <label className="inline-flex items-center gap-2 text-sm text-zinc-900 dark:text-zinc-100">
       <input
         type="checkbox"
         checked={checked}
@@ -60,14 +64,14 @@ export function Button({
       `
       : variant === "danger"
       ? `
-        rounded-xl border border-red-500/40 px-3 py-2 text-sm text-red-700
+        rounded-xl border border-red-500/50 bg-white px-3 py-2 text-sm text-red-700
         hover:bg-red-50 active:scale-[0.99]
-        dark:text-red-200 dark:border-red-500/30 dark:hover:bg-red-950/40
+        dark:bg-transparent dark:text-red-200 dark:border-red-500/30 dark:hover:bg-red-950/40
         disabled:opacity-60 disabled:cursor-not-allowed
       `
       : `
-        rounded-xl border border-zinc-300/80 bg-white/70 px-3 py-2 text-sm text-zinc-900 shadow-sm
-        hover:bg-zinc-50 hover:border-zinc-400/80 active:scale-[0.99]
+        rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm
+        hover:bg-zinc-100 hover:border-zinc-400 active:scale-[0.99]
         dark:border-zinc-700/80 dark:bg-zinc-900/60 dark:text-zinc-100
         dark:hover:bg-zinc-800/70 dark:hover:border-zinc-600/90
         disabled:opacity-60 disabled:cursor-not-allowed
