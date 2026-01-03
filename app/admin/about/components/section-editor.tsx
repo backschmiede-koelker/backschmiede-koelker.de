@@ -165,7 +165,7 @@ export default function SectionEditor({
 
           {isSingleton && section.type !== "HERO" && (
             <Button
-              variant="ghost"
+              variant={draft.isActive ? "softDanger" : "softSuccess"}
               disabled={saving}
               onClick={async () => {
                 setErr(null);

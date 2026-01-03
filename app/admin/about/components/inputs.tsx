@@ -50,7 +50,7 @@ export function Button({
 }: {
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: "primary" | "ghost" | "danger";
+  variant?: "primary" | "ghost" | "danger" | "softDanger" | "softSuccess";
   disabled?: boolean;
   type?: "button" | "submit";
 }) {
@@ -67,6 +67,22 @@ export function Button({
         rounded-xl border border-red-500/50 bg-white px-3 py-2 text-sm text-red-700
         hover:bg-red-50 active:scale-[0.99]
         dark:bg-transparent dark:text-red-200 dark:border-red-500/30 dark:hover:bg-red-950/40
+        disabled:opacity-60 disabled:cursor-not-allowed
+      `
+      : variant === "softDanger"
+      ? `
+        rounded-xl border border-red-200 bg-red-50/60 px-3 py-2 text-sm text-red-800
+        hover:bg-red-100/60 hover:border-red-300 active:scale-[0.99]
+        dark:border-red-500/20 dark:bg-red-950/15 dark:text-red-100
+        dark:hover:bg-red-950/25 dark:hover:border-red-500/30
+        disabled:opacity-60 disabled:cursor-not-allowed
+      `
+      : variant === "softSuccess"
+      ? `
+        rounded-xl border border-emerald-200 bg-emerald-50/60 px-3 py-2 text-sm text-emerald-900
+        hover:bg-emerald-100/60 hover:border-emerald-300 active:scale-[0.99]
+        dark:border-emerald-500/20 dark:bg-emerald-950/15 dark:text-emerald-100
+        dark:hover:bg-emerald-950/25 dark:hover:border-emerald-500/30
         disabled:opacity-60 disabled:cursor-not-allowed
       `
       : `
