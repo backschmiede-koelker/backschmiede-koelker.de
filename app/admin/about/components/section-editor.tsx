@@ -38,6 +38,12 @@ function typeLabel(t: AboutSectionDTO["type"]) {
   }
 }
 
+function isProbablyUrl(input: string) {
+  const v = input.trim();
+  if (!v) return true; // leer ist ok -> fallback greift im Frontend
+  return v.startsWith("/") || /^https?:\/\//i.test(v);
+}
+
 export default function SectionEditor({
   section,
   onUpdated,
@@ -61,7 +67,7 @@ export default function SectionEditor({
 
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [open, setOpen] = useState(false); 
+  const [open, setOpen] = useState(false);
 
   const itemBlock = useMemo(() => {
     if (section.type === "STATS") return <StatsEditor section={section} onUpdated={onUpdated} />;
@@ -71,6 +77,8 @@ export default function SectionEditor({
     if (section.type === "GALLERY") return <GalleryEditor section={section} onUpdated={onUpdated} />;
     return null;
   }, [section, onUpdated]);
+
+  const isCta = section.type === "CTA";
 
   return (
     <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-white/5 p-4">
@@ -95,6 +103,13 @@ export default function SectionEditor({
             disabled={saving}
             onClick={async () => {
               setErr(null);
+
+              // leichte UI-Validierung nur für CTA-Link
+              if (isCta && !isProbablyUrl(draft.body)) {
+                setErr("Bitte eine gültige URL eingeben (z.B. /kontakt oder https://…).");
+                return;
+              }
+
               setSaving(true);
               try {
                 const next = await updateSection({
@@ -143,12 +158,21 @@ export default function SectionEditor({
       {/* COLLAPSED SUMMARY */}
       {!open && (
         <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400 space-y-1">
-          {draft.subtitle ? <div className="truncate">{draft.subtitle}</div> : null}
-          {draft.body ? <div className="line-clamp-2">{draft.body}</div> : null}
+          {isCta ? (
+            <>
+              {draft.subtitle ? <div className="truncate">Button: {draft.subtitle}</div> : null}
+              {draft.body ? <div className="truncate">Link: {draft.body}</div> : null}
+            </>
+          ) : (
+            <>
+              {draft.subtitle ? <div className="truncate">{draft.subtitle}</div> : null}
+              {draft.body ? <div className="line-clamp-2">{draft.body}</div> : null}
+            </>
+          )}
         </div>
       )}
 
-      {/* BODY (nur wenn open) */}
+      {/* BODY */}
       {open && (
         <div className="mt-4 space-y-4">
           <div className="grid gap-3 md:grid-cols-3">
@@ -160,9 +184,11 @@ export default function SectionEditor({
               />
             </div>
 
+            {/* TITLE */}
             <div className="md:col-span-3">
               <div className="text-xs font-medium mb-1">
-                Titel <span className="text-zinc-500">(optional)</span>
+                {isCta ? "Überschrift" : "Titel"}{" "}
+                <span className="text-zinc-500">(optional)</span>
               </div>
               <TextInput
                 value={draft.title}
@@ -170,28 +196,62 @@ export default function SectionEditor({
               />
             </div>
 
-            <div className="md:col-span-3">
-              <div className="text-xs font-medium mb-1">
-                Untertitel <span className="text-zinc-500">(optional)</span>
-              </div>
-              <TextInput
-                value={draft.subtitle}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, subtitle: e.target.value }))
-                }
-              />
-            </div>
+            {/* CTA SPECIAL FIELDS */}
+            {isCta ? (
+              <>
+                <div className="md:col-span-3">
+                  <div className="text-xs font-medium mb-1">
+                    Button-Text <span className="text-zinc-500">(optional)</span>
+                  </div>
+                  <TextInput
+                    value={draft.subtitle}
+                    onChange={(e) => setDraft((d) => ({ ...d, subtitle: e.target.value }))}
+                    placeholder='z.B. "Kontakt aufnehmen"'
+                  />
+                </div>
 
-            <div className="md:col-span-3">
-              <div className="text-xs font-medium mb-1">
-                Text / Inhalt <span className="text-zinc-500">(optional)</span>
-              </div>
-              <TextArea
-                value={draft.body}
-                onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
-              />
-            </div>
+                <div className="md:col-span-3">
+                  <div className="text-xs font-medium mb-1">
+                    Button-Link (URL) <span className="text-zinc-500">(optional)</span>
+                  </div>
+                  <TextInput
+                    value={draft.body}
+                    onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
+                    placeholder='z.B. "/kontakt" oder "https://example.com"'
+                  />
+                  <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                    Tipp: z.B. <span className="font-medium">/jobs</span> für intern,{" "}
+                    <span className="font-medium">https://…</span> für extern.
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* SUBTITLE */}
+                <div className="md:col-span-3">
+                  <div className="text-xs font-medium mb-1">
+                    Untertitel <span className="text-zinc-500">(optional)</span>
+                  </div>
+                  <TextInput
+                    value={draft.subtitle}
+                    onChange={(e) => setDraft((d) => ({ ...d, subtitle: e.target.value }))}
+                  />
+                </div>
 
+                {/* BODY */}
+                <div className="md:col-span-3">
+                  <div className="text-xs font-medium mb-1">
+                    Text / Inhalt <span className="text-zinc-500">(optional)</span>
+                  </div>
+                  <TextArea
+                    value={draft.body}
+                    onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* IMAGE stays for all types (auch CTA ok, falls du später willst) */}
             <div className="md:col-span-3">
               <div className="text-xs font-medium mb-2">
                 Bild <span className="text-zinc-500">(optional)</span>
@@ -199,9 +259,7 @@ export default function SectionEditor({
               <ImageUploader
                 folder="about"
                 imageUrl={draft.imageUrl}
-                onChange={(storedOrEmpty) =>
-                  setDraft((d) => ({ ...d, imageUrl: storedOrEmpty }))
-                }
+                onChange={(storedOrEmpty) => setDraft((d) => ({ ...d, imageUrl: storedOrEmpty }))}
               />
             </div>
           </div>
