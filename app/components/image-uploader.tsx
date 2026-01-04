@@ -164,33 +164,38 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
       </div>
 
       {(imageUrl || previewSrc) && (
-        <div className="mt-4 flex items-start gap-3">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start">
+          {/* 4) Vorschau */}
           <img
             src={previewSrc || ""}
             alt=""
             className="h-16 w-16 rounded object-cover ring-1 ring-black/10 dark:ring-white/10"
           />
+
           <div className="min-w-0 flex-1">
+            {/* 5) Link (Textbox) */}
             <div className="rounded-md bg-zinc-50 p-2 text-xs ring-1 ring-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700">
               <div className="truncate" title={previewSrc || ""}>
                 {previewSrc}
               </div>
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
+
+            {/* 6/7/8) Aktionen: Mobile untereinander, ab sm in Reihe */}
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-2">
               <a href={previewSrc || "#"} target="_blank" className="text-xs underline">
                 Link öffnen
               </a>
               <button
                 type="button"
                 onClick={() => navigator.clipboard.writeText(previewSrc || "")}
-                className="text-xs underline"
+                className="text-xs underline text-left sm:text-left"
               >
                 Link kopieren
               </button>
               <button
                 type="button"
                 onClick={removeCurrentImage}
-                className="text-xs underline text-red-600 disabled:opacity-60"
+                className="text-xs underline text-red-600 disabled:opacity-60 text-left sm:text-left"
                 disabled={deleting}
               >
                 {deleting ? "Löscht…" : "Bild entfernen"}

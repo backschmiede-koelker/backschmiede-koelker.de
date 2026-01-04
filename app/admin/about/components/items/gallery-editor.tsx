@@ -102,22 +102,22 @@ export default function GalleryEditor({
           Neues Bild hinzufügen
         </div>
 
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          <div className="md:col-span-2">
+        <div className="mt-3 grid gap-3 lg:grid-cols-2">
+          <div className="lg:col-span-2">
             <div className="text-xs font-medium mb-2 text-zinc-800 dark:text-zinc-200">
               Bild
             </div>
             <ImageUploader folder="about" imageUrl={imageUrl} onChange={setImageUrl} />
           </div>
 
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <div className="text-xs font-medium mb-1 text-zinc-800 dark:text-zinc-200">
               Alt-Text <span className="text-zinc-500 dark:text-zinc-400">(optional)</span>
             </div>
             <TextInput value={alt} onChange={(e) => setAlt(e.target.value)} />
           </div>
 
-          <div className="md:col-span-2 flex items-center justify-end">
+          <div className="lg:col-span-2 flex items-center justify-end">
             <Button
               disabled={busy || !imageUrl}
               onClick={async () => {
@@ -308,15 +308,15 @@ function Row({
         <ImageUploader folder="about" imageUrl={imageUrl} onChange={setImageUrl} />
       </div>
 
-      <div className="grid gap-2 md:grid-cols-6">
-        <div className="md:col-span-4">
+      <div className="grid gap-2 lg:grid-cols-6">
+        <div className="lg:col-span-4">
           <div className="text-xs font-medium mb-1 text-zinc-800 dark:text-zinc-200">
             Alt-Text <span className="text-zinc-500 dark:text-zinc-400">(optional)</span>
           </div>
           <TextInput value={alt} onChange={(e) => setAlt(e.target.value)} />
         </div>
 
-        <div className="md:col-span-2 flex items-end justify-end gap-2">
+        <div className="lg:col-span-2 flex items-end justify-end gap-2">
           <Button disabled={busy} onClick={() => void onSave({ imageUrl, alt })}>
             Speichern
           </Button>

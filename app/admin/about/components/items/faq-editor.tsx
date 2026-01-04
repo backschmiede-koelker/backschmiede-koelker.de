@@ -84,17 +84,17 @@ export default function FaqEditor({
       <div className="text-sm font-semibold">FAQ</div>
 
       {/* CREATE */}
-      <div className="grid gap-2 md:grid-cols-5">
-        <div className="md:col-span-2">
+      <div className="grid gap-2 lg:grid-cols-5">
+        <div className="lg:col-span-2">
           <div className="text-xs font-medium mb-1">Frage</div>
           <TextInput value={question} onChange={(e) => setQuestion(e.target.value)} />
         </div>
-        <div className="md:col-span-2">
+        <div className="lg:col-span-2">
           <div className="text-xs font-medium mb-1">Antwort</div>
           <TextInput value={answer} onChange={(e) => setAnswer(e.target.value)} />
         </div>
 
-        <div className="md:col-span-5">
+        <div className="lg:col-span-5">
           <Button
             disabled={busy || !question.trim() || !answer.trim()}
             onClick={async () => {
@@ -238,17 +238,17 @@ function Row({
   const [answer, setAnswer] = useState(a0);
 
   return (
-    <div className="grid gap-2 md:grid-cols-6">
-      <div className="md:col-span-3">
+    <div className="grid gap-2 lg:grid-cols-6">
+      <div className="lg:col-span-3">
         <div className="text-xs font-medium mb-1">Frage</div>
         <TextInput value={question} onChange={(e) => setQuestion(e.target.value)} />
       </div>
-      <div className="md:col-span-3">
+      <div className="lg:col-span-3">
         <div className="text-xs font-medium mb-1">Antwort</div>
         <TextInput value={answer} onChange={(e) => setAnswer(e.target.value)} />
       </div>
 
-      <div className="md:col-span-6 flex items-center justify-end gap-2">
+      <div className="lg:col-span-6 flex items-center justify-end gap-2">
         <Button disabled={busy} onClick={() => void onSave({ question, answer })}>
           Speichern
         </Button>

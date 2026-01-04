@@ -51,7 +51,7 @@ function typeLabel(t: AboutSectionDTO["type"]) {
 
 function isProbablyUrl(input: string) {
   const v = input.trim();
-  if (!v) return true; // leer ist ok -> fallback greift im Frontend
+  if (!v) return true;
   return v.startsWith("/") || /^https?:\/\//i.test(v);
 }
 
@@ -94,9 +94,9 @@ export default function SectionEditor({
   const isCta = section.type === "CTA";
 
   return (
-    <div className="rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-white/5 p-4">
+    <div className="rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-white/5 p-4 min-w-0">
       {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 min-w-0">
         <button
           type="button"
           onClick={() => setOpen((o) => !o)}
@@ -111,13 +111,13 @@ export default function SectionEditor({
           </div>
         </button>
 
-        <div className="flex items-center gap-2">
+        {/* WICHTIG für 300px: wrap + min-w-0 */}
+        <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
           <Button
             disabled={saving}
             onClick={async () => {
               setErr(null);
 
-              // leichte UI-Validierung nur für CTA-Link
               if (isCta && !isProbablyUrl(draft.body)) {
                 setErr("Bitte eine gültige URL eingeben (z.B. /kontakt oder https://…).");
                 return;
@@ -204,7 +204,7 @@ export default function SectionEditor({
 
       {/* COLLAPSED SUMMARY */}
       {!open && (
-        <div className="mt-3 text-sm text-zinc-700 dark:text-zinc-400 space-y-1">
+        <div className="mt-3 text-sm text-zinc-700 dark:text-zinc-400 space-y-1 break-words">
           {isCta ? (
             <>
               {draft.subtitle ? <div className="truncate">Button: {draft.subtitle}</div> : null}
@@ -221,9 +221,10 @@ export default function SectionEditor({
 
       {/* BODY */}
       {open && (
-        <div className="mt-4 space-y-4">
-          <div className="grid gap-3 md:grid-cols-3">
-            <div className="md:col-span-2 flex items-end">
+        <div className="mt-4 space-y-4 min-w-0">
+          {/* WICHTIG: lg statt md (Sidebar ab md) */}
+          <div className="grid gap-3 lg:grid-cols-3 min-w-0">
+            <div className="lg:col-span-2 flex items-end">
               <Checkbox
                 checked={draft.isActive}
                 onChange={(v) => setDraft((d) => ({ ...d, isActive: v }))}
@@ -232,7 +233,7 @@ export default function SectionEditor({
             </div>
 
             {/* TITLE */}
-            <div className="md:col-span-3">
+            <div className="lg:col-span-3">
               <div className="text-xs font-medium mb-1">
                 {isCta ? "Überschrift" : "Titel"}{" "}
                 <span className="text-zinc-500">(optional)</span>
@@ -246,7 +247,7 @@ export default function SectionEditor({
             {/* CTA SPECIAL FIELDS */}
             {isCta ? (
               <>
-                <div className="md:col-span-3">
+                <div className="lg:col-span-3">
                   <div className="text-xs font-medium mb-1">
                     Button-Text <span className="text-zinc-500">(optional)</span>
                   </div>
@@ -257,7 +258,7 @@ export default function SectionEditor({
                   />
                 </div>
 
-                <div className="md:col-span-3">
+                <div className="lg:col-span-3">
                   <div className="text-xs font-medium mb-1">
                     Button-Link (URL) <span className="text-zinc-500">(optional)</span>
                   </div>
@@ -266,7 +267,7 @@ export default function SectionEditor({
                     onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
                     placeholder='z.B. "/kontakt" oder "https://example.com"'
                   />
-                  <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+                  <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400 break-words">
                     Tipp: z.B. <span className="font-medium">/jobs</span> für intern,{" "}
                     <span className="font-medium">https://…</span> für extern.
                   </div>
@@ -275,7 +276,7 @@ export default function SectionEditor({
             ) : (
               <>
                 {/* SUBTITLE */}
-                <div className="md:col-span-3">
+                <div className="lg:col-span-3">
                   <div className="text-xs font-medium mb-1">
                     Untertitel <span className="text-zinc-500">(optional)</span>
                   </div>
@@ -286,7 +287,7 @@ export default function SectionEditor({
                 </div>
 
                 {/* BODY */}
-                <div className="md:col-span-3">
+                <div className="lg:col-span-3">
                   <div className="text-xs font-medium mb-1">
                     Text / Inhalt <span className="text-zinc-500">(optional)</span>
                   </div>
@@ -298,21 +299,23 @@ export default function SectionEditor({
               </>
             )}
 
-            {/* IMAGE stays for all types (auch CTA ok, falls du später willst) */}
-            <div className="md:col-span-3">
+            {/* IMAGE */}
+            <div className="lg:col-span-3 min-w-0">
               <div className="text-xs font-medium mb-2">
                 Bild <span className="text-zinc-500">(optional)</span>
               </div>
-              <ImageUploader
-                folder="about"
-                imageUrl={draft.imageUrl}
-                onChange={(storedOrEmpty) => setDraft((d) => ({ ...d, imageUrl: storedOrEmpty }))}
-              />
+              <div className="min-w-0">
+                <ImageUploader
+                  folder="about"
+                  imageUrl={draft.imageUrl}
+                  onChange={(storedOrEmpty) => setDraft((d) => ({ ...d, imageUrl: storedOrEmpty }))}
+                />
+              </div>
             </div>
           </div>
 
           {itemBlock && (
-            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-3">
+            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-3 min-w-0">
               {itemBlock}
             </div>
           )}

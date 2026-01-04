@@ -140,7 +140,7 @@ export default function AboutFaqSection({ section }: { section: AboutSectionDTO 
   const faqs = section.faqs;
 
   // Single-open feels “premium” and calmer.
-  const [openId, setOpenId] = React.useState<string | null>(faqs[0]?.id ?? null);
+  const [openId, setOpenId] = React.useState<string | null>(null);
 
   return (
     <AboutCard className="relative overflow-hidden">

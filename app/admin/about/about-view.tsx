@@ -62,7 +62,6 @@ export default function AboutView({
   }
 
   async function persistOrderFromLocal(nextLocal: AboutSectionDTO[]) {
-    // Persist only middle section ids
     const idsInOrder = nextLocal.map((s) => s.id);
     await persistMiddleOrder(idsInOrder);
   }
@@ -70,7 +69,6 @@ export default function AboutView({
   const sortable = useSortableList({
     items: middleSectionsSorted,
     onReorderPersist: async (next) => {
-      // next provides items with temporary "sortOrder indices" from hook -> rebuild local list in that order
       const idToIndex = new Map(next.map((n: any) => [n.id, n.sortOrder]));
       const nextLocal = middleSectionsSorted
         .slice()
@@ -83,7 +81,6 @@ export default function AboutView({
         return [...keep, ...updatedMiddle];
       });
 
-      // persist to server
       await persistOrderFromLocal(nextLocal);
     },
   });
@@ -107,7 +104,6 @@ export default function AboutView({
     const [moved] = nextLocal.splice(idx, 1);
     nextLocal.splice(j, 0, moved);
 
-    // local first for animation
     sortable.setLocalOrder(nextLocal);
     setSections((prev) => {
       const keep = prev.filter((s) => s.type === "HERO" || s.type === "TEAM");
@@ -119,11 +115,11 @@ export default function AboutView({
   }
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0 overflow-x-clip">
+    <main className="mx-auto w-full max-w-5xl px-3.5 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 min-w-0 overflow-x-clip">
       <AdminPageHeader
         title="Über uns"
         subtitle="Verwalte Inhalte, Texte und Informationen der Über uns Seite."
-      /> 
+      />
 
       <SectionBox
         title="Hero Bereich"
@@ -132,7 +128,9 @@ export default function AboutView({
         summary={
           hero ? (
             <div className="text-sm text-zinc-600 dark:text-zinc-400">
-              <div className="font-medium text-zinc-900 dark:text-zinc-100">{hero.title || "—"}</div>
+              <div className="font-medium text-zinc-900 dark:text-zinc-100">
+                {hero.title || "—"}
+              </div>
               <div className="truncate">{hero.subtitle || "—"}</div>
             </div>
           ) : null
@@ -165,7 +163,7 @@ export default function AboutView({
           )}
 
           <div className="rounded-2xl border border-zinc-300 dark:border-zinc-800/80 overflow-hidden bg-white dark:bg-zinc-950/30">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 dark:border-zinc-800/80">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-zinc-200 dark:border-zinc-800/80">
               <div className="text-sm font-semibold">Reihenfolge (Mitte)</div>
               <div className="text-xs text-zinc-600 dark:text-zinc-400">
                 {savingOrder ? "Speichert Sortierung…" : "Drag & Drop oder Pfeile nutzen"}

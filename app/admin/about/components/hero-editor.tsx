@@ -4,7 +4,7 @@
 import { useState } from "react";
 import type { AboutSectionDTO } from "../types";
 import ImageUploader from "@/app/components/image-uploader";
-import { Button, TextArea, TextInput, Checkbox } from "./inputs";
+import { Button, TextArea, TextInput } from "./inputs";
 import { updateHero } from "../actions";
 
 export default function HeroEditor({
@@ -33,7 +33,9 @@ export default function HeroEditor({
           {err}
         </div>
       )}
-      <div className="grid gap-3 md:grid-cols-2">
+
+      {/* WICHTIG: lg statt md (weil ab md die Sidebar Platz klaut) */}
+      <div className="grid gap-3 lg:grid-cols-2">
         <div>
           <div className="text-xs font-medium mb-1">Titel</div>
           <TextInput
@@ -52,7 +54,7 @@ export default function HeroEditor({
           />
         </div>
 
-        <div className="md:col-span-2">
+        <div className="lg:col-span-2">
           <div className="text-xs font-medium mb-1">Text</div>
           <TextArea
             value={draft.body}
@@ -61,7 +63,7 @@ export default function HeroEditor({
           />
         </div>
 
-        <div className="md:col-span-2">
+        <div className="lg:col-span-2">
           <div className="text-xs font-medium mb-2">Hero Bild</div>
           <ImageUploader
             folder="about"
@@ -72,9 +74,7 @@ export default function HeroEditor({
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-4"></div>
-
-        <div className="flex items-center justify-end">
+        <div className="lg:col-span-2 flex items-center justify-end">
           <Button
             disabled={saving}
             onClick={async () => {

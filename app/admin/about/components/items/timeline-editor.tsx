@@ -121,18 +121,18 @@ export default function TimelineEditor({
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-6">
+        <div className="mt-4 grid gap-3 lg:grid-cols-6">
           <div>
             <div className="text-xs font-medium mb-1">Jahr</div>
             <TextInput value={year} onChange={(e) => setYear(e.target.value)} />
           </div>
 
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <div className="text-xs font-medium mb-1">Titel</div>
             <TextInput value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
 
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <div className="text-xs font-medium mb-1">Beschreibung</div>
             <TextInput value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
@@ -209,7 +209,7 @@ export default function TimelineEditor({
                   "
                   {...sortable.bindDropTarget(it.id)}
                 >
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 min-w-0">
                     <ReorderControls
                       disabled={busy}
                       isFirst={index === 0}
@@ -219,7 +219,7 @@ export default function TimelineEditor({
                       onDown={() => void moveByArrow(it.id, 1)}
                     />
 
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <Row
                         item={it}
                         busy={busy}
@@ -355,23 +355,23 @@ function Row({
   }, [item.id, item.year, item.title, item.description]);
 
   return (
-    <div className="grid gap-2 md:grid-cols-6">
+    <div className="grid gap-2 lg:grid-cols-6">
       <div>
         <div className="text-xs font-medium mb-1">Jahr</div>
         <TextInput value={year} onChange={(e) => setYear(e.target.value)} />
       </div>
 
-      <div className="md:col-span-2">
+      <div className="lg:col-span-2">
         <div className="text-xs font-medium mb-1">Titel</div>
         <TextInput value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
 
-      <div className="md:col-span-3">
+      <div className="lg:col-span-3">
         <div className="text-xs font-medium mb-1">Beschreibung</div>
         <TextInput value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
 
-      <div className="md:col-span-6 flex flex-wrap items-center justify-end gap-2">
+      <div className="lg:col-span-6 flex flex-wrap items-center justify-end gap-2">
         <Button
           disabled={busy || saving}
           onClick={async () => {

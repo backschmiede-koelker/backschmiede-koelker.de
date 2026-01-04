@@ -273,7 +273,7 @@ export default function PeopleEditor({
                       "
                       {...leadSortable.bindDropTarget(p.id)}
                     >
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 min-w-0">
                         <ReorderControls
                           disabled={busy}
                           isFirst={index === 0}
@@ -282,7 +282,7 @@ export default function PeopleEditor({
                           onUp={() => void moveByArrowInGroup("lead", p.id, -1)}
                           onDown={() => void moveByArrowInGroup("lead", p.id, 1)}
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <PersonCard
                             person={p}
                             disableKindChangeToOtherGroup
@@ -327,7 +327,7 @@ export default function PeopleEditor({
                       "
                       {...staffSortable.bindDropTarget(p.id)}
                     >
-                      <div className="flex gap-3">
+                      <div className="flex gap-3 min-w-0">
                         <ReorderControls
                           disabled={busy}
                           isFirst={index === 0}
@@ -336,7 +336,7 @@ export default function PeopleEditor({
                           onUp={() => void moveByArrowInGroup("staff", p.id, -1)}
                           onDown={() => void moveByArrowInGroup("staff", p.id, 1)}
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <PersonCard
                             person={p}
                             disableKindChangeToOtherGroup
@@ -513,22 +513,22 @@ function TeamSectionEditor({
         </button>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
-        <div className="md:col-span-2">
+      <div className="grid gap-3 lg:grid-cols-3">
+        <div className="lg:col-span-2">
           <div className="text-xs font-medium mb-1">
             Titel <span className="text-zinc-500">(optional)</span>
           </div>
           <TextInput value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
 
-        <div className="md:col-span-3">
+        <div className="lg:col-span-3">
           <div className="text-xs font-medium mb-1">
             Untertitel <span className="text-zinc-500">(optional)</span>
           </div>
           <TextInput value={subtitle} onChange={(e) => setSubtitle(e.target.value)} />
         </div>
 
-        <div className="md:col-span-3 flex items-center justify-end">
+        <div className="lg:col-span-3 flex items-center justify-end">
           <Button
             disabled={saving}
             onClick={async () => {
@@ -595,8 +595,8 @@ function CreatePersonForm({
         </div>
       )}
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <div className="md:col-span-2">
+      <div className="grid gap-3 lg:grid-cols-2">
+        <div className="lg:col-span-2">
           <div className="text-xs font-medium mb-1">Name</div>
           <TextInput value={name} onChange={(e) => setName(e.target.value)} />
         </div>
@@ -620,14 +620,14 @@ function CreatePersonForm({
           />
         </div>
 
-        <div className="md:col-span-2">
+        <div className="lg:col-span-2">
           <div className="text-xs font-medium mb-1">
             Kurz-Bio <span className="text-zinc-500">(optional)</span>
           </div>
           <TextArea value={shortBio} onChange={(e) => setShortBio(e.target.value)} />
         </div>
 
-        <div className="md:col-span-2">
+        <div className="lg:col-span-2">
           <div className="text-xs font-medium mb-2">
             Portrait <span className="text-zinc-500">(optional)</span>
           </div>
@@ -659,7 +659,7 @@ function CreatePersonForm({
           />
         </div>
 
-        <div className="md:col-span-2 flex flex-wrap gap-4">
+        <div className="lg:col-span-2 flex flex-wrap gap-4">
           <label className="inline-flex items-center gap-2 text-sm">
             <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
             Aktiv{" "}
@@ -669,7 +669,7 @@ function CreatePersonForm({
           </label>
         </div>
 
-        <div className="md:col-span-2 flex items-center justify-end">
+        <div className="lg:col-span-2 flex items-center justify-end">
           <Button
             disabled={saving || !name.trim()}
             onClick={async () => {
@@ -763,7 +763,7 @@ function PersonCard({
           </div>
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
           <Button
             disabled={saving}
             onClick={async () => {
@@ -829,7 +829,7 @@ function PersonCard({
 
       {open && (
         <div className="mt-4 space-y-4">
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-3 lg:grid-cols-2">
             <div>
               <div className="text-xs font-medium mb-1">Name</div>
               <TextInput value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} />
@@ -856,14 +856,14 @@ function PersonCard({
               <TextInput value={draft.roleLabel} onChange={(e) => setDraft((d) => ({ ...d, roleLabel: e.target.value }))} />
             </div>
 
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2">
               <div className="text-xs font-medium mb-1">
                 Kurz-Bio <span className="text-zinc-500">(optional)</span>
               </div>
               <TextArea value={draft.shortBio} onChange={(e) => setDraft((d) => ({ ...d, shortBio: e.target.value }))} />
             </div>
 
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2">
               <div className="text-xs font-medium mb-2">
                 Portrait <span className="text-zinc-500">(optional)</span>
               </div>
@@ -891,7 +891,7 @@ function PersonCard({
               <TextInput value={draft.instagramHandle} onChange={(e) => setDraft((d) => ({ ...d, instagramHandle: e.target.value }))} />
             </div>
 
-            <div className="md:col-span-2 flex flex-wrap gap-4">
+            <div className="lg:col-span-2 flex flex-wrap gap-4">
               <label className="inline-flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={draft.active} onChange={(e) => setDraft((d) => ({ ...d, active: e.target.checked }))} />
                 Aktiv{" "}
