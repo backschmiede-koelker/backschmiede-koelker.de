@@ -16,7 +16,7 @@ function Chip({ children }: { children: React.ReactNode }) {
   return (
     <span
       className={[
-        "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium",
+        "inline-flex max-w-full items-center rounded-full px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-medium whitespace-normal break-words",
         // WHITE: etwas dunkler + klarere Outline für Kontrast
         "bg-white/85 text-zinc-800 ring-1 ring-zinc-300/70 shadow-[0_1px_0_rgba(0,0,0,0.03)]",
         // DARK: wie gehabt
@@ -65,10 +65,10 @@ export default function AboutHeroSection({
         />
       </div>
 
-      <div className="relative p-5 md:p-10">
-        <div className="grid gap-8 md:grid-cols-12 items-center">
+      <div className="relative p-4 sm:p-5 md:p-10">
+        <div className="grid gap-8 lg:grid-cols-12 items-center">
           {/* Left */}
-          <div className="md:col-span-7">
+          <div className="lg:col-span-7">
             {/* Eyebrow pill: WHITE edler + schärfer */}
             <div
               className={[
@@ -90,7 +90,7 @@ export default function AboutHeroSection({
             </div>
 
             {/* Chips */}
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2 min-w-0">
               <Chip>Recke</Chip>
               <Chip>Mettingen</Chip>
               <Chip>Tradition & Handwerk</Chip>
@@ -99,7 +99,7 @@ export default function AboutHeroSection({
           </div>
 
           {/* Right (Image) */}
-          <div className="md:col-span-5">
+          <div className="lg:col-span-5">
             <div className="relative">
               {/* Premium ambient accents (behind the card) */}
               <div className="pointer-events-none absolute -inset-10 rounded-[44px] dark:hidden">
@@ -134,18 +134,18 @@ export default function AboutHeroSection({
                   <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent dark:from-black/35 dark:via-black/10 dark:to-transparent" />
 
                   {/* Bottom label */}
-                  <div className="absolute left-4 right-4 bottom-4">
-                    <div className="flex items-center justify-between gap-3 rounded-2xl backdrop-blur px-4 py-3 ring-1 ring-white/10 bg-zinc-950/70 text-white shadow-[0_12px_30px_rgba(0,0,0,0.25)] dark:bg-zinc-900/60 dark:shadow-sm">
+                  <div className="absolute left-3 right-3 bottom-3 sm:left-4 sm:right-4 sm:bottom-4">
+                    <div className="flex items-start gap-3 rounded-2xl backdrop-blur px-3 sm:px-4 py-2.5 sm:py-3 ring-1 ring-white/10 bg-zinc-950/70 text-white shadow-[0_12px_30px_rgba(0,0,0,0.25)] dark:bg-zinc-900/60 dark:shadow-sm">
                       <div className="min-w-0">
-                        <div className="text-xs font-semibold text-white">
+                        <div className="text-xs font-semibold text-white whitespace-normal break-words">
                           Seit Generationen in der Region
                         </div>
-                        <div className="text-[11px] text-white/80 truncate">
+                        <div className="text-[11px] text-white/80 whitespace-normal break-words">
                           Gute Zutaten · Zeit · Handwerk · Herz
                         </div>
                       </div>
 
-                      <div className="flex-none rounded-full bg-emerald-600 text-white text-[11px] font-semibold px-3 py-1 shadow-sm">
+                      <div className="ml-auto flex-none rounded-full bg-emerald-600 text-white text-[11px] font-semibold px-2.5 sm:px-3 py-1 shadow-sm">
                         Frisch
                       </div>
                     </div>
