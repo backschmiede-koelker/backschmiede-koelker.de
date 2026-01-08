@@ -10,8 +10,7 @@ import PeopleEditor from "./components/items/people-editor";
 import SectionAddPicker from "./components/section-add-picker";
 import { reorderMiddleSections } from "./actions";
 
-// Reuse same DnD behavior + animations everywhere
-import { useSortableList } from "./components/dnd/useSortableList";
+import { useSortableList } from "./components/dnd/use-sortable-list";
 import { AnimatePresence, motion } from "framer-motion";
 import { GripVertical, ArrowUp, ArrowDown } from "lucide-react";
 import AdminPageHeader from "../components/admin-page-header";
@@ -74,7 +73,6 @@ export default function AboutView({
         .slice()
         .sort((a, b) => (idToIndex.get(a.id) ?? 0) - (idToIndex.get(b.id) ?? 0));
 
-      // local first (instant + animated)
       setSections((prev) => {
         const keep = prev.filter((s) => s.type === "HERO" || s.type === "TEAM");
         const updatedMiddle = nextLocal.map((s, i) => ({ ...s, sortOrder: i }));
@@ -127,7 +125,7 @@ export default function AboutView({
         defaultOpen={false}
         summary={
           hero ? (
-            <div className="text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="text-sm text-zinc-600 dark:text-zinc-400 min-w-0">
               <div className="font-medium text-zinc-900 dark:text-zinc-100">
                 {hero.title || "—"}
               </div>
@@ -149,7 +147,7 @@ export default function AboutView({
       </SectionBox>
 
       <SectionBox title="Bereiche">
-        <div className="space-y-5">
+        <div className="space-y-5 min-w-0">
           <SectionAddPicker
             sections={sections as any}
             onCreated={(created) => setSections((prev) => [...prev, created])}
@@ -162,8 +160,8 @@ export default function AboutView({
             </div>
           )}
 
-          <div className="rounded-2xl border border-zinc-300 dark:border-zinc-800/80 overflow-hidden bg-white dark:bg-zinc-950/30">
-            <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-zinc-200 dark:border-zinc-800/80">
+          <div className="admin-surface overflow-hidden min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3 sm:px-4 py-3 border-b border-zinc-200/70 dark:border-zinc-800/80 min-w-0">
               <div className="text-sm font-semibold">Reihenfolge (Mitte)</div>
               <div className="text-xs text-zinc-600 dark:text-zinc-400">
                 {savingOrder ? "Speichert Sortierung…" : "Drag & Drop oder Pfeile nutzen"}
@@ -171,11 +169,11 @@ export default function AboutView({
             </div>
 
             {(sortable.items as AboutSectionDTO[]).length === 0 ? (
-              <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">
+              <div className="p-3 sm:p-4 text-sm text-zinc-600 dark:text-zinc-400">
                 Noch keine Bereiche in der Mitte.
               </div>
             ) : (
-              <motion.div layout transition={{ duration: 0.22 }} className="p-3 space-y-3">
+              <motion.div layout transition={{ duration: 0.22 }} className="p-2 sm:p-3 space-y-3 min-w-0">
                 <AnimatePresence initial={false}>
                   {(sortable.items as AboutSectionDTO[]).map((s, idx) => {
                     const isFirst = idx === 0;
@@ -190,13 +188,10 @@ export default function AboutView({
                         exit={{ opacity: 0, y: 8 }}
                         transition={{ duration: 0.18 }}
                         id={sectionAnchorId(s.id)}
-                        className="
-                          rounded-2xl border border-zinc-300 bg-white p-4 shadow-sm
-                          dark:border-zinc-800 dark:bg-zinc-900/40
-                        "
+                        className="admin-surface admin-pad min-w-0"
                         {...sortable.bindDropTarget(s.id)}
                       >
-                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 min-w-0">
                           <div className="flex items-center gap-3 min-w-0">
                             <div
                               {...sortable.bindDragHandle(s.id)}
@@ -259,16 +254,18 @@ export default function AboutView({
                           </div>
                         </div>
 
-                        <SectionEditor
-                          section={s}
-                          canDelete={true}
-                          onUpdated={(next) =>
-                            setSections((prev) => prev.map((x) => (x.id === next.id ? next : x)))
-                          }
-                          onDeleted={() =>
-                            setSections((prev) => prev.filter((x) => x.id !== s.id))
-                          }
-                        />
+                        <div className="mt-3 min-w-0">
+                          <SectionEditor
+                            section={s}
+                            canDelete={true}
+                            onUpdated={(next) =>
+                              setSections((prev) => prev.map((x) => (x.id === next.id ? next : x)))
+                            }
+                            onDeleted={() =>
+                              setSections((prev) => prev.filter((x) => x.id !== s.id))
+                            }
+                          />
+                        </div>
                       </motion.div>
                     );
                   })}

@@ -1,4 +1,4 @@
-// app/admin/about/components/dnd/useSortableList.ts
+// app/admin/about/components/dnd/use-sortable-list.ts
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -13,7 +13,11 @@ export function useSortableList<T extends SortableBase>({
   onReorderPersist: (next: { id: string; sortOrder: number }[]) => Promise<void>;
 }) {
   const sortedItems = useMemo(
-    () => [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.id.localeCompare(b.id)),
+    () =>
+      [...items].sort(
+        (a, b) =>
+          (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.id.localeCompare(b.id)
+      ),
     [items]
   );
 
@@ -33,12 +37,13 @@ export function useSortableList<T extends SortableBase>({
     if (from < 0) return;
 
     const clampedTarget = Math.max(0, Math.min(targetIndex, ids.length));
-    if (from === clampedTarget || from === clampedTarget - 1) { }
+    const insertAt = from < clampedTarget ? clampedTarget - 1 : clampedTarget;
+
+    // no-op → nicht neu setzen (verhindert Jitter / unnötiges Re-render)
+    if (insertAt === from) return;
 
     const next = localOrder.slice();
     const [moved] = next.splice(from, 1);
-
-    const insertAt = from < clampedTarget ? clampedTarget - 1 : clampedTarget;
     next.splice(insertAt, 0, moved);
 
     setLocalOrder(next);
@@ -108,6 +113,6 @@ export function useSortableList<T extends SortableBase>({
     bindDragHandle,
     bindDropTarget,
     persistCurrentOrder,
-    setLocalOrder, 
+    setLocalOrder,
   };
 }

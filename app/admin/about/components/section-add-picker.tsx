@@ -8,7 +8,6 @@ import ImageUploader from "@/app/components/image-uploader";
 import { createSection } from "../actions";
 
 type SectionType = AboutSectionDTO["type"];
-
 type SingletonType = Exclude<SectionType, "CUSTOM_TEXT" | "HERO" | "TEAM">;
 
 const SINGLETONS: { type: SingletonType; title: string; desc: string }[] = [
@@ -103,7 +102,7 @@ export default function SectionAddPicker({
   }
 
   return (
-    <section className="rounded-2xl border border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 min-w-0">
+    <section className="rounded-2xl border border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/20 admin-pad min-w-0">
       <div className="flex flex-wrap items-center justify-between gap-3 min-w-0">
         <div className="min-w-0">
           <div className="text-sm font-semibold">Abschnitt hinzufügen</div>
@@ -125,27 +124,23 @@ export default function SectionAddPicker({
           Einmalige Bereiche
         </div>
 
-        {/* WICHTIG: lg statt md */}
-        <div className="mt-2 grid gap-3 lg:grid-cols-2">
+        <div className="mt-2 grid gap-3 lg:grid-cols-2 min-w-0">
           {SINGLETONS.map((x) => {
             const existing = isExisting(sections, x.type);
 
+            const cardCls = existing
+              ? "admin-surface admin-pad min-w-0"
+              : "rounded-2xl border border-emerald-500/25 bg-white/70 dark:bg-zinc-950/30 shadow-sm admin-pad min-w-0";
+
             return (
-              <div
-                key={x.type}
-                className={[
-                  "rounded-2xl border p-4 min-w-0",
-                  existing
-                    ? "border-zinc-200/70 bg-white/70 dark:border-zinc-800/80 dark:bg-zinc-950/30"
-                    : "border-emerald-500/25 bg-white/70 dark:bg-zinc-950/30",
-                ].join(" ")}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3 min-w-0">
+              <div key={x.type} className={cardCls}>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 min-w-0">
                   <div className="min-w-0">
                     <div className="font-semibold">{x.title}</div>
                     <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
                       {x.desc}
                     </div>
+
                     {existing ? (
                       <div className="mt-2 inline-flex items-center rounded-full border border-emerald-500/25 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-500/20">
                         Vorhanden ✓
@@ -157,16 +152,18 @@ export default function SectionAddPicker({
                     )}
                   </div>
 
-                  <div className="flex flex-col items-end gap-2">
-                    {existing ? (
-                      <Button variant="ghost" onClick={() => onScrollToSection(existing.id)}>
-                        Zum Abschnitt
-                      </Button>
-                    ) : (
-                      <Button disabled={saving} onClick={() => createSingleton(x.type)}>
-                        {saving ? "Erstellt…" : "Anlegen"}
-                      </Button>
-                    )}
+                  <div className="min-w-0">
+                    <div className="admin-btn-row admin-btn-equal">
+                      {existing ? (
+                        <Button variant="ghost" onClick={() => onScrollToSection(existing.id)}>
+                          Zum Abschnitt
+                        </Button>
+                      ) : (
+                        <Button disabled={saving} onClick={() => createSingleton(x.type)}>
+                          {saving ? "Erstellt…" : "Anlegen"}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -181,37 +178,39 @@ export default function SectionAddPicker({
           Bausteine
         </div>
 
-        <div className="mt-2 rounded-2xl border border-zinc-200/70 bg-white/70 dark:border-zinc-800/80 dark:bg-zinc-950/30 p-4 min-w-0">
-          <div className="flex flex-wrap items-center justify-between gap-3 min-w-0">
+        <div className="mt-2 admin-surface admin-pad min-w-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
             <div className="min-w-0">
               <div className="font-semibold">Text (frei)</div>
               <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
                 Mehrfach nutzbar. Ideal für Story-Absätze, Philosophie, Handwerk, etc.
               </div>
             </div>
-            <Button variant="ghost" onClick={() => setOpenText((o) => !o)}>
-              {openText ? "Schließen" : "Text hinzufügen"}
-            </Button>
+
+            <div className="admin-btn-row admin-btn-equal">
+              <Button variant="ghost" onClick={() => setOpenText((o) => !o)}>
+                {openText ? "Schließen" : "Text hinzufügen"}
+              </Button>
+            </div>
           </div>
 
           {openText && (
-            /* WICHTIG: lg statt md */
             <div className="mt-4 grid gap-3 lg:grid-cols-2 min-w-0">
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 min-w-0">
                 <div className="text-xs font-medium mb-1">
                   Titel <span className="text-zinc-500">(optional)</span>
                 </div>
                 <TextInput value={title} onChange={(e) => setTitle(e.target.value)} />
               </div>
 
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 min-w-0">
                 <div className="text-xs font-medium mb-1">
                   Untertitel <span className="text-zinc-500">(optional)</span>
                 </div>
                 <TextInput value={subtitle} onChange={(e) => setSubtitle(e.target.value)} />
               </div>
 
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 min-w-0">
                 <div className="text-xs font-medium mb-1">
                   Text / Inhalt <span className="text-zinc-500">(optional)</span>
                 </div>
@@ -225,10 +224,12 @@ export default function SectionAddPicker({
                 <ImageUploader folder="about" imageUrl={imageUrl} onChange={setImageUrl} />
               </div>
 
-              <div className="lg:col-span-2 flex flex-wrap items-center justify-end gap-2">
-                <Button disabled={saving} onClick={createTextBlock}>
-                  {saving ? "Erstellt…" : "Anlegen"}
-                </Button>
+              <div className="lg:col-span-2 min-w-0">
+                <div className="admin-btn-row admin-btn-equal">
+                  <Button disabled={saving} onClick={createTextBlock}>
+                    {saving ? "Erstellt…" : "Anlegen"}
+                  </Button>
+                </div>
               </div>
             </div>
           )}

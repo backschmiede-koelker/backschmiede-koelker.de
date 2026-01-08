@@ -27,16 +27,15 @@ export default function HeroEditor({
   const [err, setErr] = useState<string | null>(null);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 min-w-0">
       {err && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
           {err}
         </div>
       )}
 
-      {/* WICHTIG: lg statt md (weil ab md die Sidebar Platz klaut) */}
-      <div className="grid gap-3 lg:grid-cols-2">
-        <div>
+      <div className="grid gap-3 lg:grid-cols-2 min-w-0">
+        <div className="min-w-0">
           <div className="text-xs font-medium mb-1">Titel</div>
           <TextInput
             value={draft.title}
@@ -45,7 +44,7 @@ export default function HeroEditor({
           />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <div className="text-xs font-medium mb-1">Untertitel</div>
           <TextInput
             value={draft.subtitle}
@@ -54,7 +53,7 @@ export default function HeroEditor({
           />
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0">
           <div className="text-xs font-medium mb-1">Text</div>
           <TextArea
             value={draft.body}
@@ -63,42 +62,44 @@ export default function HeroEditor({
           />
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0">
           <div className="text-xs font-medium mb-2">Hero Bild</div>
-          <ImageUploader
-            folder="about"
-            imageUrl={draft.imageUrl}
-            onChange={(storedOrEmpty) =>
-              setDraft((d) => ({ ...d, imageUrl: storedOrEmpty }))
-            }
-          />
+          <div className="min-w-0">
+            <ImageUploader
+              folder="about"
+              imageUrl={draft.imageUrl}
+              onChange={(storedOrEmpty) => setDraft((d) => ({ ...d, imageUrl: storedOrEmpty }))}
+            />
+          </div>
         </div>
 
-        <div className="lg:col-span-2 flex items-center justify-end">
-          <Button
-            disabled={saving}
-            onClick={async () => {
-              setErr(null);
-              setSaving(true);
-              try {
-                const next = await updateHero({
-                  id: draft.id,
-                  title: draft.title || null,
-                  subtitle: draft.subtitle || null,
-                  body: draft.body || null,
-                  imageUrl: draft.imageUrl || null,
-                  sortOrder: draft.sortOrder,
-                });
-                onUpdated(next);
-              } catch (e: any) {
-                setErr(e?.message || "Fehler beim Speichern");
-              } finally {
-                setSaving(false);
-              }
-            }}
-          >
-            {saving ? "Speichert…" : "Hero speichern"}
-          </Button>
+        <div className="lg:col-span-2 min-w-0">
+          <div className="admin-btn-row admin-btn-equal">
+            <Button
+              disabled={saving}
+              onClick={async () => {
+                setErr(null);
+                setSaving(true);
+                try {
+                  const next = await updateHero({
+                    id: draft.id,
+                    title: draft.title || null,
+                    subtitle: draft.subtitle || null,
+                    body: draft.body || null,
+                    imageUrl: draft.imageUrl || null,
+                    sortOrder: draft.sortOrder,
+                  });
+                  onUpdated(next);
+                } catch (e: any) {
+                  setErr(e?.message || "Fehler beim Speichern");
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              {saving ? "Speichert…" : "Hero speichern"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

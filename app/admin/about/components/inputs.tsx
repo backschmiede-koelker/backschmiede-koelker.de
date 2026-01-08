@@ -31,11 +31,7 @@ export function Checkbox({
 }) {
   return (
     <label className="inline-flex items-center gap-2 text-sm text-zinc-900 dark:text-zinc-100">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-      />
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
       {label}
     </label>
   );
@@ -54,9 +50,12 @@ export function Button({
   disabled?: boolean;
   type?: "button" | "submit";
 }) {
+  const btnBase = "inline-flex items-center justify-center whitespace-nowrap h-10";
+
   const cls =
     variant === "primary"
       ? `
+        ${btnBase}
         rounded-xl bg-emerald-600 px-3 py-2 text-sm text-white shadow-sm
         hover:bg-emerald-700 active:scale-[0.99]
         dark:bg-emerald-500/90 dark:hover:bg-emerald-500
@@ -64,6 +63,7 @@ export function Button({
       `
       : variant === "danger"
       ? `
+        ${btnBase}
         rounded-xl border border-red-500/50 bg-white px-3 py-2 text-sm text-red-700
         hover:bg-red-50 active:scale-[0.99]
         dark:bg-transparent dark:text-red-200 dark:border-red-500/30 dark:hover:bg-red-950/40
@@ -71,6 +71,7 @@ export function Button({
       `
       : variant === "softDanger"
       ? `
+        ${btnBase}
         rounded-xl border border-red-200 bg-red-50/60 px-3 py-2 text-sm text-red-800
         hover:bg-red-100/60 hover:border-red-300 active:scale-[0.99]
         dark:border-red-500/20 dark:bg-red-950/15 dark:text-red-100
@@ -79,6 +80,7 @@ export function Button({
       `
       : variant === "softSuccess"
       ? `
+        ${btnBase}
         rounded-xl border border-emerald-200 bg-emerald-50/60 px-3 py-2 text-sm text-emerald-900
         hover:bg-emerald-100/60 hover:border-emerald-300 active:scale-[0.99]
         dark:border-emerald-500/20 dark:bg-emerald-950/15 dark:text-emerald-100
@@ -86,6 +88,7 @@ export function Button({
         disabled:opacity-60 disabled:cursor-not-allowed
       `
       : `
+        ${btnBase}
         rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm
         hover:bg-zinc-100 hover:border-zinc-400 active:scale-[0.99]
         dark:border-zinc-700/80 dark:bg-zinc-900/60 dark:text-zinc-100

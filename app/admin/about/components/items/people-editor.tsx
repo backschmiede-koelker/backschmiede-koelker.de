@@ -15,9 +15,10 @@ import {
   updateSection,
 } from "../../actions";
 import { PERSON_KIND_OPTIONS } from "../options";
-import { useSortableList } from "../dnd/useSortableList";
-import { GripVertical, ArrowUp, ArrowDown, Users } from "lucide-react";
+import { useSortableList } from "../dnd/use-sortable-list";
+import ReorderHeader from "../dnd/reorder-header";
 import { AnimatePresence, motion } from "framer-motion";
+import { Users } from "lucide-react";
 
 type Kind = "OWNER" | "MANAGER" | "TEAM_MEMBER";
 
@@ -137,19 +138,18 @@ export default function PeopleEditor({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0">
       {/* TEAM SECTION CONTROL */}
-      <div className="rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-950/30 p-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="admin-surface admin-pad min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
           <div className="min-w-0">
             <div className="text-sm font-semibold">Team-Bereich</div>
             <div className="text-xs text-zinc-600 dark:text-zinc-400">
-              Hier bearbeitest du Titel/Untertitel und ob der Team-Bereich aktiv ist.
-              Welche Personen angezeigt werden, steuerst du unten pro Person über „Aktiv“.
+              Titel/Untertitel & Status hier. Welche Personen angezeigt werden, steuerst du unten pro Person über „Aktiv“.
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="admin-btn-row admin-btn-equal">
             <Button variant="ghost" onClick={() => setTeamOpen((o) => !o)}>
               {teamOpen ? "Schließen" : "Öffnen"}
             </Button>
@@ -178,9 +178,9 @@ export default function PeopleEditor({
         </div>
 
         {!teamOpen && (
-          <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+          <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400 min-w-0">
             {teamSection ? (
-              <div className="space-y-1">
+              <div className="space-y-1 min-w-0">
                 <div className="font-medium text-zinc-900 dark:text-zinc-100">
                   {teamSection.title || "—"}
                 </div>
@@ -201,10 +201,7 @@ export default function PeopleEditor({
         )}
 
         {teamOpen && teamSection && (
-          <TeamSectionEditor
-            section={teamSection}
-            onUpdated={(next) => onTeamSectionChange(next)}
-          />
+          <TeamSectionEditor section={teamSection} onUpdated={(next) => onTeamSectionChange(next)} />
         )}
 
         {teamOpen && !teamSection && (
@@ -215,17 +212,20 @@ export default function PeopleEditor({
       </div>
 
       {/* CREATE PERSON */}
-      <div className="rounded-2xl border border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/20 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
+      <div className="rounded-2xl border border-emerald-500/20 bg-emerald-50/40 dark:bg-emerald-950/20 admin-pad min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
+          <div className="min-w-0">
             <div className="text-sm font-semibold">Neue Person</div>
             <div className="text-xs text-zinc-600 dark:text-zinc-400">
               Du kannst steuern, ob die Person auf der Über-uns-Seite erscheint – über „Aktiv“.
             </div>
           </div>
-          <Button variant="ghost" onClick={() => setCreateOpen((o) => !o)}>
-            {createOpen ? "Schließen" : "Öffnen"}
-          </Button>
+
+          <div className="admin-btn-row admin-btn-equal">
+            <Button variant="ghost" onClick={() => setCreateOpen((o) => !o)}>
+              {createOpen ? "Schließen" : "Öffnen"}
+            </Button>
+          </div>
         </div>
 
         {createOpen && (
@@ -241,22 +241,22 @@ export default function PeopleEditor({
 
       {/* LIST */}
       {total === 0 ? (
-        <div className="rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-950/30 p-4 text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="admin-surface admin-pad text-sm text-zinc-600 dark:text-zinc-400 min-w-0">
           Noch keine Personen angelegt.
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 min-w-0">
           <GroupBlock
             title="Verantwortung & Leitung"
             subtitle="Drag & Drop oder Pfeile – nur innerhalb dieser Gruppe."
             icon={<Users size={16} />}
           >
             {leadSortable.items.length === 0 ? (
-              <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">
+              <div className="p-3 sm:p-4 text-sm text-zinc-600 dark:text-zinc-400">
                 Keine Personen in „Verantwortung & Leitung“.
               </div>
             ) : (
-              <motion.div layout transition={{ duration: 0.22 }} className="p-3 space-y-3">
+              <motion.div layout transition={{ duration: 0.22 }} className="p-2 sm:p-3 space-y-3 min-w-0">
                 <AnimatePresence initial={false}>
                   {leadSortable.items.map((p: AboutPersonDTO, index: number) => (
                     <motion.div
@@ -266,32 +266,26 @@ export default function PeopleEditor({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 8 }}
                       transition={{ duration: 0.18 }}
-                      className="
-                        rounded-2xl border border-zinc-200/80 bg-white shadow-sm
-                        dark:border-zinc-800 dark:bg-zinc-900/40
-                        p-3
-                      "
+                      className="min-w-0"
                       {...leadSortable.bindDropTarget(p.id)}
                     >
-                      <div className="flex gap-3 min-w-0">
-                        <ReorderControls
+                      <div className="admin-surface admin-pad min-w-0">
+                        <ReorderHeader
                           disabled={busy}
                           isFirst={index === 0}
                           isLast={index === leadSortable.items.length - 1}
                           bindDragHandle={leadSortable.bindDragHandle(p.id)}
                           onUp={() => void moveByArrowInGroup("lead", p.id, -1)}
                           onDown={() => void moveByArrowInGroup("lead", p.id, 1)}
+                          leftMeta={<div className="text-xs text-zinc-500">Position: {index + 1}</div>}
                         />
-                        <div className="flex-1 min-w-0">
-                          <PersonCard
-                            person={p}
-                            disableKindChangeToOtherGroup
-                            onUpdated={(next) =>
-                              onChange(people.map((x) => (x.id === next.id ? next : x)))
-                            }
-                            onDeleted={() => onChange(people.filter((x) => x.id !== p.id))}
-                          />
-                        </div>
+
+                        <PersonCard
+                          person={p}
+                          disableKindChangeToOtherGroup
+                          onUpdated={(next) => onChange(people.map((x) => (x.id === next.id ? next : x)))}
+                          onDeleted={() => onChange(people.filter((x) => x.id !== p.id))}
+                        />
                       </div>
                     </motion.div>
                   ))}
@@ -306,11 +300,11 @@ export default function PeopleEditor({
             icon={<Users size={16} />}
           >
             {staffSortable.items.length === 0 ? (
-              <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">
+              <div className="p-3 sm:p-4 text-sm text-zinc-600 dark:text-zinc-400">
                 Keine Personen in „Mitarbeiter“.
               </div>
             ) : (
-              <motion.div layout transition={{ duration: 0.22 }} className="p-3 space-y-3">
+              <motion.div layout transition={{ duration: 0.22 }} className="p-2 sm:p-3 space-y-3 min-w-0">
                 <AnimatePresence initial={false}>
                   {staffSortable.items.map((p: AboutPersonDTO, index: number) => (
                     <motion.div
@@ -320,32 +314,26 @@ export default function PeopleEditor({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 8 }}
                       transition={{ duration: 0.18 }}
-                      className="
-                        rounded-2xl border border-zinc-200/80 bg-white shadow-sm
-                        dark:border-zinc-800 dark:bg-zinc-900/40
-                        p-3
-                      "
+                      className="min-w-0"
                       {...staffSortable.bindDropTarget(p.id)}
                     >
-                      <div className="flex gap-3 min-w-0">
-                        <ReorderControls
+                      <div className="admin-surface admin-pad min-w-0">
+                        <ReorderHeader
                           disabled={busy}
                           isFirst={index === 0}
                           isLast={index === staffSortable.items.length - 1}
                           bindDragHandle={staffSortable.bindDragHandle(p.id)}
                           onUp={() => void moveByArrowInGroup("staff", p.id, -1)}
                           onDown={() => void moveByArrowInGroup("staff", p.id, 1)}
+                          leftMeta={<div className="text-xs text-zinc-500">Position: {index + 1}</div>}
                         />
-                        <div className="flex-1 min-w-0">
-                          <PersonCard
-                            person={p}
-                            disableKindChangeToOtherGroup
-                            onUpdated={(next) =>
-                              onChange(people.map((x) => (x.id === next.id ? next : x)))
-                            }
-                            onDeleted={() => onChange(people.filter((x) => x.id !== p.id))}
-                          />
-                        </div>
+
+                        <PersonCard
+                          person={p}
+                          disableKindChangeToOtherGroup
+                          onUpdated={(next) => onChange(people.map((x) => (x.id === next.id ? next : x)))}
+                          onDeleted={() => onChange(people.filter((x) => x.id !== p.id))}
+                        />
                       </div>
                     </motion.div>
                   ))}
@@ -373,104 +361,22 @@ function GroupBlock({
   children: React.ReactNode;
 }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-start justify-between gap-3">
+    <div className="space-y-2 min-w-0">
+      <div className="flex flex-wrap items-start justify-between gap-3 min-w-0">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             {icon ? (
               <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
                 {icon}
               </span>
             ) : null}
-            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              {title}
-            </h3>
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{title}</h3>
           </div>
-          {subtitle ? (
-            <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{subtitle}</div>
-          ) : null}
+          {subtitle ? <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">{subtitle}</div> : null}
         </div>
       </div>
 
-      <div
-        className="
-          rounded-2xl border border-zinc-200/70 bg-white/70 shadow-sm
-          dark:border-zinc-800/80 dark:bg-zinc-950/30
-          overflow-hidden
-        "
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function ReorderControls({
-  disabled,
-  isFirst,
-  isLast,
-  bindDragHandle,
-  onUp,
-  onDown,
-}: {
-  disabled: boolean;
-  isFirst: boolean;
-  isLast: boolean;
-  bindDragHandle: any;
-  onUp: () => void;
-  onDown: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-2 pt-1">
-      <div
-        {...bindDragHandle}
-        className="
-          cursor-grab active:cursor-grabbing rounded-lg p-2
-          border border-zinc-200 bg-zinc-50 hover:bg-zinc-100
-          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
-        "
-        title="Ziehen"
-      >
-        <GripVertical size={18} />
-      </div>
-
-      <button
-        type="button"
-        disabled={disabled || isFirst}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onUp();
-        }}
-        className="
-          w-10 h-10 flex items-center justify-center rounded-lg
-          border border-zinc-200 bg-white hover:bg-zinc-50
-          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
-          disabled:opacity-30 disabled:cursor-not-allowed
-        "
-        title="Nach oben"
-      >
-        <ArrowUp size={16} />
-      </button>
-
-      <button
-        type="button"
-        disabled={disabled || isLast}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onDown();
-        }}
-        className="
-          w-10 h-10 flex items-center justify-center rounded-lg
-          border border-zinc-200 bg-white hover:bg-zinc-50
-          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
-          disabled:opacity-30 disabled:cursor-not-allowed
-        "
-        title="Nach unten"
-      >
-        <ArrowDown size={16} />
-      </button>
+      <div className="admin-surface overflow-hidden min-w-0">{children}</div>
     </div>
   );
 }
@@ -490,8 +396,8 @@ function TeamSectionEditor({
   const [saving, setSaving] = useState(false);
 
   return (
-    <div className="mt-4 space-y-4">
-      <div className="rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/70 dark:bg-zinc-900/30 p-3 flex flex-wrap items-center justify-between gap-3">
+    <div className="mt-4 space-y-4 min-w-0">
+      <div className="admin-nested-flat p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 min-w-0">
         <div className="min-w-0">
           <div className="text-sm font-semibold">Team-Bereich Status</div>
           <div className="text-xs text-zinc-600 dark:text-zinc-400">
@@ -503,7 +409,7 @@ function TeamSectionEditor({
           type="button"
           onClick={() => setActive((v) => !v)}
           className={[
-            "rounded-xl px-3 py-2 text-sm font-medium border shadow-sm transition active:scale-[0.99]",
+            "h-10 inline-flex items-center justify-center whitespace-nowrap rounded-xl px-3 text-sm font-medium border shadow-sm transition active:scale-[0.99]",
             active
               ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500/90 dark:hover:bg-emerald-500 dark:border-emerald-500/80"
               : "bg-white/80 text-zinc-900 border-zinc-300/80 hover:bg-zinc-50 dark:bg-zinc-900/60 dark:text-zinc-100 dark:border-zinc-700/80 dark:hover:bg-zinc-800/70",
@@ -513,44 +419,46 @@ function TeamSectionEditor({
         </button>
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid gap-3 lg:grid-cols-3 min-w-0">
+        <div className="lg:col-span-2 min-w-0">
           <div className="text-xs font-medium mb-1">
             Titel <span className="text-zinc-500">(optional)</span>
           </div>
           <TextInput value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
 
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 min-w-0">
           <div className="text-xs font-medium mb-1">
             Untertitel <span className="text-zinc-500">(optional)</span>
           </div>
           <TextInput value={subtitle} onChange={(e) => setSubtitle(e.target.value)} />
         </div>
 
-        <div className="lg:col-span-3 flex items-center justify-end">
-          <Button
-            disabled={saving}
-            onClick={async () => {
-              setSaving(true);
-              try {
-                const next = await updateSection({
-                  id: section.id,
-                  title: title || null,
-                  subtitle: subtitle || null,
-                  body: section.body ?? null,
-                  imageUrl: section.imageUrl ?? null,
-                  isActive: active,
-                  sortOrder: section.sortOrder ?? 9999,
-                });
-                onUpdated(next);
-              } finally {
-                setSaving(false);
-              }
-            }}
-          >
-            {saving ? "Speichert…" : "Team-Bereich speichern"}
-          </Button>
+        <div className="lg:col-span-3 min-w-0">
+          <div className="admin-btn-row admin-btn-equal">
+            <Button
+              disabled={saving}
+              onClick={async () => {
+                setSaving(true);
+                try {
+                  const next = await updateSection({
+                    id: section.id,
+                    title: title || null,
+                    subtitle: subtitle || null,
+                    body: section.body ?? null,
+                    imageUrl: section.imageUrl ?? null,
+                    isActive: active,
+                    sortOrder: section.sortOrder ?? 9999,
+                  });
+                  onUpdated(next);
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              {saving ? "Speichert…" : "Team-Bereich speichern"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -581,27 +489,25 @@ function CreatePersonForm({
   const [err, setErr] = useState<string | null>(null);
 
   const nextSortOrder = useMemo(() => {
-    const groupItems = existingPeople.filter((p) =>
-      isLead(kind) ? isLead(p.kind) : isStaff(p.kind)
-    );
+    const groupItems = existingPeople.filter((p) => (isLead(kind) ? isLead(p.kind) : isStaff(p.kind)));
     return groupItems.length;
   }, [existingPeople, kind]);
 
   return (
-    <div className="mt-4 space-y-3">
+    <div className="mt-4 space-y-3 min-w-0">
       {err && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
           {err}
         </div>
       )}
 
-      <div className="grid gap-3 lg:grid-cols-2">
-        <div className="lg:col-span-2">
+      <div className="grid gap-3 lg:grid-cols-2 min-w-0">
+        <div className="lg:col-span-2 min-w-0">
           <div className="text-xs font-medium mb-1">Name</div>
           <TextInput value={name} onChange={(e) => setName(e.target.value)} />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <div className="text-xs font-medium mb-1">Kategorie</div>
           <OptionSelect value={kind} onChange={(v) => setKind(v as Kind)} options={PERSON_KIND_OPTIONS} />
           <div className="mt-1 text-[11px] text-zinc-600 dark:text-zinc-400">
@@ -609,57 +515,49 @@ function CreatePersonForm({
           </div>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <div className="text-xs font-medium mb-1">
             Rollen-Label <span className="text-zinc-500">(optional)</span>
           </div>
-          <TextInput
-            value={roleLabel}
-            onChange={(e) => setRoleLabel(e.target.value)}
-            placeholder='z.B. "Inhaber"'
-          />
+          <TextInput value={roleLabel} onChange={(e) => setRoleLabel(e.target.value)} placeholder='z.B. "Inhaber"' />
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0">
           <div className="text-xs font-medium mb-1">
             Kurz-Bio <span className="text-zinc-500">(optional)</span>
           </div>
           <TextArea value={shortBio} onChange={(e) => setShortBio(e.target.value)} />
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0">
           <div className="text-xs font-medium mb-2">
             Portrait <span className="text-zinc-500">(optional)</span>
           </div>
           <ImageUploader folder="about" imageUrl={avatarUrl} onChange={setAvatarUrl} />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <div className="text-xs font-medium mb-1">
             E-Mail <span className="text-zinc-500">(optional)</span>
           </div>
           <TextInput value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <div className="text-xs font-medium mb-1">
             Telefon <span className="text-zinc-500">(optional)</span>
           </div>
           <TextInput value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <div className="text-xs font-medium mb-1">
             Instagram <span className="text-zinc-500">(optional)</span>
           </div>
-          <TextInput
-            value={instagramHandle}
-            onChange={(e) => setInstagramHandle(e.target.value)}
-            placeholder="@backschmiede"
-          />
+          <TextInput value={instagramHandle} onChange={(e) => setInstagramHandle(e.target.value)} placeholder="@backschmiede" />
         </div>
 
-        <div className="lg:col-span-2 flex flex-wrap gap-4">
+        <div className="lg:col-span-2 flex flex-wrap gap-4 min-w-0">
           <label className="inline-flex items-center gap-2 text-sm">
             <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
             Aktiv{" "}
@@ -669,36 +567,38 @@ function CreatePersonForm({
           </label>
         </div>
 
-        <div className="lg:col-span-2 flex items-center justify-end">
-          <Button
-            disabled={saving || !name.trim()}
-            onClick={async () => {
-              setErr(null);
-              setSaving(true);
-              try {
-                const created = await createPerson({
-                  kind,
-                  name,
-                  roleLabel: roleLabel || null,
-                  shortBio: shortBio || null,
-                  longBio: longBio || null,
-                  avatarUrl: avatarUrl || null,
-                  email: email || null,
-                  phone: phone || null,
-                  instagramHandle: instagramHandle || null,
-                  isShownOnAbout: active,
-                  sortOrder: nextSortOrder,
-                });
-                onCreated(created);
-              } catch (e: any) {
-                setErr(e?.message || "Fehler beim Erstellen");
-              } finally {
-                setSaving(false);
-              }
-            }}
-          >
-            {saving ? "Speichert…" : "Anlegen"}
-          </Button>
+        <div className="lg:col-span-2 min-w-0">
+          <div className="admin-btn-row admin-btn-equal">
+            <Button
+              disabled={saving || !name.trim()}
+              onClick={async () => {
+                setErr(null);
+                setSaving(true);
+                try {
+                  const created = await createPerson({
+                    kind,
+                    name,
+                    roleLabel: roleLabel || null,
+                    shortBio: shortBio || null,
+                    longBio: longBio || null,
+                    avatarUrl: avatarUrl || null,
+                    email: email || null,
+                    phone: phone || null,
+                    instagramHandle: instagramHandle || null,
+                    isShownOnAbout: active,
+                    sortOrder: nextSortOrder,
+                  });
+                  onCreated(created);
+                } catch (e: any) {
+                  setErr(e?.message || "Fehler beim Erstellen");
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              {saving ? "Speichert…" : "Anlegen"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>
@@ -737,8 +637,7 @@ function PersonCard({
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
-  const kindLabel =
-    PERSON_KIND_OPTIONS.find((o) => o.value === draft.kind)?.label ?? draft.kind;
+  const kindLabel = PERSON_KIND_OPTIONS.find((o) => o.value === draft.kind)?.label ?? draft.kind;
 
   const originalGroup: "lead" | "staff" = isLead(person.kind) ? "lead" : "staff";
 
@@ -751,19 +650,17 @@ function PersonCard({
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/20 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 min-w-0">
         <button type="button" onClick={() => setOpen((o) => !o)} className="min-w-0 text-left">
           <div className="text-xs opacity-70">{kindLabel}</div>
           <div className="font-semibold truncate">
             {draft.name || "—"}{" "}
-            <span className="text-xs font-normal opacity-60">
-              {open ? "• geöffnet" : "• zugeklappt"}
-            </span>
+            <span className="text-xs font-normal opacity-60">{open ? "• geöffnet" : "• zugeklappt"}</span>
           </div>
         </button>
 
-        <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
+        <div className="admin-btn-row admin-btn-row-3 admin-btn-equal">
           <Button
             disabled={saving}
             onClick={async () => {
@@ -801,6 +698,7 @@ function PersonCard({
 
           <DeleteButton
             confirmText="Person wirklich löschen?"
+            disabled={saving}
             onDelete={async () => {
               await deletePerson(person.id);
               onDeleted();
@@ -816,10 +714,9 @@ function PersonCard({
       )}
 
       {!open && (
-        <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400 space-y-1">
+        <div className="mt-3 text-sm text-zinc-600 dark:text-zinc-400 space-y-1 min-w-0">
           <div className="text-xs">
-            Status:{" "}
-            <span className="font-semibold">{draft.active ? "Aktiv" : "Inaktiv"}</span>{" "}
+            Status: <span className="font-semibold">{draft.active ? "Aktiv" : "Inaktiv"}</span>{" "}
             <span className="opacity-80">(Über-uns-Seite)</span>
           </div>
           {draft.roleLabel ? <div className="truncate">{draft.roleLabel}</div> : null}
@@ -828,14 +725,14 @@ function PersonCard({
       )}
 
       {open && (
-        <div className="mt-4 space-y-4">
-          <div className="grid gap-3 lg:grid-cols-2">
-            <div>
+        <div className="mt-4 space-y-4 min-w-0">
+          <div className="grid gap-3 lg:grid-cols-2 min-w-0">
+            <div className="min-w-0">
               <div className="text-xs font-medium mb-1">Name</div>
               <TextInput value={draft.name} onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))} />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <div className="text-xs font-medium mb-1">Kategorie</div>
               <OptionSelect
                 value={draft.kind}
@@ -849,49 +746,53 @@ function PersonCard({
               ) : null}
             </div>
 
-            <div>
+            <div className="min-w-0">
               <div className="text-xs font-medium mb-1">
                 Rollen-Label <span className="text-zinc-500">(optional)</span>
               </div>
               <TextInput value={draft.roleLabel} onChange={(e) => setDraft((d) => ({ ...d, roleLabel: e.target.value }))} />
             </div>
 
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 min-w-0">
               <div className="text-xs font-medium mb-1">
                 Kurz-Bio <span className="text-zinc-500">(optional)</span>
               </div>
               <TextArea value={draft.shortBio} onChange={(e) => setDraft((d) => ({ ...d, shortBio: e.target.value }))} />
             </div>
 
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 min-w-0">
               <div className="text-xs font-medium mb-2">
                 Portrait <span className="text-zinc-500">(optional)</span>
               </div>
-              <ImageUploader folder="about" imageUrl={draft.avatarUrl} onChange={(v) => setDraft((d) => ({ ...d, avatarUrl: v }))} />
+              <ImageUploader
+                folder="about"
+                imageUrl={draft.avatarUrl}
+                onChange={(v) => setDraft((d) => ({ ...d, avatarUrl: v }))}
+              />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <div className="text-xs font-medium mb-1">
                 E-Mail <span className="text-zinc-500">(optional)</span>
               </div>
               <TextInput type="email" value={draft.email} onChange={(e) => setDraft((d) => ({ ...d, email: e.target.value }))} />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <div className="text-xs font-medium mb-1">
                 Telefon <span className="text-zinc-500">(optional)</span>
               </div>
               <TextInput value={draft.phone} onChange={(e) => setDraft((d) => ({ ...d, phone: e.target.value }))} />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <div className="text-xs font-medium mb-1">
                 Instagram <span className="text-zinc-500">(optional)</span>
               </div>
               <TextInput value={draft.instagramHandle} onChange={(e) => setDraft((d) => ({ ...d, instagramHandle: e.target.value }))} />
             </div>
 
-            <div className="lg:col-span-2 flex flex-wrap gap-4">
+            <div className="lg:col-span-2 flex flex-wrap gap-4 min-w-0">
               <label className="inline-flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={draft.active} onChange={(e) => setDraft((d) => ({ ...d, active: e.target.checked }))} />
                 Aktiv{" "}

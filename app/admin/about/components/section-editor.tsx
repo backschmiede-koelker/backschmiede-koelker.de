@@ -94,25 +94,18 @@ export default function SectionEditor({
   const isCta = section.type === "CTA";
 
   return (
-    <div className="rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-white/5 p-4 min-w-0">
+    <div className="admin-nested-flat min-w-0">
       {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-3 min-w-0">
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className="min-w-0 text-left"
-        >
+        <button type="button" onClick={() => setOpen((o) => !o)} className="min-w-0 text-left">
           <div className="text-xs opacity-70">{typeLabel(section.type)}</div>
           <div className="font-semibold truncate">
             {draft.title || "—"}{" "}
-            <span className="text-xs font-normal opacity-60">
-              {open ? "• geöffnet" : "• zugeklappt"}
-            </span>
+            <span className="text-xs font-normal opacity-60">{open ? "• geöffnet" : "• zugeklappt"}</span>
           </div>
         </button>
 
-        {/* WICHTIG für 300px: wrap + min-w-0 */}
-        <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
+        <div className="admin-btn-row admin-btn-row-2 admin-btn-equal">
           <Button
             disabled={saving}
             onClick={async () => {
@@ -152,6 +145,7 @@ export default function SectionEditor({
           {!isSingleton && canDelete && (
             <DeleteButton
               confirmText="Bereich wirklich löschen?"
+              disabled={saving}
               onDelete={async () => {
                 try {
                   await deleteSection(section.id);
@@ -195,16 +189,14 @@ export default function SectionEditor({
         </div>
       </div>
 
-      {/* ERROR */}
       {err && (
         <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200">
           {err}
         </div>
       )}
 
-      {/* COLLAPSED SUMMARY */}
       {!open && (
-        <div className="mt-3 text-sm text-zinc-700 dark:text-zinc-400 space-y-1 break-words">
+        <div className="mt-3 text-sm text-zinc-700 dark:text-zinc-400 space-y-1 break-words min-w-0">
           {isCta ? (
             <>
               {draft.subtitle ? <div className="truncate">Button: {draft.subtitle}</div> : null}
@@ -219,12 +211,10 @@ export default function SectionEditor({
         </div>
       )}
 
-      {/* BODY */}
       {open && (
         <div className="mt-4 space-y-4 min-w-0">
-          {/* WICHTIG: lg statt md (Sidebar ab md) */}
           <div className="grid gap-3 lg:grid-cols-3 min-w-0">
-            <div className="lg:col-span-2 flex items-end">
+            <div className="lg:col-span-2 flex items-end min-w-0">
               <Checkbox
                 checked={draft.isActive}
                 onChange={(v) => setDraft((d) => ({ ...d, isActive: v }))}
@@ -232,22 +222,16 @@ export default function SectionEditor({
               />
             </div>
 
-            {/* TITLE */}
-            <div className="lg:col-span-3">
+            <div className="lg:col-span-3 min-w-0">
               <div className="text-xs font-medium mb-1">
-                {isCta ? "Überschrift" : "Titel"}{" "}
-                <span className="text-zinc-500">(optional)</span>
+                {isCta ? "Überschrift" : "Titel"} <span className="text-zinc-500">(optional)</span>
               </div>
-              <TextInput
-                value={draft.title}
-                onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))}
-              />
+              <TextInput value={draft.title} onChange={(e) => setDraft((d) => ({ ...d, title: e.target.value }))} />
             </div>
 
-            {/* CTA SPECIAL FIELDS */}
             {isCta ? (
               <>
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-3 min-w-0">
                   <div className="text-xs font-medium mb-1">
                     Button-Text <span className="text-zinc-500">(optional)</span>
                   </div>
@@ -258,7 +242,7 @@ export default function SectionEditor({
                   />
                 </div>
 
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-3 min-w-0">
                   <div className="text-xs font-medium mb-1">
                     Button-Link (URL) <span className="text-zinc-500">(optional)</span>
                   </div>
@@ -275,31 +259,22 @@ export default function SectionEditor({
               </>
             ) : (
               <>
-                {/* SUBTITLE */}
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-3 min-w-0">
                   <div className="text-xs font-medium mb-1">
                     Untertitel <span className="text-zinc-500">(optional)</span>
                   </div>
-                  <TextInput
-                    value={draft.subtitle}
-                    onChange={(e) => setDraft((d) => ({ ...d, subtitle: e.target.value }))}
-                  />
+                  <TextInput value={draft.subtitle} onChange={(e) => setDraft((d) => ({ ...d, subtitle: e.target.value }))} />
                 </div>
 
-                {/* BODY */}
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-3 min-w-0">
                   <div className="text-xs font-medium mb-1">
                     Text / Inhalt <span className="text-zinc-500">(optional)</span>
                   </div>
-                  <TextArea
-                    value={draft.body}
-                    onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
-                  />
+                  <TextArea value={draft.body} onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))} />
                 </div>
               </>
             )}
 
-            {/* IMAGE */}
             <div className="lg:col-span-3 min-w-0">
               <div className="text-xs font-medium mb-2">
                 Bild <span className="text-zinc-500">(optional)</span>
@@ -314,11 +289,7 @@ export default function SectionEditor({
             </div>
           </div>
 
-          {itemBlock && (
-            <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 p-3 min-w-0">
-              {itemBlock}
-            </div>
-          )}
+          {itemBlock && <div className="admin-nested-flat min-w-0">{itemBlock}</div>}
         </div>
       )}
     </div>

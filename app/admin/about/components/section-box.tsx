@@ -1,3 +1,4 @@
+// app/admin/about/components/section-box.tsx
 "use client";
 
 import * as React from "react";
@@ -21,17 +22,11 @@ export default function SectionBox({
   const [open, setOpen] = React.useState(defaultOpen);
 
   return (
-    <section
-      className="
-        rounded-2xl border border-zinc-300 bg-white shadow-[0_1px_0_rgba(0,0,0,0.04)]
-        dark:shadow-none dark:border-zinc-800/80 dark:bg-zinc-950/40
-        p-4 md:p-5
-      "
-    >
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold">{title}</h2>
+    <section className="admin-surface admin-pad min-w-0 mb-4 md:mb-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 min-w-0">
+        <h2 className="text-sm font-semibold min-w-0">{title}</h2>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 min-w-0">
           {right}
           {collapsible && (
             <Button variant="ghost" onClick={() => setOpen((o) => !o)}>
@@ -41,8 +36,8 @@ export default function SectionBox({
         </div>
       </div>
 
-      {!open && summary ? <div className="mt-3">{summary}</div> : null}
-      {(!collapsible || open) && <div className="mt-4">{children}</div>}
+      {!open && summary ? <div className="mt-3 min-w-0">{summary}</div> : null}
+      {(!collapsible || open) && <div className="mt-4 min-w-0">{children}</div>}
     </section>
   );
 }

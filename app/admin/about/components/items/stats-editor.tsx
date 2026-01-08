@@ -6,9 +6,10 @@ import type { AboutSectionDTO } from "../../types";
 import { Button, TextInput } from "../inputs";
 import DeleteButton from "../delete-button";
 import { createStat, deleteStat, updateStat, getSectionById } from "../../actions";
-import { useSortableList } from "../dnd/useSortableList";
+import { useSortableList } from "../dnd/use-sortable-list";
+import ReorderHeader from "../dnd/reorder-header";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowDown, ArrowUp, BarChart3, GripVertical } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 
 type StatDTO = AboutSectionDTO["stats"][number];
 
@@ -28,11 +29,12 @@ export default function StatsEditor({
     onUpdated(next);
   }
 
-  // Keep list stable + treat sortOrder as index (0..n-1)
   const statsSorted = useMemo(() => {
     const aNum = (n: unknown) => (Number.isFinite(Number(n)) ? Number(n) : 0);
     return [...section.stats].sort(
-      (a, b) => aNum((a as any).sortOrder) - aNum((b as any).sortOrder) || String(a.id).localeCompare(String(b.id))
+      (a, b) =>
+        aNum((a as any).sortOrder) - aNum((b as any).sortOrder) ||
+        String(a.id).localeCompare(String(b.id))
     );
   }, [section.stats]);
 
@@ -50,13 +52,11 @@ export default function StatsEditor({
         )
       );
 
-      // Update parent immediately (so UI doesn't wait for refresh)
       onUpdated({
         ...section,
         stats: nextLocal.map((it, i) => ({ ...it, sortOrder: i })),
       } as AboutSectionDTO);
 
-      // Also refresh once to stay in sync with server
       await refreshSection();
     } finally {
       setBusy(false);
@@ -66,7 +66,6 @@ export default function StatsEditor({
   const sortable = useSortableList({
     items: statsSorted,
     onReorderPersist: async (next) => {
-      // next is "same items" with updated "sortOrder" coming from hook
       const idToIndex = new Map(next.map((n: any) => [n.id, n.sortOrder]));
       const nextLocal = statsSorted
         .slice()
@@ -75,7 +74,6 @@ export default function StatsEditor({
     },
   });
 
-  // Ensure the hook list updates if section.stats changes from outside
   useEffect(() => {
     sortable.setLocalOrder(statsSorted);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,7 +98,7 @@ export default function StatsEditor({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0">
       <div className="text-sm font-semibold">Stats</div>
 
       {/* CREATE */}
@@ -108,9 +106,10 @@ export default function StatsEditor({
         className="
           rounded-2xl border border-zinc-200/70 bg-white/70 p-4 shadow-sm
           dark:border-zinc-800/80 dark:bg-zinc-950/30
+          min-w-0
         "
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-3 min-w-0">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
@@ -119,28 +118,34 @@ export default function StatsEditor({
               <div className="text-sm font-semibold">Neuer Stat</div>
             </div>
             <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
-              Sortierung passiert automatisch per Drag & Drop oder Pfeilen.
+              Sortierung per Drag & Drop oder Pfeilen.
             </div>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 lg:grid-cols-5">
-          <div className="lg:col-span-2">
+        {/* ✅ Button auf Desktop korrekt auf Input-Höhe */}
+        <div className="mt-4 grid gap-3 lg:grid-cols-5 min-w-0">
+          <div className="lg:col-span-2 min-w-0">
             <div className="text-xs font-medium mb-1">Label</div>
             <TextInput value={label} onChange={(e) => setLabel(e.target.value)} />
           </div>
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 min-w-0">
             <div className="text-xs font-medium mb-1">Value</div>
             <TextInput value={value} onChange={(e) => setValue(e.target.value)} />
           </div>
 
-          <div className="flex items-end">
+          <div className="min-w-0 flex flex-col">
+            <div
+              aria-hidden="true"
+              className="hidden lg:block text-xs font-medium mb-1 opacity-0 select-none"
+            >
+              Aktion
+            </div>
             <Button
               disabled={busy || !label.trim() || !value.trim()}
               onClick={async () => {
                 setBusy(true);
                 try {
-                  // add to end
                   const sortOrder = (sortable.items as StatDTO[]).length;
                   await createStat({ sectionId: section.id, label, value, sortOrder });
                   setLabel("");
@@ -162,16 +167,18 @@ export default function StatsEditor({
         className="
           rounded-2xl border border-zinc-200/70 bg-white/70 shadow-sm overflow-hidden
           dark:border-zinc-800/80 dark:bg-zinc-950/30
+          min-w-0
         "
       >
         <div
           className="
-            flex items-center justify-between gap-3
+            flex flex-wrap items-center justify-between gap-3
             px-4 py-3 border-b border-zinc-200/70
             dark:border-zinc-800/80
+            min-w-0
           "
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-900">
               <BarChart3 size={16} />
             </span>
@@ -185,7 +192,7 @@ export default function StatsEditor({
         {sortable.items.length === 0 ? (
           <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">Noch keine Stats.</div>
         ) : (
-          <motion.div layout transition={{ duration: 0.22 }} className="p-3 space-y-3">
+          <motion.div layout transition={{ duration: 0.22 }} className="p-3 space-y-3 min-w-0">
             <AnimatePresence initial={false}>
               {(sortable.items as StatDTO[]).map((it, index) => (
                 <motion.div
@@ -198,127 +205,55 @@ export default function StatsEditor({
                   className="
                     rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-sm
                     dark:border-zinc-800 dark:bg-zinc-900/40
+                    min-w-0
                   "
                   {...sortable.bindDropTarget(it.id)}
                 >
-                  <div className="flex gap-3 min-w-0">
-                    <ReorderControls
-                      disabled={busy}
-                      isFirst={index === 0}
-                      isLast={index === sortable.items.length - 1}
-                      bindDragHandle={sortable.bindDragHandle(it.id)}
-                      onUp={() => void moveByArrow(it.id, -1)}
-                      onDown={() => void moveByArrow(it.id, 1)}
-                    />
+                  <ReorderHeader
+                    disabled={busy}
+                    isFirst={index === 0}
+                    isLast={index === sortable.items.length - 1}
+                    bindDragHandle={sortable.bindDragHandle(it.id)}
+                    onUp={() => void moveByArrow(it.id, -1)}
+                    onDown={() => void moveByArrow(it.id, 1)}
+                    leftMeta={<div className="text-xs text-zinc-500">Position: {index + 1}</div>}
+                  />
 
-                    <div className="flex-1 min-w-0">
-                      <Row
-                        item={it}
-                        busy={busy}
-                        onSave={async (n) => {
-                          if (busy) return;
-                          setBusy(true);
-                          try {
-                            await updateStat({
-                              id: it.id,
-                              label: n.label,
-                              value: n.value,
-                              sortOrder: (it as any).sortOrder ?? index,
-                            });
-                            await refreshSection();
-                          } finally {
-                            setBusy(false);
-                          }
-                        }}
-                        onDelete={async () => {
-                          if (busy) return;
-                          setBusy(true);
-                          try {
-                            await deleteStat(it.id);
-                            await refreshSection();
-                          } finally {
-                            setBusy(false);
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
+                  <Row
+                    item={it}
+                    busy={busy}
+                    onSave={async (n) => {
+                      if (busy) return;
+                      setBusy(true);
+                      try {
+                        await updateStat({
+                          id: it.id,
+                          label: n.label,
+                          value: n.value,
+                          sortOrder: (it as any).sortOrder ?? index,
+                        });
+                        await refreshSection();
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                    onDelete={async () => {
+                      if (busy) return;
+                      setBusy(true);
+                      try {
+                        await deleteStat(it.id);
+                        await refreshSection();
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>
           </motion.div>
         )}
       </div>
-    </div>
-  );
-}
-
-function ReorderControls({
-  disabled,
-  isFirst,
-  isLast,
-  bindDragHandle,
-  onUp,
-  onDown,
-}: {
-  disabled: boolean;
-  isFirst: boolean;
-  isLast: boolean;
-  bindDragHandle: any;
-  onUp: () => void;
-  onDown: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-2 pt-1">
-      <div
-        {...bindDragHandle}
-        className="
-          cursor-grab active:cursor-grabbing rounded-lg p-2
-          border border-zinc-200 bg-zinc-50 hover:bg-zinc-100
-          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
-        "
-        title="Ziehen"
-      >
-        <GripVertical size={18} />
-      </div>
-
-      <button
-        type="button"
-        disabled={disabled || isFirst}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onUp();
-        }}
-        className="
-          w-10 h-10 flex items-center justify-center rounded-lg
-          border border-zinc-200 bg-white hover:bg-zinc-50
-          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
-          disabled:opacity-30 disabled:cursor-not-allowed
-        "
-        title="Nach oben"
-      >
-        <ArrowUp size={16} />
-      </button>
-
-      <button
-        type="button"
-        disabled={disabled || isLast}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onDown();
-        }}
-        className="
-          w-10 h-10 flex items-center justify-center rounded-lg
-          border border-zinc-200 bg-white hover:bg-zinc-50
-          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
-          disabled:opacity-30 disabled:cursor-not-allowed
-        "
-        title="Nach unten"
-      >
-        <ArrowDown size={16} />
-      </button>
     </div>
   );
 }
@@ -344,18 +279,18 @@ function Row({
   }, [item.id, item.label, item.value]);
 
   return (
-    <div className="grid gap-2 lg:grid-cols-6">
-      <div className="lg:col-span-2">
+    <div className="grid gap-2 lg:grid-cols-6 min-w-0">
+      <div className="lg:col-span-2 min-w-0">
         <div className="text-xs font-medium mb-1">Label</div>
         <TextInput value={label} onChange={(e) => setLabel(e.target.value)} />
       </div>
 
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-2 min-w-0">
         <div className="text-xs font-medium mb-1">Value</div>
         <TextInput value={value} onChange={(e) => setValue(e.target.value)} />
       </div>
 
-      <div className="lg:col-span-2 flex flex-wrap items-end justify-end gap-2">
+      <div className="lg:col-span-2 flex flex-wrap items-end justify-end gap-2 min-w-0">
         <Button
           disabled={busy || saving}
           onClick={async () => {

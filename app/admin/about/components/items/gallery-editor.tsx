@@ -7,9 +7,10 @@ import { Button, TextInput } from "../inputs";
 import DeleteButton from "../delete-button";
 import ImageUploader from "@/app/components/image-uploader";
 import { createGallery, deleteGallery, updateGallery, getSectionById } from "../../actions";
-import { useSortableList } from "../dnd/useSortableList";
-import { GripVertical, ArrowUp, ArrowDown, Image as ImageIcon } from "lucide-react";
+import { useSortableList } from "../dnd/use-sortable-list";
+import ReorderHeader from "../dnd/reorder-header";
 import { AnimatePresence, motion } from "motion/react";
+import { Image as ImageIcon } from "lucide-react";
 
 export default function GalleryEditor({
   section,
@@ -61,10 +62,8 @@ export default function GalleryEditor({
     const [moved] = nextLocal.splice(idx, 1);
     nextLocal.splice(j, 0, moved);
 
-    // local first for animation
     sortable.setLocalOrder(nextLocal);
 
-    // persist immediately
     setBusy(true);
     try {
       await Promise.all(
@@ -84,7 +83,7 @@ export default function GalleryEditor({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-0">
       <div className="text-sm font-semibold">Galerie</div>
 
       {/* CREATE BOX */}
@@ -93,31 +92,32 @@ export default function GalleryEditor({
           rounded-2xl border border-emerald-500/20 bg-emerald-50/40 shadow-sm
           dark:border-emerald-400/20 dark:bg-emerald-950/20
           p-4
+          min-w-0
         "
       >
-        <div className="flex items-center gap-2 text-xs font-medium text-emerald-900 dark:text-emerald-100">
+        <div className="flex items-center gap-2 text-xs font-medium text-emerald-900 dark:text-emerald-100 min-w-0">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-600 text-white dark:bg-emerald-500/90">
             <ImageIcon size={16} />
           </span>
           Neues Bild hinzufügen
         </div>
 
-        <div className="mt-3 grid gap-3 lg:grid-cols-2">
-          <div className="lg:col-span-2">
-            <div className="text-xs font-medium mb-2 text-zinc-800 dark:text-zinc-200">
-              Bild
+        <div className="mt-3 grid gap-3 lg:grid-cols-2 min-w-0">
+          <div className="lg:col-span-2 min-w-0">
+            <div className="text-xs font-medium mb-2 text-zinc-800 dark:text-zinc-200">Bild</div>
+            <div className="min-w-0 max-w-full admin-uploader-clip">
+              <ImageUploader folder="about" imageUrl={imageUrl} onChange={setImageUrl} />
             </div>
-            <ImageUploader folder="about" imageUrl={imageUrl} onChange={setImageUrl} />
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 min-w-0">
             <div className="text-xs font-medium mb-1 text-zinc-800 dark:text-zinc-200">
               Alt-Text <span className="text-zinc-500 dark:text-zinc-400">(optional)</span>
             </div>
             <TextInput value={alt} onChange={(e) => setAlt(e.target.value)} />
           </div>
 
-          <div className="lg:col-span-2 flex items-center justify-end">
+          <div className="lg:col-span-2 flex flex-wrap items-center justify-end gap-2 min-w-0">
             <Button
               disabled={busy || !imageUrl}
               onClick={async () => {
@@ -127,7 +127,7 @@ export default function GalleryEditor({
                     sectionId: section.id,
                     imageUrl,
                     alt: alt.trim() ? alt.trim() : null,
-                    sortOrder: items.length, // always append
+                    sortOrder: items.length,
                   });
                   setImageUrl("");
                   setAlt("");
@@ -149,23 +149,20 @@ export default function GalleryEditor({
           rounded-2xl border border-zinc-200/70 bg-white/70 shadow-sm
           dark:border-zinc-800/80 dark:bg-zinc-950/30
           overflow-hidden
+          min-w-0
         "
       >
-        <div className="px-4 py-3 border-b border-zinc-200/70 dark:border-zinc-800/80">
-          <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            Vorhandene Bilder
-          </div>
+        <div className="px-4 py-3 border-b border-zinc-200/70 dark:border-zinc-800/80 min-w-0">
+          <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Vorhandene Bilder</div>
           <div className="text-xs text-zinc-600 dark:text-zinc-400">
-            Reihenfolge per Drag & Drop oder mit den Pfeilen ändern (wird sofort gespeichert).
+            Reihenfolge per Drag & Drop oder mit den Pfeilen ändern.
           </div>
         </div>
 
         {items.length === 0 ? (
-          <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">
-            Noch keine Galerie-Bilder.
-          </div>
+          <div className="p-4 text-sm text-zinc-600 dark:text-zinc-400">Noch keine Galerie-Bilder.</div>
         ) : (
-          <motion.div layout transition={{ duration: 0.22 }} className="p-3 space-y-3">
+          <motion.div layout transition={{ duration: 0.22 }} className="p-3 space-y-3 min-w-0">
             <AnimatePresence initial={false}>
               {items.map((it, index) => (
                 <motion.div
@@ -179,95 +176,49 @@ export default function GalleryEditor({
                     rounded-2xl border border-zinc-200/80 bg-white shadow-sm
                     dark:border-zinc-800 dark:bg-zinc-900/40
                     p-3
+                    min-w-0
+                    overflow-hidden
                   "
                   {...sortable.bindDropTarget(it.id)}
                 >
-                  <div className="flex gap-3">
-                    {/* CONTROLS */}
-                    <div className="flex flex-col items-center gap-2 pt-1">
-                      <div
-                        {...sortable.bindDragHandle(it.id)}
-                        className="
-                          cursor-grab active:cursor-grabbing rounded-lg p-2
-                          border border-zinc-200 bg-zinc-50 hover:bg-zinc-100
-                          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
-                        "
-                        title="Ziehen"
-                      >
-                        <GripVertical size={18} />
-                      </div>
+                  <ReorderHeader
+                    disabled={busy}
+                    isFirst={index === 0}
+                    isLast={index === items.length - 1}
+                    bindDragHandle={sortable.bindDragHandle(it.id)}
+                    onUp={() => void moveByArrow(it.id, -1)}
+                    onDown={() => void moveByArrow(it.id, 1)}
+                    leftMeta={<div className="text-xs text-zinc-500">Position: {index + 1}</div>}
+                  />
 
-                      <button
-                        type="button"
-                        disabled={busy || index === 0}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          void moveByArrow(it.id, -1);
-                        }}
-                        className="
-                          w-10 h-10 flex items-center justify-center rounded-lg
-                          border border-zinc-200 bg-white hover:bg-zinc-50
-                          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
-                          disabled:opacity-30 disabled:cursor-not-allowed
-                        "
-                        title="Nach oben"
-                      >
-                        <ArrowUp size={16} />
-                      </button>
-
-                      <button
-                        type="button"
-                        disabled={busy || index === items.length - 1}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          void moveByArrow(it.id, 1);
-                        }}
-                        className="
-                          w-10 h-10 flex items-center justify-center rounded-lg
-                          border border-zinc-200 bg-white hover:bg-zinc-50
-                          dark:border-zinc-700 dark:bg-zinc-900/50 dark:hover:bg-zinc-800/70
-                          disabled:opacity-30 disabled:cursor-not-allowed
-                        "
-                        title="Nach unten"
-                      >
-                        <ArrowDown size={16} />
-                      </button>
-                    </div>
-
-                    {/* CONTENT */}
-                    <div className="flex-1">
-                      <Row
-                        imageUrl0={it.imageUrl}
-                        alt0={it.alt ?? ""}
-                        busy={busy}
-                        onSave={async (n) => {
-                          setBusy(true);
-                          try {
-                            await updateGallery({
-                              id: it.id,
-                              imageUrl: n.imageUrl,
-                              alt: n.alt.trim() ? n.alt.trim() : null,
-                              sortOrder: it.sortOrder,
-                            });
-                            await refreshSection();
-                          } finally {
-                            setBusy(false);
-                          }
-                        }}
-                        onDelete={async () => {
-                          setBusy(true);
-                          try {
-                            await deleteGallery(it.id);
-                            await refreshSection();
-                          } finally {
-                            setBusy(false);
-                          }
-                        }}
-                      />
-                    </div>
-                  </div>
+                  <Row
+                    imageUrl0={it.imageUrl}
+                    alt0={it.alt ?? ""}
+                    busy={busy}
+                    onSave={async (n) => {
+                      setBusy(true);
+                      try {
+                        await updateGallery({
+                          id: it.id,
+                          imageUrl: n.imageUrl,
+                          alt: n.alt.trim() ? n.alt.trim() : null,
+                          sortOrder: it.sortOrder,
+                        });
+                        await refreshSection();
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                    onDelete={async () => {
+                      setBusy(true);
+                      try {
+                        await deleteGallery(it.id);
+                        await refreshSection();
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                  />
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -295,36 +246,28 @@ function Row({
   const [alt, setAlt] = useState(alt0);
 
   return (
-    <div className="space-y-3">
-      <div
-        className="
-          rounded-xl border border-zinc-200 bg-zinc-50/70 p-3
-          dark:border-zinc-800 dark:bg-zinc-950/30
-        "
-      >
-        <div className="text-xs font-medium mb-2 text-zinc-800 dark:text-zinc-200">
-          Bild
+    <div className="space-y-3 min-w-0">
+      {/* ✅ Nested-Card entfernt → verhindert md/768 Overflow-Messfehler */}
+      <div className="min-w-0 max-w-full">
+        <div className="text-xs font-medium mb-2 text-zinc-800 dark:text-zinc-200">Bild</div>
+        <div className="min-w-0 max-w-full admin-uploader-clip">
+          <ImageUploader folder="about" imageUrl={imageUrl} onChange={setImageUrl} />
         </div>
-        <ImageUploader folder="about" imageUrl={imageUrl} onChange={setImageUrl} />
       </div>
 
-      <div className="grid gap-2 lg:grid-cols-6">
-        <div className="lg:col-span-4">
+      <div className="grid gap-2 lg:grid-cols-6 min-w-0">
+        <div className="lg:col-span-4 min-w-0">
           <div className="text-xs font-medium mb-1 text-zinc-800 dark:text-zinc-200">
             Alt-Text <span className="text-zinc-500 dark:text-zinc-400">(optional)</span>
           </div>
           <TextInput value={alt} onChange={(e) => setAlt(e.target.value)} />
         </div>
 
-        <div className="lg:col-span-2 flex items-end justify-end gap-2">
+        <div className="lg:col-span-2 flex flex-wrap items-end justify-end gap-2 min-w-0">
           <Button disabled={busy} onClick={() => void onSave({ imageUrl, alt })}>
             Speichern
           </Button>
-          <DeleteButton
-            confirmText="Galerie-Bild wirklich löschen?"
-            disabled={busy}
-            onDelete={onDelete}
-          />
+          <DeleteButton confirmText="Galerie-Bild wirklich löschen?" disabled={busy} onDelete={onDelete} />
         </div>
       </div>
     </div>
