@@ -1,5 +1,6 @@
 // /app/components/tgtg-cta.tsx
 'use client';
+import { ChevronRight } from 'lucide-react';
 import * as React from 'react';
 
 type LocationInfo = {
@@ -60,7 +61,7 @@ function FAQItem({ question, children }: { question: string; children: React.Rea
           }`}
           aria-hidden
         >
-          ›
+          <ChevronRight className="h-4 w-4" />
         </span>
       </button>
       <div

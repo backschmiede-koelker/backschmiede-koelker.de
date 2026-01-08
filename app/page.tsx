@@ -237,8 +237,27 @@ export default async function Page() {
             Aktuelles
           </h2>
 
-          <div className="rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
-            <News />
+          <div
+            className="
+              relative overflow-hidden rounded-3xl
+              border border-amber-500/25
+              bg-gradient-to-br from-amber-50/70 via-white/90 to-emerald-50/65
+              p-3 shadow-sm
+              dark:border-amber-300/25 dark:from-amber-900/18 dark:via-zinc-900/75 dark:to-emerald-900/25
+              sm:p-6
+            "
+          >
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -top-10 -right-12 h-32 w-32 rounded-full bg-amber-300/25 blur-[60px] dark:bg-amber-400/20"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -bottom-12 -left-10 h-32 w-32 rounded-full bg-emerald-300/18 blur-[60px] dark:bg-emerald-500/15"
+            />
+            <div className="relative z-10 min-w-0">
+              <News />
+            </div>
           </div>
         </section>
       )}

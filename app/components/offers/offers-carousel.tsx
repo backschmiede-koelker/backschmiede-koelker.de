@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import OfferRenderer, { type OfferDTO } from "../offer-renderer";
 
 type Context = "today" | "default";
@@ -201,7 +202,7 @@ export default function OffersCarousel({
               "
               aria-label="Vorheriges Angebot"
             >
-              ‹
+              <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               type="button"
@@ -214,7 +215,7 @@ export default function OffersCarousel({
               "
               aria-label="Nächstes Angebot"
             >
-              ›
+              <ChevronRight className="h-4 w-4" />
             </button>
           </div>
         </div>
