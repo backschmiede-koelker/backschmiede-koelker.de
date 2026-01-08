@@ -2,12 +2,10 @@
 'use client';
 import * as React from 'react';
 
-type PickupWindow = { day: string; time: string };
 type LocationInfo = {
   key: 'RECKE' | 'METTINGEN';
   label: string;
-  mapsUrl: string;
-  windows: PickupWindow[];
+  tgtgShareUrl: string; // mobile -> App, desktop -> Installationsseite
 };
 
 type Props = {
@@ -18,22 +16,12 @@ const DEFAULT_LOCATIONS: LocationInfo[] = [
   {
     key: 'RECKE',
     label: 'Recke',
-    mapsUrl: 'https://maps.app.goo.gl/v7fAobfiUPDe8xTV6',
-    windows: [
-      { day: 'Mo-Fr', time: '17:00-18:00' },
-      { day: 'Sa',    time: '16:30-17:30' },
-      { day: 'So',    time: '—' },
-    ],
+    tgtgShareUrl: 'https://share.toogoodtogo.com/item/142593183634493376/',
   },
   {
     key: 'METTINGEN',
     label: 'Mettingen',
-    mapsUrl: 'https://maps.app.goo.gl/gyHqK9nJXGHv4oxX6',
-    windows: [
-      { day: 'Mo-Fr', time: '17:00-18:00' },
-      { day: 'Sa',    time: '12:00-12:30' },
-      { day: 'So',    time: '—' },
-    ],
+    tgtgShareUrl: 'https://share.toogoodtogo.com/item/146056137368565632/',
   },
 ];
 
@@ -44,36 +32,28 @@ function FAQItem({ question, children }: { question: string; children: React.Rea
   const [maxHeight, setMaxHeight] = React.useState(0);
 
   React.useEffect(() => {
-    if (open && contentRef.current) {
-      setMaxHeight(contentRef.current.scrollHeight);
-    } else {
-      setMaxHeight(0);
-    }
+    if (open && contentRef.current) setMaxHeight(contentRef.current.scrollHeight);
+    else setMaxHeight(0);
   }, [open]);
 
-  // Optional: bei Resize neu berechnen
   React.useEffect(() => {
     if (!open) return;
-    function handleResize() {
-      if (contentRef.current) {
-        setMaxHeight(contentRef.current.scrollHeight);
-      }
-    }
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const onResize = () => {
+      if (contentRef.current) setMaxHeight(contentRef.current.scrollHeight);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, [open]);
 
   return (
     <div className="border-t border-emerald-800/10 first:border-t-0 dark:border-emerald-300/15">
       <button
         type="button"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => setOpen((p) => !p)}
         className="flex w-full items-center justify-between gap-2 py-2 text-left"
         aria-expanded={open}
       >
-        <span className="text-sm font-medium">
-          {question}
-        </span>
+        <span className="text-sm font-medium">{question}</span>
         <span
           className={`inline-flex h-5 w-5 items-center justify-center text-xs transition-transform duration-200 ${
             open ? 'rotate-90' : ''
@@ -118,106 +98,84 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
       />
 
       {/* Header */}
-      <header className="relative z-10 mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 bg-white/70 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 backdrop-blur dark:border-emerald-300/15 dark:bg-white/10 dark:text-emerald-200">
-            {/* Leaf icon */}
-            <svg width="12" height="12" viewBox="0 0 24 24" className="shrink-0" aria-hidden>
-              <path d="M3 21s6-1 10-5 5-10 5-10-6 1-10 5-5 10-5 10Z" fill="currentColor" />
-            </svg>
-            Lebensmittel retten
-          </div>
-          <h3 id="tgtg-title" className="mt-2 text-2xl font-semibold leading-tight">
-            Too&nbsp;Good&nbsp;To&nbsp;Go – Überraschungstüten
-          </h3>
-          <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
-            Spare und rette frische Backwaren vom Tag. Abholung zu festen Zeitfenstern – schnell sein lohnt sich!
-          </p>
+      <header className="relative z-10 mb-5">
+        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 bg-white/70 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700 backdrop-blur dark:border-emerald-300/15 dark:bg-white/10 dark:text-emerald-200">
+          <svg width="12" height="12" viewBox="0 0 24 24" className="shrink-0" aria-hidden>
+            <path d="M3 21s6-1 10-5 5-10 5-10-6 1-10 5-5 10-5 10Z" fill="currentColor" />
+          </svg>
+          Lebensmittel retten
         </div>
 
-        {/* CTAs */}
-        <div className="mt-3 flex flex-wrap gap-2 sm:mt-0">
-          <a
-            href="https://www.toogoodtogo.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-          >
-            App öffnen
-          </a>
-          <a
-            href="https://store.toogoodtogo.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-xl border border-emerald-800/15 bg-white/80 px-4 py-2 text-sm font-semibold text-zinc-900 backdrop-blur hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 dark:border-emerald-300/20 dark:bg-white/10 dark:text-white dark:hover:bg-emerald-900/40"
-          >
-            Für Partner
-          </a>
-        </div>
+        <h3 id="tgtg-title" className="mt-2 text-2xl font-semibold leading-tight">
+          Too&nbsp;Good&nbsp;To&nbsp;Go – Überraschungstüten
+        </h3>
+
+        <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
+          Spare und rette frische Backwaren vom Tag. Verfügbarkeit &amp; Abholfenster findest du immer aktuell in der
+          Too&nbsp;Good&nbsp;To&nbsp;Go App.
+        </p>
       </header>
 
-      {/* Grid: Locations + Steps */}
-      <div className="relative z-10 grid gap-6 lg:grid-cols-[1.2fr,1fr]">
-        {/* Locations */}
+      {/* Desktop: Buttons + Anleitung nebeneinander, FAQ darunter (full width) */}
+      <div className="relative z-10 grid gap-6 lg:grid-cols-2">
+        {/* Buttons */}
         <div className="space-y-3">
           <h4 className="text-sm font-semibold tracking-wide text-zinc-800 dark:text-zinc-200">
-            Abholfenster &amp; Standorte
+            Direkt in der App öffnen
           </h4>
 
-          <ul className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
             {locations.map((loc) => (
-              <li
+              <div
                 key={loc.key}
-                className="group overflow-hidden rounded-2xl bg-white/85 ring-1 ring-black/5 transition-shadow hover:shadow-md dark:bg-zinc-900/70 dark:ring-white/10"
+                className="group overflow-hidden rounded-2xl bg-white/85 ring-1 ring-black/5 p-4 transition-shadow hover:shadow-md dark:bg-zinc-900/70 dark:ring-white/10"
               >
-                <div className="flex items-start justify-between gap-3 p-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      {/* Pin icon */}
-                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-600/10 text-emerald-700 dark:text-emerald-300">
-                        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden>
-                          <path
-                            d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5Z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                      </span>
-                      <a
-                        className="font-semibold hover:underline"
-                        href={loc.mapsUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {loc.label}
-                      </a>
-                    </div>
-                    <div className="mt-2 grid gap-1 text-sm">
-                      {loc.windows.map((w, i) => (
-                        <div key={i} className="flex items-center gap-2 text-zinc-700 dark:text-zinc-300">
-                          <span className="w-14 shrink-0 tabular-nums">{w.day}</span>
-                          <span className="font-medium">{w.time}</span>
-                        </div>
-                      ))}
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600/10 text-emerald-700 dark:text-emerald-300">
+                    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+                      <path
+                        d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                  <div className="min-w-0">
+                    <div className="font-semibold leading-tight">{loc.label}</div>
+                    <div className="text-xs text-zinc-600 dark:text-zinc-300">
+                      Überraschungstüte reservieren
                     </div>
                   </div>
-                  {/* arrow */}
                   <span
-                    className="mt-1 translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                    className="ml-auto translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
                     aria-hidden
                   >
                     ›
                   </span>
                 </div>
-              </li>
-            ))}
-          </ul>
 
-          <p className="text-xs text-amber-900/80 dark:text-amber-200/80">
-            Hinweis: Mengen sind begrenzt &amp; variieren je Tag. Verfügbarkeiten bitte in der App prüfen.
+                {/* Tipp: bei Universal-/App-Links ist same-tab oft zuverlässiger als _blank */}
+                <a
+                  href={loc.tgtgShareUrl}
+                  rel="noreferrer"
+                  className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                  aria-label={`Too Good To Go öffnen – ${loc.label}`}
+                >
+                  In Too Good To Go öffnen
+                </a>
+
+                <p className="mt-2 text-[11px] text-amber-900/80 dark:text-amber-200/80">
+                  Abholfenster &amp; Verfügbarkeit: bitte in der App prüfen.
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">
+            Hinweis: Mengen sind begrenzt und variieren je Tag – in der App siehst du immer den aktuellen Stand.
           </p>
         </div>
 
-        {/* Steps / FAQ */}
+        {/* Anleitung */}
         <div className="space-y-4">
           <h4 className="text-sm font-semibold tracking-wide text-zinc-800 dark:text-zinc-200">
             So funktioniert’s
@@ -225,10 +183,22 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
 
           <ol className="space-y-3">
             {[
-              { t: 'In der App suchen', d: '„Backschmiede Kölker“ auswählen und Verfügbarkeit checken.' },
-              { t: 'Tüte reservieren',   d: 'Direkt in der App bezahlen – du erhältst eine Bestätigung.' },
-              { t: 'Zur Zeit abholen',   d: 'Zum angegebenen Abholfenster erscheinen und Bestätigung zeigen.' },
-              { t: 'Genießen & sparen',  d: 'Frische Backwaren zu kleinem Preis – und Lebensmittel gerettet!' },
+              {
+                t: 'Standort öffnen',
+                d: 'Auf Recke oder Mettingen klicken – du landest direkt beim passenden Eintrag in Too Good To Go.',
+              },
+              {
+                t: 'Tüte reservieren',
+                d: 'In der App auswählen & bezahlen – du erhältst eine Bestätigung.',
+              },
+              {
+                t: 'Zur Zeit abholen',
+                d: 'Abholfenster steht in der App – bitte rechtzeitig erscheinen und Bestätigung zeigen.',
+              },
+              {
+                t: 'Genießen & sparen',
+                d: 'Frische Backwaren zum kleinen Preis – und Lebensmittel gerettet!',
+              },
             ].map((s, i) => (
               <li key={i} className="flex gap-3">
                 <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[12px] font-bold text-white">
@@ -241,19 +211,26 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
               </li>
             ))}
           </ol>
+        </div>
 
+        {/* FAQ full width (unter Buttons + Anleitung) */}
+        <div className="lg:col-span-2">
           <div className="rounded-xl border border-emerald-800/10 bg-white/80 p-3 dark:border-emerald-300/15 dark:bg-white/5">
+            <FAQItem question="Wo sehe ich Abholzeiten und Verfügbarkeit?">
+              Direkt in der Too&nbsp;Good&nbsp;To&nbsp;Go App beim jeweiligen Standort – dort sind die Abholfenster und
+              die Verfügbarkeit immer aktuell.
+            </FAQItem>
+
             <FAQItem question="Was steckt in der Überraschungstüte?">
-              Eine gemischte Auswahl vom Tag (z.&nbsp;B. Brötchen, Brote, süßes Gebäck) – abhängig davon,
-              was übrig ist.
+              Eine gemischte Auswahl vom Tag (z.&nbsp;B. Brötchen, Brote, süßes Gebäck) – abhängig davon, was übrig ist.
             </FAQItem>
 
             <FAQItem question="Kann ich mehrere Tüten reservieren?">
-              Wenn genug verfügbar ist: ja. Die App zeigt die aktuelle Anzahl je Standort.
+              Wenn genug verfügbar ist: ja. Die App zeigt die aktuelle Anzahl beim jeweiligen Standort.
             </FAQItem>
 
             <FAQItem question="Was, wenn ich es nicht rechtzeitig schaffe?">
-              Bitte plane genug Zeit ein – Abholung ist nur im angegebenen Zeitfenster möglich.
+              Bitte plane genug Zeit ein – Abholung ist nur im in der App angegebenen Zeitfenster möglich.
             </FAQItem>
           </div>
         </div>
