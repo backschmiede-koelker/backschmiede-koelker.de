@@ -100,7 +100,7 @@ export default function MultibuyForm({
           </button>
         </div>
 
-        {/* Custom-Einheit – vollbreit unter der Zeile */}
+        {/* Custom-Einheit - vollbreit unter der Zeile */}
         {customMode && (
           <div className="lg:col-span-2 2xl:col-span-4 min-w-0">
             <div className="flex flex-col gap-2 mt-1">

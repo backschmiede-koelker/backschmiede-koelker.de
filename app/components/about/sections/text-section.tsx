@@ -58,7 +58,7 @@ export default function AboutTextSection({ section }: { section: AboutSectionDTO
           </div>
         ) : (
           <p className="mt-3 text-sm text-zinc-700 dark:text-zinc-300">
-            {/* Leerer Body ist ok – Admin kann das später pflegen */}
+            {/* Leerer Body ist ok - Admin kann das später pflegen */}
           </p>
         )}
       </div>

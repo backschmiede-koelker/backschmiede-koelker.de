@@ -1,5 +1,5 @@
 // app/lib/uploads.server.ts
-// SERVER-ONLY – Dateisystem & absolute URLs aus Server-ENV
+// SERVER-ONLY - Dateisystem & absolute URLs aus Server-ENV
 import "server-only";
 import { join } from "node:path";
 import { unlink } from "node:fs/promises";

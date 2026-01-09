@@ -96,7 +96,7 @@ export function salaryLabel(
   const u = unit[job.salaryUnit || "MONTH"];
 
   if (min && max)
-    return `${min.toLocaleString("de-DE")}–${max.toLocaleString("de-DE")} € / ${u}`;
+    return `${min.toLocaleString("de-DE")}-${max.toLocaleString("de-DE")} € / ${u}`;
   if (min) return `ab ${min.toLocaleString("de-DE")} € / ${u}`;
   if (max) return `bis ${max.toLocaleString("de-DE")} € / ${u}`;
   return null;
@@ -120,7 +120,7 @@ export function salaryChipLabel(
   const minS = min != null ? compactNumberDE(min) : null;
   const maxS = max != null ? compactNumberDE(max) : null;
 
-  if (minS && maxS) return `${minS}–${maxS} € / ${u}`;
+  if (minS && maxS) return `${minS}-${maxS} € / ${u}`;
   if (minS) return `ab ${minS} € / ${u}`;
   if (maxS) return `bis ${maxS} € / ${u}`;
   return null;

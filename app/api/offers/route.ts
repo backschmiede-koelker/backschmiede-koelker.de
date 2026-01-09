@@ -61,7 +61,7 @@ function toDTO(item: any) {
     priority: item.priority,
     minBasketCents: item.minBasketCents ?? null,
 
-    // Basis-Preisfelder aus Offer – für GENERIC & Co als Fallback nutzbar
+    // Basis-Preisfelder aus Offer - für GENERIC & Co als Fallback nutzbar
     priceCents: item.priceCents ?? null,
     originalPriceCents: item.originalPriceCents ?? null,
     unit: item.unit ?? null,
@@ -196,7 +196,7 @@ export async function GET(req: Request) {
       ],
     };
 
-    // Alte Wochenlogik (DATE_RANGE, die Woche überlappen) – falls du sie später noch nutzt
+    // Alte Wochenlogik (DATE_RANGE, die Woche überlappen) - falls du sie später noch nutzt
     const weeklyWhere: Prisma.OfferWhereInput = {
       ...activeBase,
       kind: OfferKind.DATE_RANGE,

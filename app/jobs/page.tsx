@@ -8,7 +8,7 @@ import { fetchJobs } from "@/app/lib/jobs/db";
 
 export const metadata: Metadata = {
   title: "Stellenangebote | Backschmiede Kölker",
-  description: "Jobs in Backstube, Verkauf & mehr – fair, planbar, Teamspirit. Jetzt bewerben!",
+  description: "Jobs in Backstube, Verkauf & mehr - fair, planbar, Teamspirit. Jetzt bewerben!",
   alternates: { canonical: "/jobs" },
   openGraph: {
     title: "Stellenangebote | Backschmiede Kölker",

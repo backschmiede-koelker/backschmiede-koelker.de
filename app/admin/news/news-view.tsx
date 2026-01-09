@@ -179,7 +179,7 @@ export default function AdminNewsView() {
                 onChange={(e) => setCtaLabel(e.target.value)}
               />
               <div className="text-xs text-zinc-600 dark:text-zinc-400">
-                Optional – nur ausfüllen, wenn bei der News ein Button erscheinen soll.
+                Optional - nur ausfüllen, wenn bei der News ein Button erscheinen soll.
               </div>
             </div>
 
@@ -444,7 +444,7 @@ function NewsCard({ item, onSaved, onDelete }: {
             onChange={(e) => setCtaLabel(e.target.value)}
           />
           <div className="text-xs text-zinc-600 dark:text-zinc-400">
-            Optional – nur ausfüllen, wenn bei der News ein Button erscheinen soll.
+            Optional - nur ausfüllen, wenn bei der News ein Button erscheinen soll.
           </div>
         </div>
 

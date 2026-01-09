@@ -31,7 +31,7 @@ export default function HeroScrollCta({
         Öffnungszeiten
       </button>
 
-      {/* 2) Angebote – jetzt immer sichtbar */}
+      {/* 2) Angebote - jetzt immer sichtbar */}
       <button
         onClick={() => scrollToId(angebotId)}
         className={btnPrimary + " ml-3"}

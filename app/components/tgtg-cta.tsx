@@ -108,7 +108,7 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
         </div>
 
         <h3 id="tgtg-title" className="mt-2 text-2xl font-semibold leading-tight">
-          Too&nbsp;Good&nbsp;To&nbsp;Go – Überraschungstüten
+          Too&nbsp;Good&nbsp;To&nbsp;Go - Überraschungstüten
         </h3>
 
         <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
@@ -159,7 +159,7 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
                   href={loc.tgtgShareUrl}
                   rel="noreferrer"
                   className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
-                  aria-label={`Too Good To Go öffnen – ${loc.label}`}
+                  aria-label={`Too Good To Go öffnen - ${loc.label}`}
                 >
                   In Too Good To Go öffnen
                 </a>
@@ -172,7 +172,7 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
           </div>
 
           <p className="text-xs text-zinc-600 dark:text-zinc-300">
-            Hinweis: Mengen sind begrenzt und variieren je Tag – in der App siehst du immer den aktuellen Stand.
+            Hinweis: Mengen sind begrenzt und variieren je Tag - in der App siehst du immer den aktuellen Stand.
           </p>
         </div>
 
@@ -186,19 +186,19 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
             {[
               {
                 t: 'Standort öffnen',
-                d: 'Auf Recke oder Mettingen klicken – du landest direkt beim passenden Eintrag in Too Good To Go.',
+                d: 'Auf Recke oder Mettingen klicken - du landest direkt beim passenden Eintrag in Too Good To Go.',
               },
               {
                 t: 'Tüte reservieren',
-                d: 'In der App auswählen & bezahlen – du erhältst eine Bestätigung.',
+                d: 'In der App auswählen & bezahlen - du erhältst eine Bestätigung.',
               },
               {
                 t: 'Zur Zeit abholen',
-                d: 'Abholfenster steht in der App – bitte rechtzeitig erscheinen und Bestätigung zeigen.',
+                d: 'Abholfenster steht in der App - bitte rechtzeitig erscheinen und Bestätigung zeigen.',
               },
               {
                 t: 'Genießen & sparen',
-                d: 'Frische Backwaren zum kleinen Preis – und Lebensmittel gerettet!',
+                d: 'Frische Backwaren zum kleinen Preis - und Lebensmittel gerettet!',
               },
             ].map((s, i) => (
               <li key={i} className="flex gap-3">
@@ -218,12 +218,12 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
         <div className="lg:col-span-2">
           <div className="rounded-xl border border-emerald-800/10 bg-white/80 p-3 dark:border-emerald-300/15 dark:bg-white/5">
             <FAQItem question="Wo sehe ich Abholzeiten und Verfügbarkeit?">
-              Direkt in der Too&nbsp;Good&nbsp;To&nbsp;Go App beim jeweiligen Standort – dort sind die Abholfenster und
+              Direkt in der Too&nbsp;Good&nbsp;To&nbsp;Go App beim jeweiligen Standort - dort sind die Abholfenster und
               die Verfügbarkeit immer aktuell.
             </FAQItem>
 
             <FAQItem question="Was steckt in der Überraschungstüte?">
-              Eine gemischte Auswahl vom Tag (z.&nbsp;B. Brötchen, Brote, süßes Gebäck) – abhängig davon, was übrig ist.
+              Eine gemischte Auswahl vom Tag (z.&nbsp;B. Brötchen, Brote, süßes Gebäck) - abhängig davon, was übrig ist.
             </FAQItem>
 
             <FAQItem question="Kann ich mehrere Tüten reservieren?">
@@ -231,7 +231,7 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
             </FAQItem>
 
             <FAQItem question="Was, wenn ich es nicht rechtzeitig schaffe?">
-              Bitte plane genug Zeit ein – Abholung ist nur im in der App angegebenen Zeitfenster möglich.
+              Bitte plane genug Zeit ein - Abholung ist nur im in der App angegebenen Zeitfenster möglich.
             </FAQItem>
           </div>
         </div>

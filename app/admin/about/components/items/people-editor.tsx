@@ -217,7 +217,7 @@ export default function PeopleEditor({
           <div className="min-w-0">
             <div className="text-sm font-semibold">Neue Person</div>
             <div className="text-xs text-zinc-600 dark:text-zinc-400">
-              Du kannst steuern, ob die Person auf der Über-uns-Seite erscheint – über „Aktiv“.
+              Du kannst steuern, ob die Person auf der Über-uns-Seite erscheint - über „Aktiv“.
             </div>
           </div>
 
@@ -248,7 +248,7 @@ export default function PeopleEditor({
         <div className="space-y-6 min-w-0">
           <GroupBlock
             title="Verantwortung & Leitung"
-            subtitle="Drag & Drop oder Pfeile – nur innerhalb dieser Gruppe."
+            subtitle="Drag & Drop oder Pfeile - nur innerhalb dieser Gruppe."
             icon={<Users size={16} />}
           >
             {leadSortable.items.length === 0 ? (
@@ -296,7 +296,7 @@ export default function PeopleEditor({
 
           <GroupBlock
             title="Mitarbeiter"
-            subtitle="Drag & Drop oder Pfeile – nur innerhalb dieser Gruppe."
+            subtitle="Drag & Drop oder Pfeile - nur innerhalb dieser Gruppe."
             icon={<Users size={16} />}
           >
             {staffSortable.items.length === 0 ? (

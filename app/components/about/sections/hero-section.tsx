@@ -42,7 +42,7 @@ export default function AboutHeroSection({
   const title = (section.title ?? "Backschmiede Kölker").trim() || "Backschmiede Kölker";
   const subtitle =
     (section.body ?? "").trim() ||
-    "Handwerk, Teamgeist und gute Zutaten – jeden Tag frisch in Recke & Mettingen.";
+    "Handwerk, Teamgeist und gute Zutaten - jeden Tag frisch in Recke & Mettingen.";
 
   return (
     <section className="relative overflow-hidden rounded-3xl ring-1 ring-zinc-200/70 dark:ring-zinc-800 shadow-sm">

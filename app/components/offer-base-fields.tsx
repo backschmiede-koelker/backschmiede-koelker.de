@@ -23,7 +23,7 @@ export default function OfferBaseFields({
     <div className="grid gap-3">
       <div className="grid gap-3 lg:grid-cols-2">
         <div className="min-w-0">
-          <FieldLabel hint="Kurzer, knackiger Titel – damit Kund:innen sofort verstehen, worum es geht.">
+          <FieldLabel hint="Kurzer, knackiger Titel - damit Kund:innen sofort verstehen, worum es geht.">
             Titel
           </FieldLabel>
           <input

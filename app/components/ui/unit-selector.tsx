@@ -34,7 +34,7 @@ export default function UnitSelector({
     <div className={className}>
       <div className="min-h-[112px]">
         {!customMode ? (
-          // Hinweis: erst AB 2xl nebeneinander – darunter gestapelt
+          // Hinweis: erst AB 2xl nebeneinander - darunter gestapelt
           <div className="grid gap-2 2xl:grid-cols-[minmax(0,1fr),auto]">
             <SelectBox
               ariaLabel="Einheit wählen"

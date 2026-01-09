@@ -58,7 +58,7 @@ export function JobHero() {
                 .
               </h1>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-700 dark:text-zinc-300 sm:text-base">
-                Backstube oder Verkauf – bei uns zählen Teamgeist, Qualität und ein fairer Umgang.
+                Backstube oder Verkauf - bei uns zählen Teamgeist, Qualität und ein fairer Umgang.
                 Bewirb dich schnell & unkompliziert.
               </p>
             </div>
@@ -87,7 +87,7 @@ export function JobHero() {
             </div>
           </div>
 
-          {/* 3 Punkte – mobile safe */}
+          {/* 3 Punkte - mobile safe */}
           <div className="grid gap-2 sm:grid-cols-3">
             {highlights.map((h) => (
               <div

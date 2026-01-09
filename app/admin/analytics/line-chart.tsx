@@ -12,7 +12,7 @@ type Props = {
   className?: string;
   /** Linieninterpolation: "linear" (wie vorher) oder "smooth" (Spline) */
   curve?: "linear" | "smooth";
-  /** Glättungsgrad für "smooth" (0..1). 0.5–0.7 ist meist ideal. */
+  /** Glättungsgrad für "smooth" (0..1). 0.5-0.7 ist meist ideal. */
   tension?: number;
 };
 

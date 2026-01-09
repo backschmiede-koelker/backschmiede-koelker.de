@@ -276,22 +276,22 @@ export default async function Page() {
             Angebote
           </h2>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-            Hier findest du unsere aktuellen Spezialpreise und Aktionen – heute
+            Hier findest du unsere aktuellen Spezialpreise und Aktionen - heute
             und für die nächsten Tage.
           </p>
         </header>
 
-        {/* HEUTE – zeigt nur etwas, wenn auch wirklich Angebote existieren */}
+        {/* HEUTE - zeigt nur etwas, wenn auch wirklich Angebote existieren */}
         <Suspense fallback={null}>
           <TodayOffersSection />
         </Suspense>
 
-        {/* DEMNÄCHST – wird automatisch ausgeblendet, wenn leer */}
+        {/* DEMNÄCHST - wird automatisch ausgeblendet, wenn leer */}
         <Suspense fallback={null}>
           <UpcomingOffersSection />
         </Suspense>
 
-        {/* To Good To Go – immer sichtbar, sorgt dafür dass die Section nie „leer“ wirkt */}
+        {/* To Good To Go - immer sichtbar, sorgt dafür dass die Section nie „leer“ wirkt */}
         <div className="mt-8">
           <TgtgCta />
         </div>

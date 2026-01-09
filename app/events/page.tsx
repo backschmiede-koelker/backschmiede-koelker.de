@@ -4,11 +4,11 @@ import EventsTimeline from "@/app/components/events/events-timeline";
 
 export const metadata: Metadata = {
   title: "Veranstaltungen | Backschmiede Kölker",
-  description: "Events & Termine der Backschmiede Kölker – Aktionen, Termine und Besonderes auf einen Blick.",
+  description: "Events & Termine der Backschmiede Kölker - Aktionen, Termine und Besonderes auf einen Blick.",
   alternates: { canonical: "/events" },
   openGraph: {
     title: "Veranstaltungen | Backschmiede Kölker",
-    description: "Events & Termine der Backschmiede Kölker – Aktionen, Termine und Besonderes auf einen Blick.",
+    description: "Events & Termine der Backschmiede Kölker - Aktionen, Termine und Besonderes auf einen Blick.",
     url: "/events",
     type: "website",
   },

@@ -24,9 +24,9 @@ export const JOB_PRESETS: JobPreset[] = [
     category: "BAECKER",
     title: "Bäcker/in (m/w/d)",
     teaser:
-      "Du liebst Handwerk und Qualität? Werde Teil unserer Backstube – mit festen Abläufen und einem guten Team.",
+      "Du liebst Handwerk und Qualität? Werde Teil unserer Backstube - mit festen Abläufen und einem guten Team.",
     description:
-      "Wir backen mit Leidenschaft und Anspruch.\n\nBei uns arbeitest du in einem eingespielten Team – mit klaren Abläufen, guter Einarbeitung und fairen Bedingungen.\n\nWenn du Fragen hast, melde dich gern kurz.",
+      "Wir backen mit Leidenschaft und Anspruch.\n\nBei uns arbeitest du in einem eingespielten Team - mit klaren Abläufen, guter Einarbeitung und fairen Bedingungen.\n\nWenn du Fragen hast, melde dich gern kurz.",
     employmentTypes: ["FULL_TIME", "PART_TIME"],
     responsibilities: [
       "Herstellung von Backwaren nach Rezepturen",
@@ -48,7 +48,7 @@ export const JOB_PRESETS: JobPreset[] = [
     category: "KONDITOR",
     title: "Konditor/in (m/w/d)",
     teaser:
-      "Du liebst feines Handwerk? Werde Teil unseres Teams – von Cremes über Torten bis Dekoration, mit Struktur und Ruhe im Ablauf.",
+      "Du liebst feines Handwerk? Werde Teil unseres Teams - von Cremes über Torten bis Dekoration, mit Struktur und Ruhe im Ablauf.",
     description:
       "Bei uns zählt Qualität und sauberes Arbeiten.\n\nDu arbeitest im Team mit klaren Abläufen, guter Einarbeitung und fairen Bedingungen.\n\nWenn du Fragen hast, melde dich gern kurz.",
     employmentTypes: ["FULL_TIME", "PART_TIME"],
@@ -73,9 +73,9 @@ export const JOB_PRESETS: JobPreset[] = [
     category: "PRODUKTION",
     title: "Bäcker/in & Konditor/in (m/w/d)",
     teaser:
-      "Du kannst beides – oder willst dich entwickeln? Backstube & Konditorei: klare Abläufe, gutes Team, fair und planbar.",
+      "Du kannst beides - oder willst dich entwickeln? Backstube & Konditorei: klare Abläufe, gutes Team, fair und planbar.",
     description:
-      "Bei uns zählt Handwerk und Qualität.\n\nDu unterstützt je nach Stärke in Backstube oder Konditorei – mit guter Einarbeitung und klaren Abläufen.\n\nWenn du Fragen hast, melde dich gern kurz.",
+      "Bei uns zählt Handwerk und Qualität.\n\nDu unterstützt je nach Stärke in Backstube oder Konditorei - mit guter Einarbeitung und klaren Abläufen.\n\nWenn du Fragen hast, melde dich gern kurz.",
     employmentTypes: ["FULL_TIME", "PART_TIME"],
     responsibilities: [
       "Herstellung von Backwaren & Feinbackwaren nach Standards",
@@ -96,7 +96,7 @@ export const JOB_PRESETS: JobPreset[] = [
     category: "VERKAEUFER",
     title: "Verkäufer/in (m/w/d)",
     teaser:
-      "Du hast Freude am Umgang mit Menschen? Wir suchen Unterstützung im Verkauf – freundlich, zuverlässig, teamorientiert.",
+      "Du hast Freude am Umgang mit Menschen? Wir suchen Unterstützung im Verkauf - freundlich, zuverlässig, teamorientiert.",
     description:
       "Im Verkauf bist du unsere Visitenkarte.\n\nDu berätst Kunden, präsentierst Ware ansprechend und sorgst dafür, dass alles rund läuft.\n\nErzähl uns kurz, welche Zeiten für dich passen.",
     employmentTypes: ["PART_TIME", "MINI_JOB", "FULL_TIME"],
@@ -119,9 +119,9 @@ export const JOB_PRESETS: JobPreset[] = [
     category: "AZUBI",
     title: "Ausbildung (m/w/d)",
     teaser:
-      "Du willst ein echtes Handwerk lernen? Starte deine Ausbildung bei uns – in Backstube oder Verkauf.",
+      "Du willst ein echtes Handwerk lernen? Starte deine Ausbildung bei uns - in Backstube oder Verkauf.",
     description:
-      "Wir bilden aus – mit Geduld, Struktur und einem Team, das dich mitnimmt.\n\nSag uns kurz, für welchen Bereich du dich interessierst (Backstube/Verkauf) und ab wann du starten möchtest.",
+      "Wir bilden aus - mit Geduld, Struktur und einem Team, das dich mitnimmt.\n\nSag uns kurz, für welchen Bereich du dich interessierst (Backstube/Verkauf) und ab wann du starten möchtest.",
     employmentTypes: ["APPRENTICESHIP"],
     responsibilities: [
       "Mitarbeit im Tagesgeschäft (je nach Bereich)",
@@ -138,9 +138,9 @@ export const JOB_PRESETS: JobPreset[] = [
     category: "AUSHILFE",
     title: "Aushilfe (m/w/d)",
     teaser:
-      "Du willst nebenbei etwas dazuverdienen? Wir suchen Aushilfen – flexibel, zuverlässig und im Team zuhause.",
+      "Du willst nebenbei etwas dazuverdienen? Wir suchen Aushilfen - flexibel, zuverlässig und im Team zuhause.",
     description:
-      "Als Aushilfe unterstützt du uns dort, wo gerade Hilfe gebraucht wird – z.B. im Verkauf, bei Vorbereitung oder im Tagesablauf.\n\nSag uns kurz, wann du Zeit hast.",
+      "Als Aushilfe unterstützt du uns dort, wo gerade Hilfe gebraucht wird - z.B. im Verkauf, bei Vorbereitung oder im Tagesablauf.\n\nSag uns kurz, wann du Zeit hast.",
     employmentTypes: ["MINI_JOB", "PART_TIME"],
     responsibilities: [
       "Unterstützung im Tagesablauf (je nach Bereich)",
@@ -157,7 +157,7 @@ export const JOB_PRESETS: JobPreset[] = [
     category: "LOGISTIK",
     title: "Logistik / Auslieferung (m/w/d)",
     teaser:
-      "Du packst gern an und behältst den Überblick? Unterstütze uns in Logistik/Auslieferung – zuverlässig & organisiert.",
+      "Du packst gern an und behältst den Überblick? Unterstütze uns in Logistik/Auslieferung - zuverlässig & organisiert.",
     description:
       "In der Logistik sorgst du dafür, dass alles zur richtigen Zeit am richtigen Ort ist.\n\nSchreib uns kurz, welche Zeiten für dich passen und ob du einen Führerschein hast (falls relevant).",
     employmentTypes: ["PART_TIME", "MINI_JOB", "FULL_TIME"],
@@ -176,7 +176,7 @@ export const JOB_PRESETS: JobPreset[] = [
     category: "PRODUKTION",
     title: "Produktion (m/w/d)",
     teaser:
-      "Du arbeitest gern strukturiert? Unterstütze uns in der Produktion – mit klaren Abläufen und einem festen Team.",
+      "Du arbeitest gern strukturiert? Unterstütze uns in der Produktion - mit klaren Abläufen und einem festen Team.",
     description:
       "In der Produktion unterstützt du bei vorbereitenden Tätigkeiten und Abläufen rund um unsere Backwaren.\n\nSchreib uns kurz, welche Zeiten für dich passen.",
     employmentTypes: ["FULL_TIME", "PART_TIME"],
@@ -195,9 +195,9 @@ export const JOB_PRESETS: JobPreset[] = [
     category: "VERWALTUNG",
     title: "Verwaltung (m/w/d)",
     teaser:
-      "Du arbeitest gern organisiert und zuverlässig? Unterstütze uns in der Verwaltung – strukturiert und im Team.",
+      "Du arbeitest gern organisiert und zuverlässig? Unterstütze uns in der Verwaltung - strukturiert und im Team.",
     description:
-      "In der Verwaltung unterstützt du bei organisatorischen Themen – je nach Bedarf.\n\nSchreib uns kurz, welche Aufgaben dir liegen und wann du starten könntest.",
+      "In der Verwaltung unterstützt du bei organisatorischen Themen - je nach Bedarf.\n\nSchreib uns kurz, welche Aufgaben dir liegen und wann du starten könntest.",
     employmentTypes: ["PART_TIME", "FULL_TIME"],
     responsibilities: [
       "Organisation & Unterstützung im Tagesgeschäft",
@@ -214,9 +214,9 @@ export const JOB_PRESETS: JobPreset[] = [
     category: "SONSTIGES",
     title: "Mitarbeiter/in (m/w/d)",
     teaser:
-      "Du findest dich nicht in den Kategorien wieder? Bewirb dich trotzdem – wir prüfen gemeinsam, was passt.",
+      "Du findest dich nicht in den Kategorien wieder? Bewirb dich trotzdem - wir prüfen gemeinsam, was passt.",
     description:
-      "Manchmal passt ein Profil nicht in eine Schublade.\n\nSchreib uns kurz, worauf du Lust hast und welche Zeiten für dich passen – wir melden uns.",
+      "Manchmal passt ein Profil nicht in eine Schublade.\n\nSchreib uns kurz, worauf du Lust hast und welche Zeiten für dich passen - wir melden uns.",
     employmentTypes: ["FULL_TIME", "PART_TIME", "MINI_JOB"],
     responsibilities: ["Unterstützung je nach Bereich", "Teamarbeit", "Zuverlässiger Einsatz im Alltag"],
     qualifications: ["Motivation", "Teamfähigkeit", "Zuverlässigkeit"],

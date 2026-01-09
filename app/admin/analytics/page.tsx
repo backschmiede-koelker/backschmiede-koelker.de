@@ -281,11 +281,11 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
           <div className="sm:hidden space-y-2">
             {campaigns.length ? campaigns.map((c, i) => (
               <div key={`${c.src}-${c.med}-${c.camp}-${i}`} className="rounded-lg border border-zinc-200/60 dark:border-zinc-800/60 p-2">
-                <div className="text-xs opacity-70">UTM – Quelle</div>
+                <div className="text-xs opacity-70">UTM - Quelle</div>
                 <div className="text-sm">{c.src}</div>
-                <div className="mt-1 text-xs opacity-70">UTM – Medium</div>
+                <div className="mt-1 text-xs opacity-70">UTM - Medium</div>
                 <div className="text-sm">{c.med}</div>
-                <div className="mt-1 text-xs opacity-70">UTM – Kampagne</div>
+                <div className="mt-1 text-xs opacity-70">UTM - Kampagne</div>
                 <div className="text-sm">{c.camp}</div>
                 <div className="mt-1 text-xs opacity-70 text-right">Aufrufe: <span className="font-medium">{Number(c.c)}</span></div>
               </div>
@@ -297,9 +297,9 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
             <table className="w-full text-sm">
               <thead className="text-left text-xs uppercase opacity-70">
                 <tr>
-                  <th className="py-2 pr-3">UTM – Quelle</th>
-                  <th className="py-2 pr-3">UTM – Medium</th>
-                  <th className="py-2 pr-3">UTM – Kampagne</th>
+                  <th className="py-2 pr-3">UTM - Quelle</th>
+                  <th className="py-2 pr-3">UTM - Medium</th>
+                  <th className="py-2 pr-3">UTM - Kampagne</th>
                   <th className="py-2 text-right">Aufrufe</th>
                 </tr>
               </thead>

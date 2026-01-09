@@ -18,7 +18,7 @@ export function JobList({ jobs }: { jobs: Job[] }) {
           </p>
         </div>
 
-        {/* kleines Badge mit Anzahl – fällt auf Mobile automatisch weg, wenn kein Platz */}
+        {/* kleines Badge mit Anzahl - fällt auf Mobile automatisch weg, wenn kein Platz */}
         <div className="hidden sm:inline-flex shrink-0 items-center rounded-full border border-zinc-200/70 bg-white/70 px-3 py-1 text-xs text-zinc-700 shadow-sm dark:border-white/10 dark:bg-zinc-900/50 dark:text-zinc-200">
           {hasJobs ? `${jobs.length} Jobs` : "0 Jobs"}
         </div>

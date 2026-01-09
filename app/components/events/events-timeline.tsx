@@ -63,7 +63,7 @@ function timeRange(startsAt: string, endsAt?: string | null) {
   const startT = timeLabel(startsAt);
   if (!endsAt) return startT;
 
-  if (sameDay(startsAt, endsAt)) return `${startT}–${timeLabel(endsAt)}`;
+  if (sameDay(startsAt, endsAt)) return `${startT}-${timeLabel(endsAt)}`;
   return `${startT} bis ${dateLabel(endsAt)} ${timeLabel(endsAt)}`;
 }
 
@@ -584,7 +584,7 @@ export default function EventsTimeline() {
                 Aktuell keine Termine online
               </div>
               <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
-                Schau später nochmal rein – wir kündigen neue Aktionen hier an.
+                Schau später nochmal rein - wir kündigen neue Aktionen hier an.
               </p>
             </div>
           </div>

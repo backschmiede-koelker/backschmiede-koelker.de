@@ -180,7 +180,7 @@ export default function Header({
             <LuPartyPopper className="text-[18px]" aria-hidden />
           </button>
 
-          {/* ❄ Schnee-Toggle – direkt neben Konfetti */}
+          {/* ❄ Schnee-Toggle - direkt neben Konfetti */}
           <button
             type="button"
             onClick={onToggleSnow}

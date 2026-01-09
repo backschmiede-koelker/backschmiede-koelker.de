@@ -52,7 +52,7 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
   const [previewOverride, setPreviewOverride] = useState<string | null>(null); // lokale Vorschau (Blob/CDN)
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Aus Prop (DB-Wert oder absolut) eine anzeigbare URL ableiten – kann vom override übersteuert werden
+  // Aus Prop (DB-Wert oder absolut) eine anzeigbare URL ableiten - kann vom override übersteuert werden
   const derivedPreview = imageUrl ? absoluteCdnUrl(imageUrl) || "" : "";
   const previewSrc = previewOverride ?? derivedPreview;
 

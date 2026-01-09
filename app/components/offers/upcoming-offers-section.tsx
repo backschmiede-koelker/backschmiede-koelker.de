@@ -48,7 +48,7 @@ export default async function UpcomingOffersSection() {
             Bald gültig
           </div>
           <p className="mt-1 text-xs text-zinc-700/80 dark:text-zinc-300/80">
-            Angebote zum Vormerken – ideal für deine nächste Bäckerei-Runde.
+            Angebote zum Vormerken - ideal für deine nächste Bäckerei-Runde.
           </p>
         </div>
       </header>

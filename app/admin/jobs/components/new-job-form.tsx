@@ -280,7 +280,7 @@ export default function NewJobForm({
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/30 " +
     "dark:border-white/10 dark:bg-zinc-900/50 dark:text-zinc-100 dark:hover:bg-zinc-800/60";
 
-  // ✅ Header klickbar (Accordion), aber nur der Header – nicht das gesamte Form,
+  // ✅ Header klickbar (Accordion), aber nur der Header - nicht das gesamte Form,
   //    damit Klicks in Inputs nicht ständig toggeln.
   const headerButton =
     "w-full text-left outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 rounded-xl";

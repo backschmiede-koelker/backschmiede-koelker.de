@@ -1,5 +1,5 @@
 // app/lib/uploads.ts
-// CLIENT-SAFE – keine Node-APIs importieren!
+// CLIENT-SAFE - keine Node-APIs importieren!
 
 /**
  * Normalisiert beliebige Eingaben (abs./rel.) auf einen DB-Speicherwert
@@ -38,7 +38,7 @@ export function publicAssetUrl(u?: string | null): string | null {
   return base ? `${base}/${stored}` : `/uploads/${stored}`;
 }
 
-/** Nur der Pfadteil mit '/uploads/' – falls du mal ohne Host rendern willst. */
+/** Nur der Pfadteil mit '/uploads/' - falls du mal ohne Host rendern willst. */
 export function uploadsPath(u?: string | null): string | null {
   const stored = toStoredPath(u);
   return stored ? `/uploads/${stored}` : null;

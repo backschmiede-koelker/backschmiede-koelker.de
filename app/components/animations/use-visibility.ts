@@ -20,7 +20,7 @@
  *                   -> 0.0 bedeutet: erst ausblenden, wenn komplett draußen.
  *  - rootMargin:    Zusätzlicher "Puffer" rund um den Viewport, z. B. "0px 0px -10% 0px".
  *                   In den meisten Fällen brauchst du das mit der Hysterese nicht mehr.
- *  - debounceMs:    Entprell-Zeit in Millisekunden (z. B. 60–120ms).
+ *  - debounceMs:    Entprell-Zeit in Millisekunden (z. B. 60-120ms).
  *  - once:          true = nur einmal anzeigen, danach nie wieder ausblenden (kein Replay).
  *
  * Verwendung (Beispiel):

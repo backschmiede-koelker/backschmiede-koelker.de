@@ -19,7 +19,7 @@ export default function AboutCtaSection({ section }: { section: AboutSectionDTO 
       <div
         className={[
           "relative overflow-hidden rounded-3xl",
-          // no blue ring – only neutral separation
+          // no blue ring - only neutral separation
           "bg-white shadow-[0_18px_50px_rgba(0,0,0,0.12)]",
           "ring-1 ring-zinc-200/80",
           "dark:bg-zinc-950/40 dark:ring-zinc-800/80 dark:shadow-[0_26px_70px_rgba(0,0,0,0.55)]",
