@@ -454,3 +454,22 @@ model AboutPerson {
   @@index([isShownInHero])
   @@schema("backschmiede_koelker")
 }
+
+model Event {
+  id          String   @id @default(cuid())
+  caption     String
+  description String?
+  imageUrl    String?
+  startsAt    DateTime
+  endsAt      DateTime?
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, startsAt])
+  @@index([startsAt])
+  @@index([caption])
+
+  @@schema("backschmiede_koelker")
+}

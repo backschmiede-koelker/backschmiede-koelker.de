@@ -68,7 +68,8 @@ export const ModelName = {
   AboutTimelineItem: 'AboutTimelineItem',
   AboutFaqItem: 'AboutFaqItem',
   AboutGalleryItem: 'AboutGalleryItem',
-  AboutPerson: 'AboutPerson'
+  AboutPerson: 'AboutPerson',
+  Event: 'Event'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -360,6 +361,21 @@ export const AboutPersonScalarFieldEnum = {
 } as const
 
 export type AboutPersonScalarFieldEnum = (typeof AboutPersonScalarFieldEnum)[keyof typeof AboutPersonScalarFieldEnum]
+
+
+export const EventScalarFieldEnum = {
+  id: 'id',
+  caption: 'caption',
+  description: 'description',
+  imageUrl: 'imageUrl',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
 
 
 export const SortOrder = {

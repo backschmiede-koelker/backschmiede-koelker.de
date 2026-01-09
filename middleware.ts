@@ -55,11 +55,13 @@ export default auth((req: ReqWithAuth) => {
     return isAdmin ? base : redirectWithCookies("/login");
   }
 
-  // About API:
-  // - /api/about (GET) ist öffentlich
-  // - alles andere unter /api/about/* nur Admin
   if (pathname.startsWith("/api/about")) {
     if (pathname === "/api/about" && req.method === "GET") return base;
+    return isAdmin ? base : redirectWithCookies("/login");
+  }
+
+  if (pathname.startsWith("/api/events")) {
+    if (req.method === "GET") return base;
     return isAdmin ? base : redirectWithCookies("/login");
   }
 

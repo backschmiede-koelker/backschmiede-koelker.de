@@ -107,3 +107,8 @@ export type AboutGalleryItem = Prisma.AboutGalleryItemModel
  * 
  */
 export type AboutPerson = Prisma.AboutPersonModel
+/**
+ * Model Event
+ * 
+ */
+export type Event = Prisma.EventModel
