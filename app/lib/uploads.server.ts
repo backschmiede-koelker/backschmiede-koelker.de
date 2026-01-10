@@ -6,7 +6,7 @@ import { unlink } from "node:fs/promises";
 import { toStoredPath } from "./uploads";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads";
-const SERVER_BASE = (process.env.BASE_ASSET_URL || process.env.NEXT_PUBLIC_ASSET_BASE || "").replace(/\/+$/, "");
+const SERVER_BASE = (process.env.NEXT_PUBLIC_BASE_ASSET_URL || "").replace(/\/+$/, "");
 
 /** DB-Wert ("folder/file") → absoluter Dateipfad. */
 export function pathFromStoredPath(stored?: string | null): string | null {

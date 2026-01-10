@@ -12,6 +12,11 @@ RUN npx prisma generate
 # Quellcode
 COPY . .
 
+ARG NEXT_PUBLIC_BASE_ASSET_URL
+ARG NEXT_PUBLIC_BASE_URL
+ENV NEXT_PUBLIC_BASE_ASSET_URL=$NEXT_PUBLIC_BASE_ASSET_URL
+ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
+
 # Next build (standalone)
 RUN npm run build
 
@@ -35,4 +40,4 @@ COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
 
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+CMD ["sh", "-c", "node server.js"]

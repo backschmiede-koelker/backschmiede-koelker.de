@@ -13,7 +13,7 @@ type Props = {
 
 /** Liefert die bevorzugte CDN-Basis (Env) oder errät sie aus der aktuellen Domain (→ cdn.<host>) */
 function assetBaseClient(): string | null {
-  const env = (process.env.NEXT_PUBLIC_ASSET_BASE || "").replace(/\/+$/, "");
+  const env = (process.env.NEXT_PUBLIC_BASE_ASSET_URL || "").replace(/\/+$/, "");
   if (env) return env;
   if (typeof window !== "undefined") {
     const { protocol, hostname } = window.location;

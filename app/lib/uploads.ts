@@ -20,7 +20,7 @@ export function toStoredPath(input?: string | null): string | null {
 
 /**
  * Öffentliche URL für ein Bild aus DB-Wert oder rohem Pfad.
- * - Mit NEXT_PUBLIC_ASSET_BASE (CDN-Host) → `${BASE}/${stored}`
+ * - Mit NEXT_PUBLIC_BASE_ASSET_URL (CDN-Host) → `${BASE}/${stored}`
  * - Ohne BASE → Fallback auf App-Pfad `/uploads/${stored}`
  * - Bereits absolute/data/blob-URLs werden unverändert zurückgegeben.
  */
@@ -33,7 +33,7 @@ export function publicAssetUrl(u?: string | null): string | null {
   const stored = toStoredPath(s);
   if (!stored) return null;
 
-  const base = (process.env.NEXT_PUBLIC_ASSET_BASE || "").replace(/\/+$/, "");
+  const base = (process.env.NEXT_PUBLIC_BASE_ASSET_URL || "").replace(/\/+$/, "");
   // Wichtig: CDN zeigt direkt auf den uploads-Root, daher KEIN "/uploads" hier!
   return base ? `${base}/${stored}` : `/uploads/${stored}`;
 }
