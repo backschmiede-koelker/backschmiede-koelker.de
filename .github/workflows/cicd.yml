@@ -50,6 +50,9 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_BASE_ASSET_URL=${{ secrets.NEXT_PUBLIC_BASE_ASSET_URL }}
+            NEXT_PUBLIC_BASE_URL=${{ secrets.NEXT_PUBLIC_BASE_URL }}
 
   deploy:
     needs: build-and-push
@@ -70,6 +73,18 @@ jobs:
         env:
           COMPOSE_FILE_PATH: ${{ '/srv/backschmiede-koelker.de/compose.yml' }}
         run: |
+          cd "$(dirname "$COMPOSE_FILE_PATH")"
           docker compose -f "$COMPOSE_FILE_PATH" pull
           docker compose -f "$COMPOSE_FILE_PATH" up -d
-          docker image prune -f
+      
+      - name: Run Prisma migrations
+        env:
+          COMPOSE_FILE_PATH: ${{ '/srv/backschmiede-koelker.de/compose.yml' }}
+        run: |
+          # führt im laufenden Web-Container die Migrations gegen DATABASE_URL aus
+          cd "$(dirname "$COMPOSE_FILE_PATH")"
+          docker compose -f "$COMPOSE_FILE_PATH" exec -T backschmiede-koelker npx prisma migrate deploy
+          docker compose -f "$COMPOSE_FILE_PATH" exec -T backschmiede-koelker npx prisma db seed
+
+      - name: Cleanup old images
+        run: docker image prune -f

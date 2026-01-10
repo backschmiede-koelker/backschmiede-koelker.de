@@ -1,22 +1,28 @@
 services:
-  backschmiede:
+  backschmiede-koelker:
     image: ghcr.io/backschmiede-koelker/backschmiede-koelker.de:latest
     container_name: backschmiede-koelker
-    restart: always
+    restart: unless-stopped
     expose:
       - "3000"
-    environment:
-      - NODE_ENV=production
+    env_file:
+      - .env.prod
+    volumes:
+      - ./uploads:/uploads
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=web"
       - "traefik.http.routers.backschmiede.rule=Host(`backschmiede-koelker.de`)"
       - "traefik.http.routers.backschmiede.entrypoints=web,websecure"
       - "traefik.http.routers.backschmiede.tls.certresolver=le"
       - "traefik.http.services.backschmiede.loadbalancer.server.port=3000"
     networks:
       - web
+      - db
     pull_policy: always
 
 networks:
   web:
+    external: true
+  db:
     external: true

@@ -1,0 +1,114 @@
+/* /app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+}
+
+@layer utilities {
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.9s ease-out forwards;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .animate-slide-in {
+    animation: slideIn 0.9s ease-out forwards;
+  }
+}
+
+/* Scrollbar helpers */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ✅ Admin UI helpers */
+@layer components {
+  /* Einheitliche „Surface“ (Card) */
+  .admin-surface {
+    @apply rounded-2xl border border-zinc-200/70 bg-white/70 shadow-sm
+           dark:border-zinc-800/80 dark:bg-zinc-950/30;
+  }
+
+  /* Responsive Padding: auf Mobile weniger */
+  .admin-pad {
+    @apply p-3 sm:p-4;
+  }
+
+  /* Tight Padding für innere Elemente */
+  .admin-pad-tight {
+    @apply p-2 sm:p-3;
+  }
+
+  /* Nested Layers auf Mobile „flach“ machen (kein Border/Shadow/Padding) */
+  .admin-nested-flat {
+    @apply border-0 bg-transparent shadow-none rounded-none p-0
+           sm:rounded-2xl sm:border sm:bg-white/70 sm:shadow-sm sm:p-4
+           dark:sm:bg-zinc-950/30;
+  }
+
+  /* ✅ NEU: Nested bis lg „flach“ (für md/768 Sidebar-Probleme) */
+  .admin-nested-flat-lg {
+    @apply border-0 bg-transparent shadow-none rounded-none p-0
+           lg:rounded-2xl lg:border lg:bg-white/70 lg:shadow-sm lg:p-4
+           dark:lg:bg-zinc-950/30;
+  }
+
+  /* ✅ Button-Row: auf Mobile als Grid (gleich breit), ab sm als Flex */
+  .admin-btn-row {
+    @apply w-full grid gap-2
+           sm:w-auto sm:flex sm:flex-wrap sm:justify-end;
+  }
+
+  /* 2 Buttons: auf Mobile 2 Spalten */
+  .admin-btn-row-2 {
+    @apply grid-cols-2;
+  }
+
+  /* 3 Buttons: auf Mobile 2 Spalten, ab sm 3 Spalten (oder Flex) */
+  .admin-btn-row-3 {
+    @apply grid-cols-2 sm:grid-cols-3;
+  }
+
+  /* Alle direkten Kinder gleich behandeln */
+  .admin-btn-row > * {
+    @apply w-full sm:w-auto;
+  }
+
+  /* Höhe für alle Buttons in der Row */
+  .admin-btn-row button {
+    @apply h-10;
+  }
+
+  /* Optional: ab sm gleiche Mindestbreite */
+  .admin-btn-equal button {
+    @apply sm:min-w-[150px];
+  }
+
+  .admin-uploader-clip {
+    @apply w-full min-w-0 max-w-full overflow-x-hidden;
+  }
+
+  .admin-uploader-clip :where(*) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .admin-uploader-clip :where(.flex) {
+      flex-wrap: wrap;
+    }
+  }
+}
