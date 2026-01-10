@@ -1,0 +1,475 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["backschmiede_koelker"]
+}
+
+enum Role {
+  ADMIN
+  @@schema("backschmiede_koelker")
+}
+
+enum OfferKind {
+  RECURRING_WEEKDAY
+  ONE_DAY
+  DATE_RANGE
+  @@schema("backschmiede_koelker")
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+  @@schema("backschmiede_koelker")
+}
+
+enum Location {
+  RECKE
+  METTINGEN
+  @@schema("backschmiede_koelker")
+}
+
+enum OfferType {
+  GENERIC
+  PRODUCT_NEW
+  PRODUCT_DISCOUNT
+  MULTIBUY_PRICE
+  @@schema("backschmiede_koelker")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  role         Role     @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@schema("backschmiede_koelker")
+}
+
+model Product {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  priceCents Int
+  unit       String
+  imageUrl   String?
+  tags       String[]
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  offersNew      OfferProductNew[]      @relation("ProductToOfferProductNew")
+  offersDiscount OfferProductDiscount[] @relation("ProductToOfferProductDiscount")
+  offersMultibuy OfferMultibuyPrice[]   @relation("ProductToOfferMultibuyPrice")
+
+  @@index([isActive, createdAt])
+  @@index([name])
+
+  @@schema("backschmiede_koelker")
+}
+
+model Offer {
+  id   String    @id @default(cuid())
+  slug String    @unique
+  type OfferType @default(GENERIC)
+
+  title    String
+  subtitle String?
+  imageUrl String?
+  tags     String[]
+  isActive Boolean  @default(true)
+
+  priceCents         Int?
+  originalPriceCents Int?
+  unit               String?
+
+  kind      OfferKind
+  weekday   Weekday?
+  date      DateTime?
+  startDate DateTime?
+  endDate   DateTime?
+
+  locations Location[]
+  priority  Int        @default(0)
+
+  minBasketCents Int?
+
+  generic         OfferGeneric?
+  productNew      OfferProductNew?
+  productDiscount OfferProductDiscount?
+  multibuyPrice   OfferMultibuyPrice?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, kind])
+  @@index([date])
+  @@index([weekday])
+  @@index([startDate, endDate])
+  @@index([priority, createdAt])
+
+  @@schema("backschmiede_koelker")
+}
+
+model OfferGeneric {
+  offerId  String  @id
+  body     String?
+  ctaLabel String?
+  ctaHref  String?
+
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@schema("backschmiede_koelker")
+}
+
+model OfferProductNew {
+  offerId        String  @id
+  productId      String
+  highlightLabel String?
+
+  product Product @relation("ProductToOfferProductNew", fields: [productId], references: [id], onDelete: Restrict)
+  offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@schema("backschmiede_koelker")
+}
+
+model OfferProductDiscount {
+  offerId            String  @id
+  productId          String
+  priceCents         Int
+  originalPriceCents Int?
+  unit               String?
+
+  product Product @relation("ProductToOfferProductDiscount", fields: [productId], references: [id], onDelete: Restrict)
+  offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@schema("backschmiede_koelker")
+}
+
+model OfferMultibuyPrice {
+  offerId           String  @id
+  productId         String
+  packQty           Int
+  packPriceCents    Int
+  comparePackQty    Int?
+  comparePriceCents Int?
+  unit              String?
+
+  product Product @relation("ProductToOfferMultibuyPrice", fields: [productId], references: [id], onDelete: Restrict)
+  offer   Offer   @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  @@schema("backschmiede_koelker")
+}
+
+model ContentBlock {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  content   String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  @@schema("backschmiede_koelker")
+}
+
+model Pageview {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  path         String
+  referrerHost String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+
+  lang    String?
+  device  String?
+  browser String?
+  country String?
+
+  sessionId String?
+  ipHash    String?
+  isBot     Boolean @default(false)
+  isAdmin   Boolean @default(false)
+
+  @@index([createdAt])
+  @@index([path, createdAt])
+  @@index([referrerHost])
+  @@index([utmSource, utmMedium, utmCampaign])
+  @@index([device])
+  @@index([browser])
+  @@index([lang])
+
+  @@schema("backschmiede_koelker")
+}
+
+model News {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  body        String
+  imageUrl    String?
+  tag         String?
+  ctaLabel    String?
+  ctaHref     String?
+  isActive    Boolean  @default(true)
+  publishedAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive, publishedAt])
+  @@index([tag])
+  @@index([title])
+
+  @@schema("backschmiede_koelker")
+}
+
+enum JobEmploymentType {
+  FULL_TIME
+  PART_TIME
+  MINI_JOB
+  APPRENTICESHIP
+  @@schema("backschmiede_koelker")
+}
+
+enum JobCategory {
+  BAECKER
+  KONDITOR
+  VERKAEUFER
+  AZUBI
+  AUSHILFE
+  LOGISTIK
+  PRODUKTION
+  VERWALTUNG
+  SONSTIGES
+  @@schema("backschmiede_koelker")
+}
+
+enum JobSalaryUnit {
+  HOUR
+  MONTH
+  YEAR
+  @@schema("backschmiede_koelker")
+}
+
+model Job {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+
+  title        String
+  category     JobCategory @default(SONSTIGES)
+
+  teaser       String
+  description  String
+
+  responsibilities String[]
+  qualifications  String[]
+  benefits        String[]
+
+  employmentTypes JobEmploymentType[]
+  locations    Location[]
+
+  shift        String?
+  workloadNote String?
+
+  salaryMinCents Int?
+  salaryMaxCents Int?
+  salaryUnit   JobSalaryUnit?
+
+  isActive     Boolean  @default(true)
+
+  priority     Int @default(0)
+
+  startsAt     DateTime?
+  startsAsap   Boolean  @default(true)
+
+  datePosted   DateTime @default(now())
+  validThrough DateTime?
+
+  applyEmail   String?
+  applyUrl     String?
+  contactPhone String?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, priority, title])
+  @@index([priority, title])
+
+  @@index([slug])
+  @@index([title])
+  @@index([category])
+
+  @@schema("backschmiede_koelker")
+}
+
+enum AboutSectionType {
+  HERO
+  VALUES
+  STATS
+  TIMELINE
+  TEAM
+  GALLERY
+  FAQ
+  CTA
+  CUSTOM_TEXT
+
+  @@schema("backschmiede_koelker")
+}
+
+enum AboutPersonKind {
+  OWNER
+  MANAGER
+  TEAM_MEMBER
+
+  @@schema("backschmiede_koelker")
+}
+
+model AboutSection {
+  id        String           @id @default(cuid())
+  type      AboutSectionType
+  slug      String           @unique
+
+  title     String?
+  subtitle  String?
+  body      String?
+  imageUrl  String?        
+
+  isActive  Boolean          @default(true)
+  sortOrder Int              @default(0)
+
+  stats     AboutStatItem[]
+  values    AboutValueItem[]
+  timeline  AboutTimelineItem[]
+  faqs      AboutFaqItem[]
+  gallery   AboutGalleryItem[]
+
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([isActive, sortOrder])
+  @@index([type])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutStatItem {
+  id        String      @id @default(cuid())
+  sectionId String
+  label     String
+  value     String
+  sortOrder Int         @default(0)
+
+  section   AboutSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutValueItem {
+  id        String      @id @default(cuid())
+  sectionId String
+  title     String
+  description String?
+  sortOrder Int         @default(0)
+
+  section   AboutSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutTimelineItem {
+  id        String      @id @default(cuid())
+  sectionId String
+  year      String
+  title     String
+  description String?
+  sortOrder Int         @default(0)
+
+  section   AboutSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutFaqItem {
+  id        String      @id @default(cuid())
+  sectionId String
+  question  String
+  answer    String
+  sortOrder Int         @default(0)
+
+  section   AboutSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutGalleryItem {
+  id        String      @id @default(cuid())
+  sectionId String
+  imageUrl  String   
+  alt       String?
+  sortOrder Int         @default(0)
+
+  section   AboutSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
+
+model AboutPerson {
+  id              String           @id @default(cuid())
+  kind            AboutPersonKind  @default(TEAM_MEMBER)
+
+  name            String
+  roleLabel       String?
+  shortBio        String?
+  longBio         String?
+
+  avatarUrl       String?        
+  phone           String?
+  email           String?
+  instagramHandle String?
+
+  isShownOnAbout  Boolean          @default(true)
+  isShownInHero   Boolean          @default(false)
+  sortOrder       Int              @default(0)
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([isShownOnAbout, sortOrder])
+  @@index([isShownInHero])
+  @@schema("backschmiede_koelker")
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  caption     String
+  description String?
+  imageUrl    String?
+  startsAt    DateTime
+  endsAt      DateTime?
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, startsAt])
+  @@index([startsAt])
+  @@index([caption])
+
+  @@schema("backschmiede_koelker")
+}

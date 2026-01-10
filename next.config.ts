@@ -1,15 +1,16 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const nextConfig: NextConfig = {
-  /* config options here */
-
-  // output has to standalone for prod 
-  output: "standalone"
-
-  /*output: 'export',
+  output: "standalone",
   images: {
-    unoptimized: true, 
-  },*/
+    remotePatterns: [
+      { protocol: "https", hostname: "cdn.backschmiede-koelker.de", pathname: "/**" },
+      ...(isDev ? [{ protocol: "http" as const, hostname: "cdn.backschmiede-koelker.lan", pathname: "/**" }] : []),
+    ],
+  },
+  ...(isDev ? { allowedDevOrigins: ["backschmiede-koelker.lan", "cdn.backschmiede-koelker.lan"] } : {}),
 };
 
 export default nextConfig;
