@@ -1,6 +1,7 @@
 // app/api/products/[id]/route.ts
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { Allergen } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { pathFromStoredPath, safeUnlink, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
@@ -40,6 +41,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     unit: string;
     imageUrl: string | null;
     tags: string[];
+    allergens: Allergen[];
     isActive: boolean;
   }>;
 
@@ -56,6 +58,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     unit: string;
     imageUrl: string | null;
     tags: string[];
+    allergens: Allergen[];
     isActive: boolean;
   }> = {};
   if (typeof body.name === "string") data.name = body.name.trim();
@@ -66,6 +69,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   if (typeof body.unit === "string") data.unit = body.unit.trim();
   if (typeof body.imageUrl === "string" || body.imageUrl === null) data.imageUrl = toStoredPath(body.imageUrl);
   if (Array.isArray(body.tags)) data.tags = body.tags.map(t => String(t));
+  if (Array.isArray(body.allergens)) data.allergens = body.allergens;
   if (typeof body.isActive === "boolean") data.isActive = body.isActive;
 
   try {

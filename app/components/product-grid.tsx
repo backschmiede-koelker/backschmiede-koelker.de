@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import SelectBox from "./select-box";
 import { publicAssetUrl } from "@/app/lib/uploads";
+import { ALLERGEN_LABEL, type Allergen } from "@/app/lib/allergens";
 
 type Product = {
   id: string;
@@ -11,8 +12,9 @@ type Product = {
   slug: string;
   priceCents: number;
   unit: string;
-  imageUrl?: string | null; // API liefert absolute URL oder Stored-Path
+  imageUrl?: string | null;
   tags: string[];
+  allergens: Allergen[];
   updatedAt: string;
 };
 
@@ -217,6 +219,19 @@ export default function ProductGrid() {
               <div className="p-4">
                 <h3 className="line-clamp-1 font-semibold tracking-tight">{p.name}</h3>
                 <p className="mt-0.5 line-clamp-1 text-xs text-zinc-500">{p.tags.join(" · ")}</p>
+                {p.allergens?.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {p.allergens.map((a) => (
+                      <span
+                        key={a}
+                        className="rounded-full bg-emerald-50 px-1 py-0.5 text-[10px] ring-1 ring-emerald-200 text-emerald-900 dark:bg-emerald-900/20 dark:ring-emerald-800/60 dark:text-emerald-200"
+                        title="Allergen"
+                      >
+                        {ALLERGEN_LABEL[a] ?? a}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <p className="mt-2 font-medium">
                   {euro(p.priceCents / 100)}{p.unit && <span className="text-sm opacity-70"> / {p.unit}</span>}
                 </p>

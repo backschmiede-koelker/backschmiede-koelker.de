@@ -57,6 +57,25 @@ model User {
   @@schema("backschmiede_koelker")
 }
 
+enum Allergen {
+  GLUTEN
+  CRUSTACEANS
+  EGGS
+  FISH
+  PEANUTS
+  SOY
+  MILK
+  NUTS
+  CELERY
+  MUSTARD
+  SESAME
+  SULPHITES
+  LUPIN
+  MOLLUSCS
+
+  @@schema("backschmiede_koelker")
+}
+
 model Product {
   id         String   @id @default(cuid())
   name       String
@@ -65,6 +84,7 @@ model Product {
   unit       String
   imageUrl   String?
   tags       String[]
+  allergens  Allergen[] @default([])
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

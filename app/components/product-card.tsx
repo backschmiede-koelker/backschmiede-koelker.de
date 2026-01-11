@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { Product } from "../types/product"
 import SelectBox from "./select-box"
 import { centsToEuroString, parseEuroToCents, PRICE_RE } from "../lib/format"
+import { ALLERGENS, ALLERGEN_LABEL, type Allergen } from "@/app/lib/allergens";
 
 type Props = {
   product: Product
@@ -19,15 +20,25 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
   const [editSaving, setEditSaving] = useState(false)
   const [editCustomUnitMode, setEditCustomUnitMode] = useState(false)
   const [editCustomUnit, setEditCustomUnit] = useState("")
+  const [editAllergens, setEditAllergens] = useState<Allergen[]>(p.allergens ?? []);
+
+  function toggleAllergen(a: Allergen) {
+    setEditAllergens((prev) =>
+      prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]
+    );
+  }
 
   const epInvalid = Number.isNaN(parseEuroToCents(editPrice || ""))
 
   const changed = useMemo(() => {
     const cents = parseEuroToCents(editPrice || "")
+    const allergensChanged =
+      [...(p.allergens ?? [])].sort().join(",") !== [...editAllergens].sort().join(",");
     if (Number.isNaN(cents)) return false
     const unitFinal = (editCustomUnitMode ? (editCustomUnit || "").trim() : editUnit) || "pro Stück"
-    return cents !== p.priceCents || unitFinal !== (p.unit || "pro Stück") || editIsActive !== p.isActive
-  }, [editPrice, editUnit, editIsActive, editCustomUnitMode, editCustomUnit, p])
+    return cents !== p.priceCents || 
+    unitFinal !== (p.unit || "pro Stück") || editIsActive !== p.isActive || allergensChanged
+  }, [editPrice, editUnit, editIsActive, editCustomUnitMode, editCustomUnit, editAllergens, p])
 
   async function saveInline() {
     setEditSaving(true)
@@ -41,7 +52,12 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
       const res = await fetch(`/api/products/${p.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceCents: cents, unit: finalUnit, isActive: active }),
+        body: JSON.stringify({
+          priceCents: cents,
+          unit: finalUnit,
+          isActive: active,
+          allergens: editAllergens,
+        }),
       })
       if (!res.ok) {
         const j = await res.json().catch(()=> ({}))
@@ -171,6 +187,32 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
             )}
             </div>
         </div>
+        </div>
+
+        <div className="col-span-2">
+          <div className="mt-4">
+            <div className="text-xs text-zinc-500">Allergene</div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {ALLERGENS.map((a) => {
+                const active = editAllergens.includes(a);
+                return (
+                  <button
+                    key={a}
+                    type="button"
+                    onClick={() => toggleAllergen(a)}
+                    className={[
+                      "rounded-full px-3 py-1 text-xs font-semibold ring-1 transition",
+                      active
+                        ? "bg-rose-100 ring-rose-300 text-rose-900 dark:bg-rose-900/30 dark:ring-rose-700 dark:text-rose-200"
+                        : "bg-zinc-100 ring-zinc-300 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-200",
+                    ].join(" ")}
+                  >
+                    {ALLERGEN_LABEL[a]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Row 2: Aktiv/Inaktiv - volle Breite */}

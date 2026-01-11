@@ -1,7 +1,7 @@
 // app/api/products/route.ts
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma, Allergen } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
@@ -36,6 +36,7 @@ export async function GET(req: Request) {
       unit: true,
       imageUrl: true,
       tags: true,
+      allergens: true,
       isActive: true,
       createdAt: true,
       updatedAt: true,
@@ -62,6 +63,7 @@ export async function POST(req: Request) {
     unit: string;
     imageUrl?: string | null;
     tags?: string[];
+    allergens?: Allergen[];
     isActive?: boolean;
   };
 
@@ -75,6 +77,7 @@ export async function POST(req: Request) {
         unit: b.unit.trim(),
         imageUrl: toStoredPath(b.imageUrl),
         tags: b.tags ?? [],
+        allergens: b.allergens ?? [],
         isActive: b.isActive ?? true,
       },
     });
