@@ -2,9 +2,9 @@
 "use client";
 
 import { PRICE_RE, euro } from "@/app/lib/format";
-import FieldLabel from "app/components/ui/field-label";
+import FieldLabel from "@/app/components/ui/field-label";
 import ProductPicker from "@/app/components/product-picker";
-import SectionCard from "app/components/ui/section-card";
+import SectionCard from "@/app/components/ui/section-card";
 import UnitWithCustom from "@/app/components/unit-with-custom";
 
 export type ProductLite = { id: string; name: string; priceCents: number; unit: string };

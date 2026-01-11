@@ -1,14 +1,14 @@
 // app/admin/offers/offers-view.tsx
 "use client";
 
-import SectionCard from "app/components/ui/section-card";
-import FieldLabel from "app/components/ui/field-label";
-import OfferTypeSelector from "app/admin/offers/components/offer-type-selector";
-import ScheduleSelector from "app/admin/offers/components/schedule-selector";
-import LocationPriorityRow from "app/admin/offers/components/location-priority-row";
-import MinSpendField from "app/admin/offers/components/min-spend-field";
-import ActionsBar from "app/admin/offers/components/actions-bar";
-import ProductDiscountForm from "app/admin/offers/components/product-discount-form";
+import SectionCard from "@/app/components/ui/section-card";
+import FieldLabel from "@/app/components/ui/field-label";
+import OfferTypeSelector from "@/app/admin/offers/components/offer-type-selector";
+import ScheduleSelector from "@/app/admin/offers/components/schedule-selector";
+import LocationPriorityRow from "@/app/admin/offers/components/location-priority-row";
+import MinSpendField from "@/app/admin/offers/components/min-spend-field";
+import ActionsBar from "@/app/admin/offers/components/actions-bar";
+import ProductDiscountForm from "@/app/admin/offers/components/product-discount-form";
 
 import OfferBaseFields from "@/app/components/offer-base-fields";
 import MultiBuyForm from "@/app/components/multibuy-form";
