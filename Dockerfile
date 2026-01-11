@@ -32,9 +32,9 @@ COPY --from=builder /app/public ./public
 
 # Prisma: Schema + Engines + Client (für Query & Migrations)
 COPY --from=builder /app/prisma ./prisma
-RUN mkdir -p node_modules/.prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
 # Prisma CLI für 'prisma migrate deploy' im Container
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
