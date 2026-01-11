@@ -2,7 +2,7 @@
 "use server";
 
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { toStoredPath } from "@/app/lib/uploads";
 import type { AboutSectionDTO, AboutPersonDTO } from "./types";
@@ -58,7 +58,7 @@ function autoSlug(type: SectionType, title?: string | null) {
 
 async function assertSingletonCreatable(type: SectionType) {
   if (!SINGLETON_TYPES.includes(type)) return;
-  const existing = await prisma.aboutSection.findFirst({ where: { type } });
+  const existing = await getPrisma().aboutSection.findFirst({ where: { type } });
   if (existing) {
     throw new Error(`${type} ist nur 1× erlaubt.`);
   }
@@ -66,7 +66,7 @@ async function assertSingletonCreatable(type: SectionType) {
 
 export async function getSectionById(id: string): Promise<AboutSectionDTO> {
   await adminGuard();
-  const sec = await prisma.aboutSection.findUnique({
+  const sec = await getPrisma().aboutSection.findUnique({
     where: { id },
     include: {
       stats: { orderBy: { sortOrder: "asc" } },
@@ -90,7 +90,7 @@ export async function updateHero(input: {
 }): Promise<AboutSectionDTO> {
   await adminGuard();
 
-  const updated = await prisma.aboutSection.update({
+  const updated = await getPrisma().aboutSection.update({
     where: { id: input.id },
     data: {
       title: input.title?.trim() || null,
@@ -120,7 +120,7 @@ export async function createSection(input: {
   const type = String(input.type).toUpperCase().trim() as SectionType;
   await assertSingletonCreatable(type);
 
-  const created = await prisma.aboutSection.create({
+  const created = await getPrisma().aboutSection.create({
     data: {
       type,
       slug: autoSlug(type, input.title ?? null),
@@ -154,7 +154,7 @@ export async function updateSection(input: {
 }): Promise<AboutSectionDTO> {
   await adminGuard();
 
-  const existing = await prisma.aboutSection.findUnique({
+  const existing = await getPrisma().aboutSection.findUnique({
     where: { id: input.id },
     select: { type: true },
   });
@@ -174,7 +174,7 @@ export async function updateSection(input: {
       ? input.sortOrder
       : 0;
 
-  const updated = await prisma.aboutSection.update({
+  const updated = await getPrisma().aboutSection.update({
     where: { id: input.id },
     data: {
       title: input.title?.trim() || null,
@@ -199,7 +199,7 @@ export async function updateSection(input: {
 export async function deleteSection(id: string) {
   await adminGuard();
 
-  const sec = await prisma.aboutSection.findUnique({
+  const sec = await getPrisma().aboutSection.findUnique({
     where: { id },
     select: { type: true },
   });
@@ -209,74 +209,74 @@ export async function deleteSection(id: string) {
     throw new Error(`${sec.type} ist ein „Einmal-Bereich“ und kann nicht gelöscht werden.`);
   }
 
-  await prisma.aboutSection.delete({ where: { id } });
+  await getPrisma().aboutSection.delete({ where: { id } });
   return { ok: true };
 }
 
 /* ---------------- ITEMS: unverändert (wie vorher) ---------------- */
 export async function createStat(input: { sectionId: string; label: string; value: string; sortOrder: number }) {
   await adminGuard();
-  await prisma.aboutStatItem.create({ data: { sectionId: input.sectionId, label: input.label.trim(), value: input.value.trim(), sortOrder: input.sortOrder ?? 0 } });
+  await getPrisma().aboutStatItem.create({ data: { sectionId: input.sectionId, label: input.label.trim(), value: input.value.trim(), sortOrder: input.sortOrder ?? 0 } });
   return { ok: true };
 }
 export async function updateStat(input: { id: string; label: string; value: string; sortOrder: number }) {
   await adminGuard();
-  await prisma.aboutStatItem.update({ where: { id: input.id }, data: { label: input.label.trim(), value: input.value.trim(), sortOrder: input.sortOrder ?? 0 } });
+  await getPrisma().aboutStatItem.update({ where: { id: input.id }, data: { label: input.label.trim(), value: input.value.trim(), sortOrder: input.sortOrder ?? 0 } });
   return { ok: true };
 }
-export async function deleteStat(id: string) { await adminGuard(); await prisma.aboutStatItem.delete({ where: { id } }); return { ok: true }; }
+export async function deleteStat(id: string) { await adminGuard(); await getPrisma().aboutStatItem.delete({ where: { id } }); return { ok: true }; }
 
 export async function createValue(input: { sectionId: string; title: string; description: string | null; sortOrder: number }) {
   await adminGuard();
-  await prisma.aboutValueItem.create({ data: { sectionId: input.sectionId, title: input.title.trim(), description: input.description?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
+  await getPrisma().aboutValueItem.create({ data: { sectionId: input.sectionId, title: input.title.trim(), description: input.description?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
   return { ok: true };
 }
 export async function updateValue(input: { id: string; title: string; description: string | null; sortOrder: number }) {
   await adminGuard();
-  await prisma.aboutValueItem.update({ where: { id: input.id }, data: { title: input.title.trim(), description: input.description?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
+  await getPrisma().aboutValueItem.update({ where: { id: input.id }, data: { title: input.title.trim(), description: input.description?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
   return { ok: true };
 }
-export async function deleteValue(id: string) { await adminGuard(); await prisma.aboutValueItem.delete({ where: { id } }); return { ok: true }; }
+export async function deleteValue(id: string) { await adminGuard(); await getPrisma().aboutValueItem.delete({ where: { id } }); return { ok: true }; }
 
 export async function createTimeline(input: { sectionId: string; year: string; title: string; description: string | null; sortOrder: number }) {
   await adminGuard();
-  await prisma.aboutTimelineItem.create({ data: { sectionId: input.sectionId, year: input.year.trim(), title: input.title.trim(), description: input.description?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
+  await getPrisma().aboutTimelineItem.create({ data: { sectionId: input.sectionId, year: input.year.trim(), title: input.title.trim(), description: input.description?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
   return { ok: true };
 }
 export async function updateTimeline(input: { id: string; year: string; title: string; description: string | null; sortOrder: number }) {
   await adminGuard();
-  await prisma.aboutTimelineItem.update({ where: { id: input.id }, data: { year: input.year.trim(), title: input.title.trim(), description: input.description?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
+  await getPrisma().aboutTimelineItem.update({ where: { id: input.id }, data: { year: input.year.trim(), title: input.title.trim(), description: input.description?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
   return { ok: true };
 }
-export async function deleteTimeline(id: string) { await adminGuard(); await prisma.aboutTimelineItem.delete({ where: { id } }); return { ok: true }; }
+export async function deleteTimeline(id: string) { await adminGuard(); await getPrisma().aboutTimelineItem.delete({ where: { id } }); return { ok: true }; }
 
 export async function createFaq(input: { sectionId: string; question: string; answer: string; sortOrder: number }) {
   await adminGuard();
-  await prisma.aboutFaqItem.create({ data: { sectionId: input.sectionId, question: input.question.trim(), answer: input.answer.trim(), sortOrder: input.sortOrder ?? 0 } });
+  await getPrisma().aboutFaqItem.create({ data: { sectionId: input.sectionId, question: input.question.trim(), answer: input.answer.trim(), sortOrder: input.sortOrder ?? 0 } });
   return { ok: true };
 }
 export async function updateFaq(input: { id: string; question: string; answer: string; sortOrder: number }) {
   await adminGuard();
-  await prisma.aboutFaqItem.update({ where: { id: input.id }, data: { question: input.question.trim(), answer: input.answer.trim(), sortOrder: input.sortOrder ?? 0 } });
+  await getPrisma().aboutFaqItem.update({ where: { id: input.id }, data: { question: input.question.trim(), answer: input.answer.trim(), sortOrder: input.sortOrder ?? 0 } });
   return { ok: true };
 }
-export async function deleteFaq(id: string) { await adminGuard(); await prisma.aboutFaqItem.delete({ where: { id } }); return { ok: true }; }
+export async function deleteFaq(id: string) { await adminGuard(); await getPrisma().aboutFaqItem.delete({ where: { id } }); return { ok: true }; }
 
 export async function createGallery(input: { sectionId: string; imageUrl: string; alt: string | null; sortOrder: number }) {
   await adminGuard();
   const stored = toStoredPath(input.imageUrl);
   if (!stored) throw new Error("Bild fehlt");
-  await prisma.aboutGalleryItem.create({ data: { sectionId: input.sectionId, imageUrl: stored, alt: input.alt?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
+  await getPrisma().aboutGalleryItem.create({ data: { sectionId: input.sectionId, imageUrl: stored, alt: input.alt?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
   return { ok: true };
 }
 export async function updateGallery(input: { id: string; imageUrl: string; alt: string | null; sortOrder: number }) {
   await adminGuard();
   const stored = toStoredPath(input.imageUrl);
   if (!stored) throw new Error("Bild fehlt");
-  await prisma.aboutGalleryItem.update({ where: { id: input.id }, data: { imageUrl: stored, alt: input.alt?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
+  await getPrisma().aboutGalleryItem.update({ where: { id: input.id }, data: { imageUrl: stored, alt: input.alt?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
   return { ok: true };
 }
-export async function deleteGallery(id: string) { await adminGuard(); await prisma.aboutGalleryItem.delete({ where: { id } }); return { ok: true }; }
+export async function deleteGallery(id: string) { await adminGuard(); await getPrisma().aboutGalleryItem.delete({ where: { id } }); return { ok: true }; }
 
 /* ---------------- PEOPLE: isShownInHero fliegt raus ---------------- */
 type PersonKind = AboutPersonDTO["kind"];
@@ -298,7 +298,7 @@ export async function createPerson(input: {
 
   const kind = (input.kind as PersonKind) || "TEAM_MEMBER";
 
-  const created = await prisma.aboutPerson.create({
+  const created = await getPrisma().aboutPerson.create({
     data: {
       kind,
       name: input.name.trim(),
@@ -336,7 +336,7 @@ export async function updatePerson(input: {
 
   const kind = (input.kind as PersonKind) || "TEAM_MEMBER";
 
-  const updated = await prisma.aboutPerson.update({
+  const updated = await getPrisma().aboutPerson.update({
     where: { id: input.id },
     data: {
       kind,
@@ -359,7 +359,7 @@ export async function updatePerson(input: {
 
 export async function deletePerson(id: string) {
   await adminGuard();
-  await prisma.aboutPerson.delete({ where: { id } });
+  await getPrisma().aboutPerson.delete({ where: { id } });
   return { ok: true };
 }
 
@@ -370,7 +370,7 @@ export async function reorderMiddleSections(input: { idsInOrder: string[] }) {
   if (ids.length === 0) return { ok: true };
 
   // Nur "mittlere" Bereiche dürfen reorderbar sein
-  const rows = await prisma.aboutSection.findMany({
+  const rows = await getPrisma().aboutSection.findMany({
     where: { id: { in: ids } },
     select: { id: true, type: true },
   });
@@ -388,7 +388,7 @@ export async function reorderMiddleSections(input: { idsInOrder: string[] }) {
   }
 
   // Stabil neu nummerieren: 0, 10, 20, ...
-  await prisma.$transaction(async (tx) => {
+  await getPrisma().$transaction(async (tx) => {
     for (let i = 0; i < ids.length; i++) {
       await tx.aboutSection.update({
         where: { id: ids[i] },
@@ -398,7 +398,7 @@ export async function reorderMiddleSections(input: { idsInOrder: string[] }) {
   });
 
   // Aktualisierte Sections inkl. Items zurückgeben (damit Client State sauber wird)
-  const updated = await prisma.aboutSection.findMany({
+  const updated = await getPrisma().aboutSection.findMany({
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
     include: {
       stats: { orderBy: { sortOrder: "asc" } },

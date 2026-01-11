@@ -10,12 +10,12 @@ import TgtgCta from "./components/tgtg-cta";
 import News from "./components/news/news";
 import TodayOffersSection from "./components/offers/today-offers-section";
 import UpcomingOffersSection from "./components/offers/upcoming-offers-section";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
 /** Prüft serverseitig via DB, ob mindestens eine aktive News existiert */
 async function getNewsPresence() {
   try {
-    const count = await prisma.news.count({ where: { isActive: true } });
+    const count = await getPrisma().news.count({ where: { isActive: true } });
     return count > 0;
   } catch {
     // Fallback: lieber anzeigen als fälschlich verstecken

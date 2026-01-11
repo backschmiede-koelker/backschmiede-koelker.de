@@ -1,6 +1,6 @@
 // app/api/about/values/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { requireAdminOr401 } from "../_auth";
 
 export async function GET(req: Request) {
@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const sectionId = (searchParams.get("sectionId") || "").trim();
 
-  const items = await prisma.aboutValueItem.findMany({
+  const items = await getPrisma().aboutValueItem.findMany({
     ...(sectionId ? { where: { sectionId } } : {}),
     orderBy: [{ sectionId: "asc" }, { sortOrder: "asc" }],
   });
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "sectionId, title required" }, { status: 400 });
   }
 
-  const created = await prisma.aboutValueItem.create({
+  const created = await getPrisma().aboutValueItem.create({
     data: {
       sectionId: b.sectionId,
       title: b.title.trim(),

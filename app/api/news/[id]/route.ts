@@ -1,23 +1,23 @@
 // app/api/news/[id]/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { pathFromStoredPath, safeUnlink, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
 async function deleteAssetIfUnused(stored?: string | null) {
   const s = toStoredPath(stored);
   if (!s) return;
-  const [p, n, o] = await prisma.$transaction([
-    prisma.product.count({ where: { imageUrl: s } }),
-    prisma.news.count({ where: { imageUrl: s } }),
-    prisma.offer.count({ where: { imageUrl: s } }),
+  const [p, n, o] = await getPrisma().$transaction([
+    getPrisma().product.count({ where: { imageUrl: s } }),
+    getPrisma().news.count({ where: { imageUrl: s } }),
+    getPrisma().offer.count({ where: { imageUrl: s } }),
   ]);
   if (p + n + o === 0) await safeUnlink(pathFromStoredPath(s));
 }
 
 export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const item = await prisma.news.findUnique({ where: { id } });
+  const item = await getPrisma().news.findUnique({ where: { id } });
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ ...item, imageUrl: toAbsoluteAssetUrlServer(item.imageUrl) });
 }
@@ -29,7 +29,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     ctaLabel: string | null; ctaHref: string | null; isActive: boolean; publishedAt: string;
   }>;
 
-  const prev = await prisma.news.findUnique({ where: { id }, select: { imageUrl: true } });
+  const prev = await getPrisma().news.findUnique({ where: { id }, select: { imageUrl: true } });
   if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const data: Partial<{
@@ -51,7 +51,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   if (typeof body.isActive === "boolean") data.isActive = body.isActive;
   if (typeof body.publishedAt === "string") data.publishedAt = new Date(body.publishedAt);
 
-  const updated = await prisma.news.update({ where: { id }, data });
+  const updated = await getPrisma().news.update({ where: { id }, data });
 
   if (body.imageUrl !== undefined && prev.imageUrl && prev.imageUrl !== updated.imageUrl) {
     await deleteAssetIfUnused(prev.imageUrl);
@@ -61,10 +61,10 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
 
 export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const prev = await prisma.news.findUnique({ where: { id }, select: { imageUrl: true } });
+  const prev = await getPrisma().news.findUnique({ where: { id }, select: { imageUrl: true } });
   if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await prisma.news.delete({ where: { id } });
+  await getPrisma().news.delete({ where: { id } });
 
   if (prev.imageUrl) await deleteAssetIfUnused(prev.imageUrl);
   return NextResponse.json({ ok: true });

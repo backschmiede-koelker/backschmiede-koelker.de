@@ -1,6 +1,6 @@
 // app/api/events/[id]/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { pathFromStoredPath, safeUnlink, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
@@ -8,11 +8,11 @@ async function deleteAssetIfUnused(stored?: string | null) {
   const s = toStoredPath(stored);
   if (!s) return;
 
-  const [p, n, o, e] = await prisma.$transaction([
-    prisma.product.count({ where: { imageUrl: s } }),
-    prisma.news.count({ where: { imageUrl: s } }),
-    prisma.offer.count({ where: { imageUrl: s } }),
-    prisma.event.count({ where: { imageUrl: s } }),
+  const [p, n, o, e] = await getPrisma().$transaction([
+    getPrisma().product.count({ where: { imageUrl: s } }),
+    getPrisma().news.count({ where: { imageUrl: s } }),
+    getPrisma().offer.count({ where: { imageUrl: s } }),
+    getPrisma().event.count({ where: { imageUrl: s } }),
   ]);
 
   if (p + n + o + e === 0) await safeUnlink(pathFromStoredPath(s));
@@ -21,7 +21,7 @@ async function deleteAssetIfUnused(stored?: string | null) {
 export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
 
-  const item = await prisma.event.findUnique({
+  const item = await getPrisma().event.findUnique({
     where: { id },
     select: {
       id: true,
@@ -56,7 +56,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     isActive: boolean;
   }>;
 
-  const prev = await prisma.event.findUnique({
+  const prev = await getPrisma().event.findUnique({
     where: { id },
     select: { imageUrl: true },
   });
@@ -94,7 +94,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
 
   if (typeof body.isActive === "boolean") data.isActive = body.isActive;
 
-  const updated = await prisma.event.update({
+  const updated = await getPrisma().event.update({
     where: { id },
     data,
     select: {
@@ -124,14 +124,14 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
 export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
 
-  const prev = await prisma.event.findUnique({
+  const prev = await getPrisma().event.findUnique({
     where: { id },
     select: { imageUrl: true },
   });
 
   if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  await prisma.event.delete({ where: { id } });
+  await getPrisma().event.delete({ where: { id } });
 
   if (prev.imageUrl) await deleteAssetIfUnused(prev.imageUrl);
 

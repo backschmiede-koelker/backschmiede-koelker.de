@@ -1,6 +1,6 @@
 // app/api/jobs/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { Prisma, Location, JobEmploymentType, JobSalaryUnit, JobCategory } from "@/generated/prisma/client";
 import { allJobsAdmin } from "@/app/lib/jobs/db";
 
@@ -102,7 +102,7 @@ export async function GET(req: Request) {
   const limitParam = parseInt(searchParams.get("limit") || "", 10);
   const take = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 100) : undefined;
 
-  const jobs = await prisma.job.findMany({
+  const jobs = await getPrisma().job.findMany({
     where,
     orderBy: [
       { priority: "desc" },
@@ -153,11 +153,11 @@ export async function POST(req: Request) {
   const baseSlug = slugify(b.title || "");
   let slug = baseSlug || "job";
   let i = 1;
-  while (await prisma.job.findUnique({ where: { slug } })) {
+  while (await getPrisma().job.findUnique({ where: { slug } })) {
     slug = `${baseSlug}-${i++}`;
   }
 
-  const created = await prisma.job.create({
+  const created = await getPrisma().job.create({
     data: {
       slug,
       title: String(b.title || "").trim(),

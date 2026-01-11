@@ -1,6 +1,6 @@
 // app/api/about/faqs/[id]/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { requireAdminOr401 } from "../../_auth";
 
 export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -19,7 +19,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   if (typeof b.answer === "string") data.answer = b.answer.trim();
   if (typeof b.sortOrder === "number" && Number.isFinite(b.sortOrder)) data.sortOrder = b.sortOrder;
 
-  const updated = await prisma.aboutFaqItem.update({ where: { id }, data });
+  const updated = await getPrisma().aboutFaqItem.update({ where: { id }, data });
   return NextResponse.json(updated);
 }
 
@@ -30,7 +30,7 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
   const { id } = await ctx.params;
 
   try {
-    await prisma.aboutFaqItem.delete({ where: { id } });
+    await getPrisma().aboutFaqItem.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
     if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2025") {

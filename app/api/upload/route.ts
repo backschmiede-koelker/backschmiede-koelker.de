@@ -4,7 +4,7 @@ import { createWriteStream } from "node:fs";
 import { mkdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import crypto from "node:crypto";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { pathFromStoredPath, safeUnlink } from "@/app/lib/uploads.server";
 
@@ -52,11 +52,11 @@ async function deleteByStoredPathIfUnused(stored?: string | null) {
   if (!s) return;
 
   // Prüfen, ob noch referenziert
-  const [p, n, o, e] = await prisma.$transaction([
-    prisma.product.count({ where: { imageUrl: s } }),
-    prisma.news.count({ where: { imageUrl: s } }),
-    prisma.offer.count({ where: { imageUrl: s } }),
-    prisma.event.count({ where: { imageUrl: s } }),
+  const [p, n, o, e] = await getPrisma().$transaction([
+    getPrisma().product.count({ where: { imageUrl: s } }),
+    getPrisma().news.count({ where: { imageUrl: s } }),
+    getPrisma().offer.count({ where: { imageUrl: s } }),
+    getPrisma().event.count({ where: { imageUrl: s } }),
   ]);
 
   if (p + n + o + e === 0) {

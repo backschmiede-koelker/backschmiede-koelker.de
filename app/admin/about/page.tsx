@@ -1,7 +1,7 @@
 // app/admin/about/page.tsx
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import AboutView from "./about-view";
 import { Metadata } from "next";
 import type { AboutPersonDTO, AboutSectionDTO } from "./types";
@@ -29,10 +29,10 @@ function mustBeAdmin(session: SessionLike) {
  * Idempotent: erstellt nur, wenn keiner existiert.
  */
 async function ensureHero() {
-  const existing = await prisma.aboutSection.findFirst({ where: { type: "HERO" } });
+  const existing = await getPrisma().aboutSection.findFirst({ where: { type: "HERO" } });
   if (existing) return;
 
-  await prisma.aboutSection.create({
+  await getPrisma().aboutSection.create({
     data: {
       type: "HERO",
       slug: "hero",
@@ -51,7 +51,7 @@ async function getData(): Promise<{
   people: AboutPersonDTO[];
 }> {
   const [sections, people] = await Promise.all([
-    prisma.aboutSection.findMany({
+    getPrisma().aboutSection.findMany({
       orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
       include: {
         stats: { orderBy: { sortOrder: "asc" } },
@@ -61,7 +61,7 @@ async function getData(): Promise<{
         gallery: { orderBy: { sortOrder: "asc" } },
       },
     }),
-    prisma.aboutPerson.findMany({
+    getPrisma().aboutPerson.findMany({
       orderBy: [
         { sortOrder: "desc" },
         { name: "asc" },

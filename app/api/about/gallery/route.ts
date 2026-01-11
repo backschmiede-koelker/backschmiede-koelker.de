@@ -1,6 +1,6 @@
 // app/api/about/gallery/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { requireAdminOr401 } from "../_auth";
 
@@ -11,7 +11,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const sectionId = (searchParams.get("sectionId") || "").trim();
 
-  const items = await prisma.aboutGalleryItem.findMany({
+  const items = await getPrisma().aboutGalleryItem.findMany({
     ...(sectionId ? { where: { sectionId } } : {}),
     orderBy: [{ sectionId: "asc" }, { sortOrder: "asc" }],
   });
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "sectionId and imageUrl required" }, { status: 400 });
   }
 
-  const created = await prisma.aboutGalleryItem.create({
+  const created = await getPrisma().aboutGalleryItem.create({
     data: {
       sectionId: b.sectionId,
       imageUrl: stored,
