@@ -1,6 +1,6 @@
 // app/api/news/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
@@ -36,7 +36,7 @@ export async function GET(req: Request) {
     ];
   }
 
-  const items = await prisma.news.findMany({
+  const items = await getPrisma().news.findMany({
     where,
     orderBy: { publishedAt: "desc" },
     ...(limit ? { take: limit } : {}),
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
 
   const slugBase = slugify(title);
   try {
-    const created = await prisma.news.create({
+    const created = await getPrisma().news.create({
       data: {
         ...baseData,
         slug: slugBase,
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
   } catch (e: unknown) {
     if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2002") {
       const alt = `${slugBase}-${Math.random().toString(36).slice(2,5)}`;
-      const created = await prisma.news.create({
+      const created = await getPrisma().news.create({
         data: { ...baseData, slug: alt }
       });
       return NextResponse.json(created, { status: 201 });

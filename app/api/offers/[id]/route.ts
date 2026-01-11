@@ -1,6 +1,6 @@
 // app/api/offers/[id]/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { Prisma, OfferKind, Weekday, Location } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import {
@@ -117,10 +117,10 @@ function toDTO(item: OfferWithDetails) {
 async function deleteAssetIfUnused(stored?: string | null) {
   const s = toStoredPath(stored);
   if (!s) return;
-  const [p, n, o] = await prisma.$transaction([
-    prisma.product.count({ where: { imageUrl: s } }),
-    prisma.news.count({ where: { imageUrl: s } }),
-    prisma.offer.count({ where: { imageUrl: s } }),
+  const [p, n, o] = await getPrisma().$transaction([
+    getPrisma().product.count({ where: { imageUrl: s } }),
+    getPrisma().news.count({ where: { imageUrl: s } }),
+    getPrisma().offer.count({ where: { imageUrl: s } }),
   ]);
   if (p + n + o === 0) await safeUnlink(pathFromStoredPath(s));
 }
@@ -131,7 +131,7 @@ export async function GET(
   ctx: { params: Promise<{ id: string }> },
 ) {
   const { id } = await ctx.params;
-  const item = await prisma.offer.findUnique({
+  const item = await getPrisma().offer.findUnique({
     where: { id },
     include: offerInclude,
   });
@@ -168,7 +168,7 @@ export async function PUT(
       payload?: unknown;
     };
 
-    const current = await prisma.offer.findUnique({
+    const current = await getPrisma().offer.findUnique({
       where: { id },
       include: {
         generic: true,
@@ -252,7 +252,7 @@ export async function PUT(
           : Number(b.base.originalPriceCents);
     if (b.base?.unit !== undefined) data.unit = b.base.unit ?? null;
 
-    const updated = await prisma.offer.update({ where: { id }, data });
+    const updated = await getPrisma().offer.update({ where: { id }, data });
 
     if (current.type === "GENERIC" && b.payload) {
       const p = b.payload as {
@@ -260,7 +260,7 @@ export async function PUT(
         ctaLabel?: string | null;
         ctaHref?: string | null;
       };
-      await prisma.offerGeneric.update({
+      await getPrisma().offerGeneric.update({
         where: { offerId: id },
         data: {
           body: p.body ?? null,
@@ -274,7 +274,7 @@ export async function PUT(
         productId?: string;
         highlightLabel?: string | null;
       };
-      await prisma.offerProductNew.update({
+      await getPrisma().offerProductNew.update({
         where: { offerId: id },
         data: {
           productId: p.productId ?? undefined,
@@ -289,7 +289,7 @@ export async function PUT(
         originalPriceCents?: number | null;
         unit?: string | null;
       };
-      await prisma.offerProductDiscount.update({
+      await getPrisma().offerProductDiscount.update({
         where: { offerId: id },
         data: {
           productId: p.productId ?? undefined,
@@ -314,7 +314,7 @@ export async function PUT(
         comparePriceCents?: number | null;
         unit?: string | null;
       };
-      await prisma.offerMultibuyPrice.update({
+      await getPrisma().offerMultibuyPrice.update({
         where: { offerId: id },
         data: {
           productId: p.productId ?? undefined,
@@ -347,7 +347,7 @@ export async function PUT(
       await deleteAssetIfUnused(prevImageUrl);
     }
 
-    const full = await prisma.offer.findUnique({
+    const full = await getPrisma().offer.findUnique({
       where: { id },
       include: offerInclude,
     });
@@ -370,13 +370,13 @@ export async function DELETE(
 ) {
   const { id } = await ctx.params;
   try {
-    const prev = await prisma.offer.findUnique({
+    const prev = await getPrisma().offer.findUnique({
       where: { id },
       select: { imageUrl: true },
     });
     if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    await prisma.offer.delete({ where: { id } });
+    await getPrisma().offer.delete({ where: { id } });
 
     if (prev.imageUrl) await deleteAssetIfUnused(prev.imageUrl);
 

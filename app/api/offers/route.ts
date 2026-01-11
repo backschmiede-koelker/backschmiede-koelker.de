@@ -1,6 +1,6 @@
 // app/api/offers/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { Prisma, OfferKind, Weekday, Location, OfferType } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
@@ -35,7 +35,7 @@ async function uniqueOfferSlug(base: string) {
   const root = slugify(base) || "angebot";
   let slug = root; let i = 1;
   while (true) {
-    const exists = await prisma.offer.findUnique({ where: { slug } });
+    const exists = await getPrisma().offer.findUnique({ where: { slug } });
     if (!exists) return slug;
     i += 1; slug = `${root}-${i}`;
   }
@@ -229,7 +229,7 @@ export async function GET(req: Request) {
       listType === "all" ? { ...locationWhere } : {};
 
     if (listType === "today") {
-      const rows = await prisma.offer.findMany({
+      const rows = await getPrisma().offer.findMany({
         where: todayWhere,
         orderBy: [
           { priority: "desc" },
@@ -245,7 +245,7 @@ export async function GET(req: Request) {
     }
 
     if (listType === "upcoming") {
-      const rows = await prisma.offer.findMany({
+      const rows = await getPrisma().offer.findMany({
         where: upcomingWhere,
         orderBy: [
           { priority: "desc" },
@@ -260,7 +260,7 @@ export async function GET(req: Request) {
     }
 
     if (listType === "weekly") {
-      const rows = await prisma.offer.findMany({
+      const rows = await getPrisma().offer.findMany({
         where: weeklyWhere,
         orderBy: [
           { priority: "desc" },
@@ -277,7 +277,7 @@ export async function GET(req: Request) {
     }
 
     // ALL
-    const rows = await prisma.offer.findMany({
+    const rows = await getPrisma().offer.findMany({
       where: allWhere,
       orderBy: [{ createdAt: "desc" }],
       include: offerInclude,
@@ -381,7 +381,7 @@ export async function POST(req: Request) {
       unit: b.base.unit ?? null,
     };
 
-    const created = await prisma.$transaction(async (tx) => {
+    const created = await getPrisma().$transaction(async (tx) => {
       const createdOffer = await tx.offer.create({ data: baseData });
 
       if (b.type === "GENERIC") {
@@ -480,7 +480,7 @@ export async function POST(req: Request) {
       return createdOffer;
     });
 
-    const full = await prisma.offer.findUnique({
+    const full = await getPrisma().offer.findUnique({
       where: { id: created.id },
       include: offerInclude,
     });

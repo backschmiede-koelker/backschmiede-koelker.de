@@ -1,6 +1,6 @@
 // app/api/products/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
@@ -24,7 +24,7 @@ export async function GET(req: Request) {
     where.name = { contains: query, mode: Prisma.QueryMode.insensitive };
   }
 
-  const products = await prisma.product.findMany({
+  const products = await getPrisma().product.findMany({
     where,
     orderBy: query ? { name: "asc" } : { createdAt: "desc" },
     ...(limit ? { take: limit } : {}),
@@ -67,7 +67,7 @@ export async function POST(req: Request) {
 
   const slug = slugify(b.name);
   try {
-    const created = await prisma.product.create({
+    const created = await getPrisma().product.create({
       data: {
         name: b.name.trim(),
         slug,
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
   } catch (e: unknown) {
     if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2002") {
       const alt = `${slug}-${Math.random().toString(36).slice(2, 5)}`;
-      const created = await prisma.product.create({
+      const created = await getPrisma().product.create({
         data: { ...b, name: b.name.trim(), slug: alt, imageUrl: toStoredPath(b.imageUrl) },
       });
       return NextResponse.json(created, { status: 201 });

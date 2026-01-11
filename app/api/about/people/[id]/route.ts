@@ -1,6 +1,6 @@
 // app/api/about/people/[id]/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { requireAdminOr401 } from "../../_auth";
 
@@ -11,7 +11,7 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
   if (denied) return denied;
 
   const { id } = await ctx.params;
-  const item = await prisma.aboutPerson.findUnique({ where: { id } });
+  const item = await getPrisma().aboutPerson.findUnique({ where: { id } });
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(item);
 }
@@ -63,7 +63,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   if (typeof b.isShownInHero === "boolean") data.isShownInHero = b.isShownInHero;
   if (typeof b.sortOrder === "number" && Number.isFinite(b.sortOrder)) data.sortOrder = b.sortOrder;
 
-  const updated = await prisma.aboutPerson.update({ where: { id }, data });
+  const updated = await getPrisma().aboutPerson.update({ where: { id }, data });
   return NextResponse.json(updated);
 }
 
@@ -74,7 +74,7 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
   const { id } = await ctx.params;
 
   try {
-    await prisma.aboutPerson.delete({ where: { id } });
+    await getPrisma().aboutPerson.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
     if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2025") {

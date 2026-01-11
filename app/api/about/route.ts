@@ -1,11 +1,11 @@
 // app/api/about/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
 export async function GET() {
   const [sections, people] = await Promise.all([
-    prisma.aboutSection.findMany({
+    getPrisma().aboutSection.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: "asc" },
       include: {
@@ -16,7 +16,7 @@ export async function GET() {
         gallery: { orderBy: { sortOrder: "asc" } },
       },
     }),
-    prisma.aboutPerson.findMany({
+    getPrisma().aboutPerson.findMany({
       where: { isShownOnAbout: true },
       orderBy: [
         { sortOrder: "desc" },

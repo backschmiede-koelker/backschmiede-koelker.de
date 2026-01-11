@@ -1,5 +1,5 @@
 // app/lib/jobs/db.ts
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import {
   Prisma,
   Job as PrismaJob,
@@ -126,7 +126,7 @@ export async function fetchJobs(filter?: {
     }
   }
 
-  const jobs = await prisma.job.findMany({
+  const jobs = await getPrisma().job.findMany({
     where,
     orderBy: [
       { priority: "desc" },
@@ -139,7 +139,7 @@ export async function fetchJobs(filter?: {
 }
 
 export async function allJobsAdmin() {
-  const jobs = await prisma.job.findMany({
+  const jobs = await getPrisma().job.findMany({
     orderBy: [
       { priority: "desc" },
       { title: "asc" },
@@ -150,11 +150,11 @@ export async function allJobsAdmin() {
 }
 
 export async function getJobBySlug(slug: string) {
-  const j = await prisma.job.findUnique({ where: { slug } });
+  const j = await getPrisma().job.findUnique({ where: { slug } });
   return j ? mapJob(j) : undefined;
 }
 
 export async function getJobById(id: string) {
-  const j = await prisma.job.findUnique({ where: { id } });
+  const j = await getPrisma().job.findUnique({ where: { id } });
   return j ? mapJob(j) : undefined;
 }

@@ -1,6 +1,6 @@
 // /app/api/collect/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { auth } from "@/auth";
 
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
     const utmMedium = typeof utm.medium === "string" ? utm.medium : undefined;
     const utmCampaign = typeof utm.campaign === "string" ? utm.campaign : undefined;
 
-    await prisma.pageview.create({
+    await getPrisma().pageview.create({
       data: {
         path,
         referrerHost: refHost,

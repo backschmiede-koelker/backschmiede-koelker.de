@@ -1,6 +1,6 @@
 // app/api/about/people/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { requireAdminOr401 } from "../_auth";
 
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
   const kind = (searchParams.get("kind") || "").trim();
 
   const kindFilter = kind ? (kind as PersonKind) : undefined;
-  const items = await prisma.aboutPerson.findMany({
+  const items = await getPrisma().aboutPerson.findMany({
     ...(kindFilter ? { where: { kind: kindFilter } } : {}),
     orderBy: { sortOrder: "asc" },
   });
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
   if (!b?.name?.trim()) return NextResponse.json({ error: "name required" }, { status: 400 });
 
   const kindValue = (b.kind as PersonKind) || "TEAM_MEMBER";
-  const created = await prisma.aboutPerson.create({
+  const created = await getPrisma().aboutPerson.create({
     data: {
       kind: kindValue,
       name: b.name.trim(),

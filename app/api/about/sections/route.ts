@@ -1,6 +1,6 @@
 // app/api/about/sections/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { requireAdminOr401 } from "../_auth";
 
@@ -24,7 +24,7 @@ export async function GET(req: Request) {
   const includeItems = searchParams.get("includeItems") === "1";
 
   const typeFilter = type ? (type as SectionType) : undefined;
-  const items = await prisma.aboutSection.findMany({
+  const items = await getPrisma().aboutSection.findMany({
     ...(typeFilter ? { where: { type: typeFilter } } : {}),
     orderBy: { sortOrder: "asc" },
     ...(includeItems
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     sortOrder?: number;
   };
 
-  const created = await prisma.aboutSection.create({
+  const created = await getPrisma().aboutSection.create({
     data: {
       type: b.type as SectionType,
       slug: (b.slug || "").trim() || `${String(b.type).toLowerCase()}-${Date.now()}`,

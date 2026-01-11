@@ -1,6 +1,6 @@
 // app/api/events/ics/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { buildIcsFile } from "@/app/lib/ics";
 
 function addMinutes(iso: string, minutes: number) {
@@ -12,7 +12,7 @@ function addMinutes(iso: string, minutes: number) {
 export async function GET() {
   const now = new Date();
 
-  const events = await prisma.event.findMany({
+  const events = await getPrisma().event.findMany({
     where: { isActive: true, startsAt: { gte: now } },
     orderBy: { startsAt: "asc" },
     select: {

@@ -1,6 +1,6 @@
 // app/api/about/stats/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { requireAdminOr401 } from "../_auth";
 
 export async function GET(req: Request) {
@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const sectionId = (searchParams.get("sectionId") || "").trim();
 
-  const items = await prisma.aboutStatItem.findMany({
+  const items = await getPrisma().aboutStatItem.findMany({
     ...(sectionId ? { where: { sectionId } } : {}),
     orderBy: [{ sectionId: "asc" }, { sortOrder: "asc" }],
   });
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "sectionId, label, value required" }, { status: 400 });
   }
 
-  const created = await prisma.aboutStatItem.create({
+  const created = await getPrisma().aboutStatItem.create({
     data: {
       sectionId: b.sectionId,
       label: b.label.trim(),

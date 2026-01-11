@@ -1,6 +1,6 @@
 // app/api/events/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
@@ -48,7 +48,7 @@ export async function GET(req: Request) {
       ...(cursor && Number.isFinite(cursor.getTime()) ? { gt: cursor } : {}),
     };
 
-    const events = await prisma.event.findMany({
+    const events = await getPrisma().event.findMany({
       where,
       orderBy: { startsAt: "asc" },
       ...(take ? { take } : {}),
@@ -75,7 +75,7 @@ export async function GET(req: Request) {
       ...(cursor && Number.isFinite(cursor.getTime()) ? { lt: cursor } : {}),
     };
 
-    const events = await prisma.event.findMany({
+    const events = await getPrisma().event.findMany({
       where,
       orderBy: { startsAt: "desc" }, // past: newest -> oldest (für Paging)
       ...(take ? { take } : {}),
@@ -97,7 +97,7 @@ export async function GET(req: Request) {
   }
 
   // Default (Admin etc.)
-  const events = await prisma.event.findMany({
+  const events = await getPrisma().event.findMany({
     where,
     orderBy: { startsAt: order },
     ...(take ? { take } : {}),
@@ -141,7 +141,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "endsAt invalid" }, { status: 400 });
   }
 
-  const created = await prisma.event.create({
+  const created = await getPrisma().event.create({
     data: {
       caption,
       description: b.description ? String(b.description).trim() : null,

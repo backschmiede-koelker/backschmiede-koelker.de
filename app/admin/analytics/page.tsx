@@ -1,6 +1,6 @@
 // /app/admin/analytics/page.tsx
 import type { Metadata } from "next";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
@@ -115,21 +115,21 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   const { range, end, start: initialStart } = parseDateRange(sp);
   let start = initialStart;
   if (range === "all") {
-    const first = await prisma.pageview.findFirst({ orderBy: { createdAt: "asc" }, select: { createdAt: true } });
+    const first = await getPrisma().pageview.findFirst({ orderBy: { createdAt: "asc" }, select: { createdAt: true } });
     start = first?.createdAt ?? new Date();
   }
 
   // Optionen für SelectBoxen (distinct)
   const [devs, langs, countries, browsers, paths, refs, utmS, utmM, utmC] = await Promise.all([
-    prisma.$queryRaw<{ device: string | null; c: bigint }[]>`SELECT "device", COUNT(*) AS c FROM "Pageview" GROUP BY "device" ORDER BY c DESC`,
-    prisma.$queryRaw<{ lang: string | null; c: bigint }[]>`SELECT "lang", COUNT(*) AS c FROM "Pageview" GROUP BY "lang" ORDER BY c DESC`,
-    prisma.$queryRaw<{ country: string | null; c: bigint }[]>`SELECT "country", COUNT(*) AS c FROM "Pageview" GROUP BY "country" ORDER BY c DESC`,
-    prisma.$queryRaw<{ browser: string | null; c: bigint }[]>`SELECT "browser", COUNT(*) AS c FROM "Pageview" GROUP BY "browser" ORDER BY c DESC`,
-    prisma.$queryRaw<{ path: string; c: bigint }[]>`SELECT "path", COUNT(*) AS c FROM "Pageview" GROUP BY "path" ORDER BY c DESC LIMIT 200`,
-    prisma.$queryRaw<{ host: string | null; c: bigint }[]>`SELECT "referrerHost" AS host, COUNT(*) AS c FROM "Pageview" GROUP BY host ORDER BY c DESC LIMIT 200`,
-    prisma.$queryRaw<{ v: string | null; c: bigint }[]>`SELECT "utmSource" AS v, COUNT(*) AS c FROM "Pageview" GROUP BY v ORDER BY c DESC`,
-    prisma.$queryRaw<{ v: string | null; c: bigint }[]>`SELECT "utmMedium" AS v, COUNT(*) AS c FROM "Pageview" GROUP BY v ORDER BY c DESC`,
-    prisma.$queryRaw<{ v: string | null; c: bigint }[]>`SELECT "utmCampaign" AS v, COUNT(*) AS c FROM "Pageview" GROUP BY v ORDER BY c DESC`,
+    getPrisma().$queryRaw<{ device: string | null; c: bigint }[]>`SELECT "device", COUNT(*) AS c FROM "Pageview" GROUP BY "device" ORDER BY c DESC`,
+    getPrisma().$queryRaw<{ lang: string | null; c: bigint }[]>`SELECT "lang", COUNT(*) AS c FROM "Pageview" GROUP BY "lang" ORDER BY c DESC`,
+    getPrisma().$queryRaw<{ country: string | null; c: bigint }[]>`SELECT "country", COUNT(*) AS c FROM "Pageview" GROUP BY "country" ORDER BY c DESC`,
+    getPrisma().$queryRaw<{ browser: string | null; c: bigint }[]>`SELECT "browser", COUNT(*) AS c FROM "Pageview" GROUP BY "browser" ORDER BY c DESC`,
+    getPrisma().$queryRaw<{ path: string; c: bigint }[]>`SELECT "path", COUNT(*) AS c FROM "Pageview" GROUP BY "path" ORDER BY c DESC LIMIT 200`,
+    getPrisma().$queryRaw<{ host: string | null; c: bigint }[]>`SELECT "referrerHost" AS host, COUNT(*) AS c FROM "Pageview" GROUP BY host ORDER BY c DESC LIMIT 200`,
+    getPrisma().$queryRaw<{ v: string | null; c: bigint }[]>`SELECT "utmSource" AS v, COUNT(*) AS c FROM "Pageview" GROUP BY v ORDER BY c DESC`,
+    getPrisma().$queryRaw<{ v: string | null; c: bigint }[]>`SELECT "utmMedium" AS v, COUNT(*) AS c FROM "Pageview" GROUP BY v ORDER BY c DESC`,
+    getPrisma().$queryRaw<{ v: string | null; c: bigint }[]>`SELECT "utmCampaign" AS v, COUNT(*) AS c FROM "Pageview" GROUP BY v ORDER BY c DESC`,
   ]);
 
   const deviceOptions = devs.map(d => d.device).filter((v): v is string => !!v);
@@ -146,7 +146,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   const where = condsFromSearch(sp, start, end);
 
   // Timeseries (volle Datenmenge - Summen/Ø korrekt)
-  const ts = await prisma.$queryRaw<{ day: string; pv: bigint; uniques: bigint }[]>`
+  const ts = await getPrisma().$queryRaw<{ day: string; pv: bigint; uniques: bigint }[]>`
     SELECT
       (date_trunc('day', "createdAt" AT TIME ZONE 'Europe/Berlin'))::date AS day,
       COUNT(*) AS pv,
@@ -159,7 +159,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   const pvData = ts.map(d => ({ x: d.day, y: Number(d.pv) }));
   const uData  = ts.map(d => ({ x: d.day, y: Number(d.uniques) }));
 
-  const [sum] = await prisma.$queryRaw<{ pv: bigint; uniques: bigint }[]>`
+  const [sum] = await getPrisma().$queryRaw<{ pv: bigint; uniques: bigint }[]>`
     SELECT COUNT(*) AS pv, COUNT(DISTINCT "ipHash") AS uniques
     FROM "Pageview" WHERE ${where}
   `;
@@ -170,15 +170,15 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
 
   // Top-Listen (mit Filtern)
   const [topPages, topRefs, campaigns, deviceDist, langDist, browserDist, countryDist] = await Promise.all([
-    prisma.$queryRaw<{ path: string; c: bigint }[]>`SELECT "path", COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY "path" ORDER BY c DESC LIMIT 10`,
-    prisma.$queryRaw<{ host: string | null; c: bigint }[]>`SELECT COALESCE("referrerHost",'(direct)') AS host, COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY host ORDER BY c DESC LIMIT 10`,
-    prisma.$queryRaw<{ src: string | null; med: string | null; camp: string | null; c: bigint }[]>`
+    getPrisma().$queryRaw<{ path: string; c: bigint }[]>`SELECT "path", COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY "path" ORDER BY c DESC LIMIT 10`,
+    getPrisma().$queryRaw<{ host: string | null; c: bigint }[]>`SELECT COALESCE("referrerHost",'(direct)') AS host, COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY host ORDER BY c DESC LIMIT 10`,
+    getPrisma().$queryRaw<{ src: string | null; med: string | null; camp: string | null; c: bigint }[]>`
       SELECT COALESCE("utmSource",'(ohne)') AS src, COALESCE("utmMedium",'(ohne)') AS med, COALESCE("utmCampaign",'(ohne)') AS camp, COUNT(*) AS c
       FROM "Pageview" WHERE ${where} GROUP BY src, med, camp ORDER BY c DESC LIMIT 10`,
-    prisma.$queryRaw<{ device: string | null; c: bigint }[]>`SELECT COALESCE("device",'unknown') AS device, COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY device ORDER BY c DESC`,
-    prisma.$queryRaw<{ lang: string | null; c: bigint }[]>`SELECT COALESCE("lang",'unknown') AS lang, COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY lang ORDER BY c DESC LIMIT 12`,
-    prisma.$queryRaw<{ browser: string | null; c: bigint }[]>`SELECT COALESCE("browser",'other') AS browser, COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY browser ORDER BY c DESC LIMIT 12`,
-    prisma.$queryRaw<{ country: string | null; c: bigint }[]>`SELECT COALESCE("country",'unknown') AS country, COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY country ORDER BY c DESC LIMIT 12`,
+    getPrisma().$queryRaw<{ device: string | null; c: bigint }[]>`SELECT COALESCE("device",'unknown') AS device, COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY device ORDER BY c DESC`,
+    getPrisma().$queryRaw<{ lang: string | null; c: bigint }[]>`SELECT COALESCE("lang",'unknown') AS lang, COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY lang ORDER BY c DESC LIMIT 12`,
+    getPrisma().$queryRaw<{ browser: string | null; c: bigint }[]>`SELECT COALESCE("browser",'other') AS browser, COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY browser ORDER BY c DESC LIMIT 12`,
+    getPrisma().$queryRaw<{ country: string | null; c: bigint }[]>`SELECT COALESCE("country",'unknown') AS country, COUNT(*) AS c FROM "Pageview" WHERE ${where} GROUP BY country ORDER BY c DESC LIMIT 12`,
   ]);
 
   const maxPage = topPages[0]?.c ? Number(topPages[0].c) : 0;

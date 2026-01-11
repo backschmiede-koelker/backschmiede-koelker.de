@@ -1,6 +1,6 @@
 // app/api/jobs/[id]/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { Prisma, Location, JobEmploymentType, JobSalaryUnit, JobCategory } from "@/generated/prisma/client";
 
 type JobUpdatePayload = Partial<{
@@ -72,7 +72,7 @@ function parsePriority(input: unknown): number | undefined {
 
 export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const job = await prisma.job.findUnique({ where: { id } });
+  const job = await getPrisma().job.findUnique({ where: { id } });
   if (!job) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(job);
 }
@@ -80,7 +80,7 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   const body = (await req.json()) as Record<string, unknown>;
-  const prev = await prisma.job.findUnique({ where: { id } });
+  const prev = await getPrisma().job.findUnique({ where: { id } });
   if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const data: JobUpdatePayload = {};
@@ -135,7 +135,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 
   if (data.startsAsap === true) data.startsAt = null;
 
-  const updated = await prisma.job.update({ where: { id }, data: data as Prisma.JobUpdateInput });
+  const updated = await getPrisma().job.update({ where: { id }, data: data as Prisma.JobUpdateInput });
   return NextResponse.json(updated);
 }
 
@@ -146,7 +146,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
 export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   try {
-    await prisma.job.delete({ where: { id } });
+    await getPrisma().job.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
     if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2025") {

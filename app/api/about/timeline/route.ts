@@ -1,6 +1,6 @@
 // app/api/about/timeline/route.ts
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { requireAdminOr401 } from "../_auth";
 
 export async function GET(req: Request) {
@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const sectionId = (searchParams.get("sectionId") || "").trim();
 
-  const items = await prisma.aboutTimelineItem.findMany({
+  const items = await getPrisma().aboutTimelineItem.findMany({
     ...(sectionId ? { where: { sectionId } } : {}),
     orderBy: [{ sectionId: "asc" }, { sortOrder: "asc" }],
   });
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "sectionId, year, title required" }, { status: 400 });
   }
 
-  const created = await prisma.aboutTimelineItem.create({
+  const created = await getPrisma().aboutTimelineItem.create({
     data: {
       sectionId: b.sectionId,
       year: b.year.trim(),
