@@ -1,7 +1,7 @@
 // app/components/offer-base-fields.tsx
 "use client";
 
-import FieldLabel from "app/components/ui/field-label";
+import FieldLabel from "@/app/components/ui/field-label";
 import ImageUploader from "@/app/components/image-uploader";
 
 export default function OfferBaseFields({

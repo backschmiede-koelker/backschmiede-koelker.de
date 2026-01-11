@@ -1,7 +1,7 @@
 // app/admin/offers/components/schedule-selector.tsx
 "use client";
 
-import FieldLabel from "app/components/ui/field-label";
+import FieldLabel from "@/app/components/ui/field-label";
 import SelectBox from "@/app/components/select-box";
 import { WEEKDAY_OPTIONS } from "@/app/components/ui/weekdays";
 import { OfferKind, Weekday } from "@/app/types/offers";
