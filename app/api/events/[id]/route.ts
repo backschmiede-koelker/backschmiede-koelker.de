@@ -1,8 +1,11 @@
 // app/api/events/[id]/route.ts
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { Location } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { pathFromStoredPath, safeUnlink, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
+
+const ALL_LOCATIONS = new Set(Object.values(Location));
 
 async function deleteAssetIfUnused(stored?: string | null) {
   const s = toStoredPath(stored);
@@ -31,6 +34,7 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
       startsAt: true,
       endsAt: true,
       isActive: true,
+      locations: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -54,6 +58,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     startsAt: string;
     endsAt: string | null;
     isActive: boolean;
+    locations: string[];
   }>;
 
   const prev = await getPrisma().event.findUnique({
@@ -70,6 +75,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     startsAt: Date;
     endsAt: Date | null;
     isActive: boolean;
+    locations: Location[];
   }> = {};
   if (typeof body.caption === "string") data.caption = body.caption.trim();
   if (typeof body.description === "string") data.description = body.description.trim();
@@ -94,6 +100,15 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
 
   if (typeof body.isActive === "boolean") data.isActive = body.isActive;
 
+  if (Array.isArray(body.locations)) {
+    const locationsRaw = body.locations;
+    const locations = locationsRaw
+      .map((x) => String(x).toUpperCase().trim())
+      .filter((x): x is Location => ALL_LOCATIONS.has(x as Location)) as Location[];
+
+    data.locations = locations;
+  }
+
   const updated = await getPrisma().event.update({
     where: { id },
     data,
@@ -105,6 +120,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
       startsAt: true,
       endsAt: true,
       isActive: true,
+      locations: true,
       createdAt: true,
       updatedAt: true,
     },

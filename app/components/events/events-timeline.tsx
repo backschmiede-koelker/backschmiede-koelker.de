@@ -49,6 +49,12 @@ function timeLabel(iso: string) {
   return fmtDate(iso, { hour: "2-digit", minute: "2-digit" });
 }
 
+function locationLabels(locs?: ("RECKE" | "METTINGEN")[]) {
+  if (!locs?.length) return [];
+  const map = { RECKE: "Recke", METTINGEN: "Mettingen" } as const;
+  return locs.map((l) => map[l] ?? l);
+}
+
 function sameDay(aIso: string, bIso: string) {
   const a = new Date(aIso);
   const b = new Date(bIso);
@@ -548,7 +554,7 @@ export default function EventsTimeline() {
 
   // ✅ harte Mindest-Reserve für den Textbereich
   // (mit p-2, kleineren margins & ggf. Titel nur 1 Zeile in "tight" Mode)
-  const textReservePx = tight ? 142 : 168;
+  const textReservePx = tight ? 154 : 180;
 
   // ✅ Bild darf sehr klein werden, damit 2 Zeilen Beschreibung NIE verloren gehen
   const imageH = clamp(cardMaxH - textReservePx, 48, 220);
@@ -835,6 +841,24 @@ export default function EventsTimeline() {
                           {dateLabel(e.startsAt)}
                         </span>
                       </div>
+
+                      {e.locations?.length ? (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {locationLabels(e.locations).map((loc) => (
+                            <span
+                              key={loc}
+                              className={[
+                                "rounded-full px-1 py-[1px]",
+                                "text-[11px]",
+                                "bg-emerald-700/15 text-emerald-950 ring-1 ring-emerald-900/25",
+                                "dark:bg-emerald-400/10 dark:text-emerald-100 dark:ring-emerald-300/20",
+                              ].join(" ")}
+                            >
+                              {loc}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
 
                       <div className="mt-1.5 text-[11px] leading-4 text-zinc-800 dark:text-zinc-300 space-y-0.5 shrink-0">
                         <div>

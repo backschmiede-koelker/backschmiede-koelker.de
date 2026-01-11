@@ -21,8 +21,15 @@ export async function GET() {
       description: true,
       startsAt: true,
       endsAt: true,
+      locations: true,
     },
   });
+
+  const locLabel = (locs: ("RECKE" | "METTINGEN")[]) => {
+    if (!locs?.length) return undefined;
+    const map = { RECKE: "Recke", METTINGEN: "Mettingen" } as const;
+    return locs.map((l) => map[l] ?? l).join(" / ");
+  };
 
   const ics = buildIcsFile(
     events.map((e) => {
@@ -34,6 +41,7 @@ export async function GET() {
         start: startIso,
         end: endIso,
         description: e.description ?? undefined,
+        location: locLabel(e.locations),
       };
     })
   );
