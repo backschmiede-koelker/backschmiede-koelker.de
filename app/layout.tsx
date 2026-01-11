@@ -1,4 +1,6 @@
 // /app/layout.tsx
+import "./globals.css";
+
 import { Providers } from "./providers/theme-provider";
 import LayoutWrapper from "./components/layout-wrapper";
 import Footer from "./components/footer";
