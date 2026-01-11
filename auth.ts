@@ -27,17 +27,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const ok = await bcrypt.compare(password, user.passwordHash)
         if (!ok) return null
 
-        return { id: user.id, name: user.username, role: user.role }
+        return {
+          id: String(user.id),
+          name: user.username,
+          role: user.role ?? null,
+        }
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user) token.role = (user as any).role
+      if (user) {
+        token.role = user.role ?? null
+      }
       return token
     },
     async session({ session, token }) {
-      if (session.user) (session.user as any).role = token.role
+      session.user.role = token.role ?? null
       return session
     },
   },
