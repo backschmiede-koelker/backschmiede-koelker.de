@@ -1,5 +1,5 @@
 # --- Build ---
-FROM node:24-alpine AS builder
+FROM node:24-bookworm-slim AS builder
 WORKDIR /app
 
 COPY package*.json ./
@@ -21,7 +21,7 @@ ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
 RUN npm run build
 
 # --- Runtime ---
-FROM node:24-alpine AS runner
+FROM node:24-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
@@ -32,12 +32,7 @@ COPY --from=builder /app/public ./public
 
 # Prisma: Schema + Engines + Client (für Query & Migrations)
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
-# Prisma CLI für 'prisma migrate deploy' im Container
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin ./node_modules/.bin
+COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
 CMD ["sh", "-c", "node server.js"]
