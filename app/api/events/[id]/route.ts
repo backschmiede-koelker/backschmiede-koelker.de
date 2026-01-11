@@ -63,7 +63,14 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
 
   if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const data: any = {};
+  const data: Partial<{
+    caption: string;
+    description: string | null;
+    imageUrl: string | null;
+    startsAt: Date;
+    endsAt: Date | null;
+    isActive: boolean;
+  }> = {};
   if (typeof body.caption === "string") data.caption = body.caption.trim();
   if (typeof body.description === "string") data.description = body.description.trim();
   if (body.description === null) data.description = null;

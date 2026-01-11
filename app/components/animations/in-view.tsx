@@ -46,10 +46,11 @@
 
 import React, { HTMLAttributes, Ref } from "react";
 import { motion as m, useAnimationControls } from "motion/react";
+import type { Easing } from "motion/react";
 import { useVisibility, UseVisibilityOptions } from "./use-visibility";
 
 type BaseProps = {
-  as?: any;                     // polymorphes Element, z. B. m.section, m.article …
+  as?: React.ElementType;       // polymorphes Element, z. B. m.section, m.article …
   children: React.ReactNode;
   className?: string;
 
@@ -58,7 +59,7 @@ type BaseProps = {
   opacityFrom?: number;         // Start-Opacity
   delay?: number;
   duration?: number;
-  ease?: any;
+  ease?: Easing;
 
   // Sichtbarkeitslogik
   visibility?: UseVisibilityOptions;
@@ -115,9 +116,9 @@ export function InViewReveal<T extends HTMLElement = HTMLDivElement>({
     [opacityFrom, y]
   );
 
-  // Hinweis: Da `Component` polymorph sein kann, casten wir den Ref schmal auf `Ref<any>`.
+  // Hinweis: Da `Component` polymorph sein kann, casten wir den Ref schmal auf `Ref<T>`.
   // Für Standardfälle (m.div etc.) passt der konkrete Typ ohnehin (HTMLDivElement).
-  const forwardedRef = ref as unknown as Ref<any>;
+  const forwardedRef = ref as unknown as Ref<T>;
 
   return (
     <Component

@@ -82,12 +82,15 @@ function PersonCard({
                 ].join(" ")}
               >
                 {avatar ? (
-                  <img
-                    src={avatar}
-                    alt={p.name}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={avatar}
+                      alt={p.name}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  </>
                 ) : (
                   <div className="grid h-full w-full place-items-center">
                     <span

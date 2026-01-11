@@ -7,6 +7,37 @@ import { OfferKind, Weekday, Location, OfferType } from "../../../types/offers";
 
 export type ProductLite = { id: string; name: string; priceCents: number; unit: string };
 
+type OfferBasePayload = {
+  title: string;
+  subtitle: string | null;
+  imageUrl: string | null;
+  tags: string[];
+  isActive: boolean;
+  kind: OfferKind;
+  locations: Location[];
+  priority: number;
+  minBasketCents: number | null;
+  weekday?: Weekday;
+  date?: string;
+  startDate?: string;
+  endDate?: string;
+};
+
+type EmptyPayload = Record<string, never>;
+type OfferPayload =
+  | EmptyPayload
+  | { body: string; ctaLabel: string | null; ctaHref: string | null }
+  | { productId: string; highlightLabel: string }
+  | { productId: string; priceCents: number; originalPriceCents: number | null; unit: string | null }
+  | {
+      productId: string;
+      packQty: number;
+      packPriceCents: number;
+      comparePackQty: number | null;
+      comparePriceCents: number | null;
+      unit: string | null;
+    };
+
 function toYMD(d: Date) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -108,7 +139,7 @@ export function useOfferForm({ allUnits, onCreated }: { allUnits: string[]; onCr
     }
     setCreating(true);
     try {
-      const base: any = {
+      const base: OfferBasePayload = {
         title: title.trim(),
         subtitle: description.trim() || null,
         imageUrl: imageUrl || null,
@@ -126,7 +157,7 @@ export function useOfferForm({ allUnits, onCreated }: { allUnits: string[]; onCr
         base.endDate = endDate;
       }
 
-      let payload: any = {};
+      let payload: OfferPayload = {};
       if (type === "GENERIC") payload = { body: description || "", ctaLabel: null, ctaHref: null };
 
       if (type === "PRODUCT_NEW") {

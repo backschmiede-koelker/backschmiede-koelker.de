@@ -1,7 +1,19 @@
 // app/lib/jobs/db.ts
 import { prisma } from "@/lib/prisma";
-import { Prisma, Job as PrismaJob, Location, JobEmploymentType, JobCategory } from "@/generated/prisma/client";
-import type { Job, JobLocation } from "./types";
+import {
+  Prisma,
+  Job as PrismaJob,
+  Location,
+  JobEmploymentType as PrismaJobEmploymentType,
+  JobCategory as PrismaJobCategory,
+} from "@/generated/prisma/client";
+import type {
+  Job,
+  JobLocation,
+  JobCategory as AppJobCategory,
+  JobEmploymentType as AppJobEmploymentType,
+  JobSalaryUnit as AppJobSalaryUnit,
+} from "./types";
 
 function mapLocation(l: Location): JobLocation {
   return l === Location.METTINGEN ? "METTINGEN" : "RECKE";
@@ -12,7 +24,7 @@ function mapJob(j: PrismaJob): Job {
     id: j.id,
     slug: j.slug,
     title: j.title,
-    category: j.category as any,
+    category: j.category as AppJobCategory,
 
     teaser: j.teaser,
     description: j.description,
@@ -21,7 +33,7 @@ function mapJob(j: PrismaJob): Job {
     qualifications: j.qualifications ?? [],
     benefits: j.benefits ?? [],
 
-    employmentTypes: (j.employmentTypes ?? []) as any,
+    employmentTypes: (j.employmentTypes ?? []) as AppJobEmploymentType[],
     locations: (j.locations ?? []).map(mapLocation),
 
     shift: j.shift ?? null,
@@ -29,7 +41,7 @@ function mapJob(j: PrismaJob): Job {
 
     salaryMinCents: j.salaryMinCents ?? null,
     salaryMaxCents: j.salaryMaxCents ?? null,
-    salaryUnit: (j.salaryUnit ?? null) as any,
+    salaryUnit: (j.salaryUnit ?? null) as AppJobSalaryUnit | null,
 
     startsAsap: j.startsAsap,
     startsAt: j.startsAt ?? null,
@@ -47,7 +59,7 @@ function mapJob(j: PrismaJob): Job {
   };
 }
 
-const labelToEmployment: Record<string, JobEmploymentType> = {
+const labelToEmployment: Record<string, PrismaJobEmploymentType> = {
   Vollzeit: "FULL_TIME",
   Teilzeit: "PART_TIME",
   Minijob: "MINI_JOB",
@@ -59,7 +71,7 @@ const labelToLocation: Record<string, Location> = {
   Recke: Location.RECKE,
 };
 
-const labelToCategory: Record<string, JobCategory> = {
+const labelToCategory: Record<string, PrismaJobCategory> = {
   "Bäcker/in": "BAECKER",
   "Konditor/in": "KONDITOR",
   Verkauf: "VERKAEUFER",
@@ -101,7 +113,7 @@ export async function fetchJobs(filter?: {
 
   const cat = (filter?.cat || "").trim();
   if (cat && cat !== "ALLE" && cat !== "Alle Bereiche") {
-    const c = labelToCategory[cat] || (cat.toUpperCase() as JobCategory);
+    const c = labelToCategory[cat] || (cat.toUpperCase() as PrismaJobCategory);
     if (c) where.category = c;
   }
 

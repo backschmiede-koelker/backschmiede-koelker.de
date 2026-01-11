@@ -1,6 +1,6 @@
 // /app/components/product-picker.tsx
 "use client";
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { FaMagnifyingGlass, FaSpinner } from "react-icons/fa6";
 
@@ -35,21 +35,23 @@ export default function ProductPicker({
   const inputId = useId();
   const statusId = useId();
 
-  function parseProductsJson(json: any): ProductLite[] {
-    if (Array.isArray(json)) return json;
-    if (json && Array.isArray(json.items)) return json.items;
+  const parseProductsJson = useCallback((json: unknown): ProductLite[] => {
+    if (Array.isArray(json)) return json as ProductLite[];
+    if (json && typeof json === "object" && Array.isArray((json as { items?: unknown }).items)) {
+      return (json as { items: ProductLite[] }).items;
+    }
     return [];
-  }
+  }, []);
 
-  async function fetchProducts(term: string): Promise<ProductLite[]> {
+  const fetchProducts = useCallback(async (term: string): Promise<ProductLite[]> => {
     const url = term
       ? `/api/products?query=${encodeURIComponent(term)}&limit=50`
       : `/api/products?limit=50`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return [];
-    const json = await res.json();
+    const json = (await res.json()) as unknown;
     return parseProductsJson(json);
-  }
+  }, [parseProductsJson]);
 
   // Initial: Liste laden
   useEffect(() => {
@@ -66,7 +68,7 @@ export default function ProductPicker({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [fetchProducts]);
 
   // Debounced Suche
   useEffect(() => {
@@ -94,7 +96,7 @@ export default function ProductPicker({
       alive = false;
       clearTimeout(t);
     };
-  }, [q]);
+  }, [q, fetchProducts]);
 
   // Outside-Click (inkl. Portal)
   useEffect(() => {

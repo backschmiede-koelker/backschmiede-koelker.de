@@ -67,13 +67,6 @@ function parseDateRange(sp: Search) {
   else start.setDate(end.getDate() - 30);
   return { range: r, start, end };
 }
-function rangeLabel(range: string, start: Date, end: Date) {
-  const fmt = (d: Date) => d.toISOString().slice(0, 10);
-  if (range !== "all") return range.toUpperCase();
-  const e = new Date(end); e.setDate(e.getDate() - 1);
-  return `Gesamter Zeitraum (${fmt(start)} - ${fmt(e)})`;
-}
-
 // --- WHERE aus Filtern ---
 function condsFromSearch(sp: Search, start: Date, end: Date) {
   const c: Prisma.Sql[] = [
@@ -119,7 +112,8 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
   const sp = await searchParams;
 
   // Zeitraum
-  let { range, start, end } = parseDateRange(sp);
+  const { range, end, start: initialStart } = parseDateRange(sp);
+  let start = initialStart;
   if (range === "all") {
     const first = await prisma.pageview.findFirst({ orderBy: { createdAt: "asc" }, select: { createdAt: true } });
     start = first?.createdAt ?? new Date();

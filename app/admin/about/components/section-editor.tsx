@@ -128,8 +128,8 @@ export default function SectionEditor({
                   sortOrder: draft.sortOrder,
                 });
                 onUpdated(next);
-              } catch (e: any) {
-                setErr(e?.message || "Fehler beim Speichern");
+              } catch (e: unknown) {
+                setErr(e instanceof Error ? e.message : "Fehler beim Speichern");
               } finally {
                 setSaving(false);
               }
@@ -150,8 +150,8 @@ export default function SectionEditor({
                 try {
                   await deleteSection(section.id);
                   onDeleted();
-                } catch (e: any) {
-                  setErr(e?.message || "Fehler beim Löschen");
+                } catch (e: unknown) {
+                  setErr(e instanceof Error ? e.message : "Fehler beim Löschen");
                 }
               }}
             />
@@ -176,8 +176,8 @@ export default function SectionEditor({
                   });
                   setDraft((d) => ({ ...d, isActive: !!next.isActive }));
                   onUpdated(next);
-                } catch (e: any) {
-                  setErr(e?.message || "Fehler beim Ändern des Status");
+                } catch (e: unknown) {
+                  setErr(e instanceof Error ? e.message : "Fehler beim Ändern des Status");
                 } finally {
                   setSaving(false);
                 }

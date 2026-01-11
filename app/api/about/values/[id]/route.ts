@@ -14,7 +14,7 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     sortOrder: number;
   }>;
 
-  const data: any = {};
+  const data: Partial<{ title: string; description: string | null; sortOrder: number }> = {};
   if (typeof b.title === "string") data.title = b.title.trim();
   if (b.description === null || typeof b.description === "string") data.description = b.description;
   if (typeof b.sortOrder === "number" && Number.isFinite(b.sortOrder)) data.sortOrder = b.sortOrder;
@@ -32,8 +32,10 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
   try {
     await prisma.aboutValueItem.delete({ where: { id } });
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    if (e?.code === "P2025") return NextResponse.json({ error: "Not found" }, { status: 404 });
+  } catch (e: unknown) {
+    if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
 }

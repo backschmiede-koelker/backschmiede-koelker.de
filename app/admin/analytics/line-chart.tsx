@@ -46,14 +46,15 @@ export default function LineChart({
     : Math.max(220, Math.min(380, Math.round(width * 0.55)));
 
   // rechts mehr Luft, damit letzte Labels/Tooltip nie abgeschnitten werden
-  const padding = isNarrow
-    ? { top: 16, right: 22, bottom: 40, left: 40 }
-    : { top: 20, right: 20, bottom: 44, left: 48 };
+  const padding = useMemo(
+    () => (isNarrow ? { top: 16, right: 22, bottom: 40, left: 40 } : { top: 20, right: 20, bottom: 44, left: 48 }),
+    [isNarrow]
+  );
 
   const effectiveMaxPoints = isNarrow ? Math.min(maxPoints, 40) : maxPoints;
   const sampled = useMemo(() => downsampleMinMax(data, effectiveMaxPoints), [data, effectiveMaxPoints]);
 
-  const { maxY, yTicks, xTicks, pts, innerW, innerH } = useMemo(() => {
+  const { maxY, yTicks, xTicks, pts, innerW } = useMemo(() => {
     const ys = sampled.map((d) => d.y);
     const max = Math.max(...ys, 1);
     const steps = 4;
@@ -78,7 +79,7 @@ export default function LineChart({
     const y = (v: number) => innerH - (v / (step * steps)) * innerH;
 
     const pts = sampled.map((d, i) => ({ px: padding.left + x(i), py: padding.top + y(d.y) }));
-    return { maxY: step * steps, yTicks, xTicks, pts, innerW, innerH };
+    return { maxY: step * steps, yTicks, xTicks, pts, innerW };
   }, [sampled, width, height, padding, isNarrow]);
 
   // --- Smooth-Helper: Catmull-Rom → Bézier ---
@@ -200,7 +201,7 @@ export default function LineChart({
           const y = height - padding.bottom;
           const isFirst = idx === 0;
           const isLast = idx === xTicks.length - 1;
-          const anchor = isFirst ? "start" : isLast ? "end" : "middle";
+          const anchor: "start" | "end" | "middle" = isFirst ? "start" : isLast ? "end" : "middle";
           const dx = isFirst ? 2 : isLast ? -2 : 0;
           return (
             <g key={`x-${t.i}`}>
@@ -209,7 +210,7 @@ export default function LineChart({
                 x={x}
                 y={height - padding.bottom + 16}
                 dx={dx}
-                textAnchor={anchor as any}
+                textAnchor={anchor}
                 fontSize={tickFont}
                 className="fill-zinc-600 dark:fill-zinc-400"
               >

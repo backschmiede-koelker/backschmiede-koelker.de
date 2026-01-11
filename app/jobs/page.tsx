@@ -5,6 +5,7 @@ import { JobList } from "@/app/components/jobs/job-list";
 import { buildFacetsFromActiveJobs } from "@/app/components/jobs/facets";
 import { buildJobsListJsonLd } from "@/app/components/jobs/job-schema";
 import { fetchJobs } from "@/app/lib/jobs/db";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Stellenangebote | Backschmiede Kölker",
@@ -21,12 +22,13 @@ export const metadata: Metadata = {
 export default async function Page({
   searchParams,
 }: {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const q = (searchParams?.q as string) || "";
-  const loc = (searchParams?.loc as string) || "";
-  const cat = (searchParams?.cat as string) || "";
-  const emp = (searchParams?.emp as string) || ""; // "Vollzeit,Teilzeit" labels → wir mappen in db.ts
+  const sp = (await searchParams) || {};
+  const q = (sp.q as string) || "";
+  const loc = (sp.loc as string) || "";
+  const cat = (sp.cat as string) || "";
+  const emp = (sp.emp as string) || ""; // "Vollzeit,Teilzeit" labels → wir mappen in db.ts
 
   const jobs = await fetchJobs({ q, loc, cat, emp });
   const activeAll = await fetchJobs({ activeOnly: true }); // unfiltered facets
@@ -38,7 +40,9 @@ export default async function Page({
         <JobHero />
 
         <div className="mt-4">
-          <JobFilters facets={facets} />
+          <Suspense fallback={null}>
+            <JobFilters facets={facets} />
+          </Suspense>
         </div>
 
         <script

@@ -1,7 +1,21 @@
 // /app/lib/places.ts
-import { locations } from '../data/locations'
+import { locations, type FallbackHours, type LocationKey } from '../data/locations'
 
 export const PLACES_REVALIDATE = 60 * 60 * 6 // 6h
+
+type GooglePlacesHours = {
+  regularOpeningHours?: Record<string, unknown>
+  currentOpeningHours?: Record<string, unknown>
+  utcOffsetMinutes?: number
+}
+
+type PlaceHours = {
+  label: string
+  source: string
+  opening_hours: GooglePlacesHours['regularOpeningHours'] | null
+  current_opening_hours: GooglePlacesHours['currentOpeningHours'] | null
+  fallback: FallbackHours
+}
 
 async function fetchHours(placeId: string) {
   const key = process.env.GOOGLE_MAPS_API_KEY
@@ -16,13 +30,14 @@ async function fetchHours(placeId: string) {
     console.error('Places ERROR', res.status, txt)
     return null
   }
-  return res.json()
+  return (await res.json()) as GooglePlacesHours
 }
 
 export async function readPlacesHours() {
-  const out: Record<string, any> = {}
-  for (const [key, cfg] of Object.entries(locations)) {
-    let data = null
+  const out = {} as Record<LocationKey, PlaceHours>
+  const entries = Object.entries(locations) as [LocationKey, (typeof locations)[LocationKey]][]
+  for (const [key, cfg] of entries) {
+    let data: GooglePlacesHours | null = null
     try {
       data = cfg.placeId ? await fetchHours(cfg.placeId) : null
     } catch {}
@@ -30,10 +45,10 @@ export async function readPlacesHours() {
     out[key] = {
       label: cfg.label,
       source: data ? 'google' : 'fallback (Öffnungszeiten können abweichen)',
-      opening_hours: (data as any)?.regularOpeningHours || null,
-      current_opening_hours: (data as any)?.currentOpeningHours || null,
-      fallback: (cfg as any).fallback,
+      opening_hours: data?.regularOpeningHours || null,
+      current_opening_hours: data?.currentOpeningHours || null,
+      fallback: cfg.fallback,
     }
   }
-  return out as { mettingen: any; recke: any }
+  return out
 }

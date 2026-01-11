@@ -167,12 +167,10 @@ function usePairEqualHeight(
 
 function WeekTable({
   lines,
-  equalHeights,
   liRefs,
   todayIndex,
 }: {
   lines: string[];
-  equalHeights: number[];
   liRefs: React.MutableRefObject<(HTMLLIElement | null)[]>;
   todayIndex: number | null;
 }) {
@@ -245,7 +243,6 @@ function PlaceCard({
   title,
   lines,
   source,
-  equalHeights,
   liRefs,
   headerRef,
   todayIndex,
@@ -253,7 +250,6 @@ function PlaceCard({
   title: string;
   lines: string[];
   source?: string;
-  equalHeights: number[];
   liRefs: React.MutableRefObject<(HTMLLIElement | null)[]>;
   headerRef: React.MutableRefObject<HTMLDivElement | null>;
   todayIndex: number | null;
@@ -280,7 +276,6 @@ function PlaceCard({
 
         <WeekTable
           lines={lines}
-          equalHeights={equalHeights}
           liRefs={liRefs}
           todayIndex={todayIndex}
         />
@@ -298,7 +293,7 @@ function PlaceCard({
 export default function HoursGrid({ left, right }: Props) {
   const leftRefs = React.useRef<(HTMLLIElement | null)[]>([]);
   const rightRefs = React.useRef<(HTMLLIElement | null)[]>([]);
-  const equalHeights = usePerIndexEqualHeights(leftRefs, rightRefs);
+  usePerIndexEqualHeights(leftRefs, rightRefs);
 
   const leftHeaderRef = React.useRef<HTMLDivElement | null>(null);
   const rightHeaderRef = React.useRef<HTMLDivElement | null>(null);
@@ -318,7 +313,6 @@ export default function HoursGrid({ left, right }: Props) {
         title={left.title}
         lines={left.lines}
         source={left.source}
-        equalHeights={equalHeights}
         liRefs={leftRefs}
         headerRef={leftHeaderRef}
         todayIndex={todayIndex}
@@ -327,7 +321,6 @@ export default function HoursGrid({ left, right }: Props) {
         title={right.title}
         lines={right.lines}
         source={right.source}
-        equalHeights={equalHeights}
         liRefs={rightRefs}
         headerRef={rightHeaderRef}
         todayIndex={todayIndex}

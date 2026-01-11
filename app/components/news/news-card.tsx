@@ -6,11 +6,15 @@ import { publicAssetUrl } from "@/app/lib/uploads";
 import type { ApiNews } from "./types";
 import { TagBadge } from "./tag-badge";
 import { formatDateISO } from "./utils";
+import type { CSSProperties } from "react";
 
 export function NewsCard({ n }: { n: ApiNews }) {
   const img = publicAssetUrl(n.imageUrl);
   const hasImg = !!img;
   const hasCTA = !!(n.ctaHref && n.ctaLabel);
+  const scrollStyle: CSSProperties & { scrollbarGutter?: string } = {
+    scrollbarGutter: "stable",
+  };
 
   return (
     <article
@@ -65,7 +69,7 @@ export function NewsCard({ n }: { n: ApiNews }) {
             pr-2
             [scrollbar-width:thin] overscroll-contain
           "
-          style={{ scrollbarGutter: "stable" } as any}
+          style={scrollStyle}
         >
           <h3 className="text-sm sm:text-base font-semibold leading-snug break-words hyphens-auto">
             {n.title}

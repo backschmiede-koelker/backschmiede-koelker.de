@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { readPlacesHours, PLACES_REVALIDATE } from '../../lib/places';
 
-export const revalidate = 60 * 60 * 6;
+export const revalidate = 21600;
 
 export async function GET() {
   const out = await readPlacesHours();

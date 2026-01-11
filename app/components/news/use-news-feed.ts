@@ -57,9 +57,9 @@ export function useNewsFeed(baseUrl?: string) {
         setReachedEnd(data.length < capped || sameLength || data.length >= HARD_LIMIT);
 
         lastCountRef.current = data.length;
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (cancelled) return;
-        setError(e?.message ?? "Fehler beim Laden.");
+        setError(e instanceof Error ? e.message : "Fehler beim Laden.");
       } finally {
         if (!cancelled) setLoading(false);
       }

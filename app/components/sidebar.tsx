@@ -44,7 +44,7 @@ function GlowTile({
   active?: boolean;
   external?: boolean;
 }) {
-  const Comp: any = external ? 'a' : Link;
+  const Comp: React.ElementType = external ? 'a' : Link;
   const props = external
     ? { href, target: '_blank', rel: 'noopener noreferrer' }
     : { href };

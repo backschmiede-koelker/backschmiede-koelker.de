@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import ThemeToggle from './theme-toggle';
-import { FaBars, FaXmark, FaRegSnowflake, FaSnowflake } from 'react-icons/fa6';
+import { FaBars, FaXmark, FaRegSnowflake } from 'react-icons/fa6';
 import { LuPartyPopper } from 'react-icons/lu';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';

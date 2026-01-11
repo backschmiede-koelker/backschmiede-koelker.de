@@ -124,6 +124,7 @@ export default function AboutHeroSection({
                     "dark:shadow-[0_18px_55px_rgba(0,0,0,0.55)]",
                   ].join(" ")}
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={img}
                     alt={title}

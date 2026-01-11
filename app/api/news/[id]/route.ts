@@ -32,7 +32,16 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   const prev = await prisma.news.findUnique({ where: { id }, select: { imageUrl: true } });
   if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const data: any = {};
+  const data: Partial<{
+    title: string;
+    body: string;
+    imageUrl: string | null;
+    tag: string | null;
+    ctaLabel: string | null;
+    ctaHref: string | null;
+    isActive: boolean;
+    publishedAt: Date;
+  }> = {};
   if (typeof body.title === "string") data.title = body.title.trim();
   if (typeof body.body === "string") data.body = body.body;
   if (typeof body.imageUrl === "string" || body.imageUrl === null) data.imageUrl = toStoredPath(body.imageUrl);

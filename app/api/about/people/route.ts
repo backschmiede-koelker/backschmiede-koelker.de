@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { requireAdminOr401 } from "../_auth";
 
+type PersonKind = "OWNER" | "MANAGER" | "TEAM_MEMBER";
+
 export async function GET(req: Request) {
   const denied = await requireAdminOr401();
   if (denied) return denied;
@@ -11,8 +13,9 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const kind = (searchParams.get("kind") || "").trim();
 
+  const kindFilter = kind ? (kind as PersonKind) : undefined;
   const items = await prisma.aboutPerson.findMany({
-    ...(kind ? { where: { kind: kind as any } } : {}),
+    ...(kindFilter ? { where: { kind: kindFilter } } : {}),
     orderBy: { sortOrder: "asc" },
   });
 
@@ -40,9 +43,10 @@ export async function POST(req: Request) {
 
   if (!b?.name?.trim()) return NextResponse.json({ error: "name required" }, { status: 400 });
 
+  const kindValue = (b.kind as PersonKind) || "TEAM_MEMBER";
   const created = await prisma.aboutPerson.create({
     data: {
-      kind: (b.kind as any) || "TEAM_MEMBER",
+      kind: kindValue,
       name: b.name.trim(),
       roleLabel: b.roleLabel ?? null,
       shortBio: b.shortBio ?? null,
@@ -53,7 +57,7 @@ export async function POST(req: Request) {
       instagramHandle: b.instagramHandle ?? null,
       isShownOnAbout: b.isShownOnAbout ?? true,
       isShownInHero: b.isShownInHero ?? false,
-      sortOrder: Number.isFinite(b.sortOrder) ? (b.sortOrder as number) : 0,
+      sortOrder: Number.isFinite(b.sortOrder) ? b.sortOrder : 0,
     },
   });
 

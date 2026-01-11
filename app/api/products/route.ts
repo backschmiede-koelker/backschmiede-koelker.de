@@ -79,8 +79,8 @@ export async function POST(req: Request) {
       },
     });
     return NextResponse.json(created, { status: 201 });
-  } catch (e: any) {
-    if (e?.code === "P2002") {
+  } catch (e: unknown) {
+    if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2002") {
       const alt = `${slug}-${Math.random().toString(36).slice(2, 5)}`;
       const created = await prisma.product.create({
         data: { ...b, name: b.name.trim(), slug: alt, imageUrl: toStoredPath(b.imageUrl) },

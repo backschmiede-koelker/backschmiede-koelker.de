@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { toStoredPath } from "@/app/lib/uploads";
+import type { AboutSectionDTO, AboutPersonDTO } from "./types";
 
 type SessionLike = { user?: { role?: string | null } | null } | null | undefined;
 
@@ -16,7 +17,7 @@ async function adminGuard() {
   mustBeAdmin(session);
 }
 
-type SectionType =
+export type SectionType =
   | "HERO"
   | "VALUES"
   | "STATS"
@@ -57,13 +58,13 @@ function autoSlug(type: SectionType, title?: string | null) {
 
 async function assertSingletonCreatable(type: SectionType) {
   if (!SINGLETON_TYPES.includes(type)) return;
-  const existing = await prisma.aboutSection.findFirst({ where: { type: type as any } });
+  const existing = await prisma.aboutSection.findFirst({ where: { type } });
   if (existing) {
     throw new Error(`${type} ist nur 1× erlaubt.`);
   }
 }
 
-export async function getSectionById(id: string) {
+export async function getSectionById(id: string): Promise<AboutSectionDTO> {
   await adminGuard();
   const sec = await prisma.aboutSection.findUnique({
     where: { id },
@@ -76,7 +77,7 @@ export async function getSectionById(id: string) {
     },
   });
   if (!sec) throw new Error("Section nicht gefunden");
-  return sec as any;
+  return sec as AboutSectionDTO;
 }
 
 export async function updateHero(input: {
@@ -86,7 +87,7 @@ export async function updateHero(input: {
   body: string | null;
   imageUrl: string | null;
   sortOrder: number;
-}) {
+}): Promise<AboutSectionDTO> {
   await adminGuard();
 
   const updated = await prisma.aboutSection.update({
@@ -102,7 +103,7 @@ export async function updateHero(input: {
     include: { stats: true, values: true, timeline: true, faqs: true, gallery: true },
   });
 
-  return updated as any;
+  return updated as AboutSectionDTO;
 }
 
 export async function createSection(input: {
@@ -113,7 +114,7 @@ export async function createSection(input: {
   imageUrl?: string | null;
   isActive?: boolean;
   sortOrder?: number;
-}) {
+}): Promise<AboutSectionDTO> {
   await adminGuard();
 
   const type = String(input.type).toUpperCase().trim() as SectionType;
@@ -121,14 +122,14 @@ export async function createSection(input: {
 
   const created = await prisma.aboutSection.create({
     data: {
-      type: type as any,
+      type,
       slug: autoSlug(type, input.title ?? null),
       title: input.title?.trim() || null,
       subtitle: input.subtitle?.trim() || null,
       body: input.body?.trim() || null,
       imageUrl: toStoredPath(input.imageUrl) ?? null,
       isActive: input.isActive ?? true,
-      sortOrder: Number.isFinite(input.sortOrder as any) ? (input.sortOrder as any) : 0,
+      sortOrder: Number.isFinite(input.sortOrder) ? input.sortOrder : 0,
     },
     include: {
       stats: { orderBy: { sortOrder: "asc" } },
@@ -139,7 +140,7 @@ export async function createSection(input: {
     },
   });
 
-  return created as any;
+  return created as AboutSectionDTO;
 }
 
 export async function updateSection(input: {
@@ -150,7 +151,7 @@ export async function updateSection(input: {
   imageUrl: string | null;
   isActive: boolean;
   sortOrder: number;
-}) {
+}): Promise<AboutSectionDTO> {
   await adminGuard();
 
   const existing = await prisma.aboutSection.findUnique({
@@ -160,14 +161,14 @@ export async function updateSection(input: {
   if (!existing) throw new Error("Section nicht gefunden");
 
   // HERO soll nur über updateHero laufen
-  if (existing.type === ("HERO" as any)) {
+  if (existing.type === "HERO") {
     throw new Error("Hero kann nur über den Hero-Editor gespeichert werden.");
   }
 
   const TEAM_FIXED_SORT_ORDER = 9999;
 
   const nextSortOrder =
-    existing.type === ("TEAM" as any)
+    existing.type === "TEAM"
       ? TEAM_FIXED_SORT_ORDER
       : Number.isFinite(input.sortOrder)
       ? input.sortOrder
@@ -192,7 +193,7 @@ export async function updateSection(input: {
     },
   });
 
-  return updated as any;
+  return updated as AboutSectionDTO;
 }
 
 export async function deleteSection(id: string) {
@@ -204,7 +205,7 @@ export async function deleteSection(id: string) {
   });
   if (!sec) return { ok: true };
 
-  if (SINGLETON_TYPES.includes(sec.type as any)) {
+  if (SINGLETON_TYPES.includes(sec.type as SectionType)) {
     throw new Error(`${sec.type} ist ein „Einmal-Bereich“ und kann nicht gelöscht werden.`);
   }
 
@@ -278,6 +279,8 @@ export async function updateGallery(input: { id: string; imageUrl: string; alt: 
 export async function deleteGallery(id: string) { await adminGuard(); await prisma.aboutGalleryItem.delete({ where: { id } }); return { ok: true }; }
 
 /* ---------------- PEOPLE: isShownInHero fliegt raus ---------------- */
+type PersonKind = AboutPersonDTO["kind"];
+
 export async function createPerson(input: {
   kind: string;
   name: string;
@@ -290,12 +293,14 @@ export async function createPerson(input: {
   instagramHandle: string | null;
   isShownOnAbout: boolean;
   sortOrder: number;
-}) {
+}): Promise<AboutPersonDTO> {
   await adminGuard();
+
+  const kind = (input.kind as PersonKind) || "TEAM_MEMBER";
 
   const created = await prisma.aboutPerson.create({
     data: {
-      kind: (input.kind as any) || ("TEAM_MEMBER" as any),
+      kind,
       name: input.name.trim(),
       roleLabel: input.roleLabel?.trim() || null,
       shortBio: input.shortBio?.trim() || null,
@@ -310,7 +315,7 @@ export async function createPerson(input: {
     },
   });
 
-  return created as any;
+  return created as AboutPersonDTO;
 }
 
 export async function updatePerson(input: {
@@ -326,13 +331,15 @@ export async function updatePerson(input: {
   instagramHandle: string | null;
   isShownOnAbout: boolean;
   sortOrder: number;
-}) {
+}): Promise<AboutPersonDTO> {
   await adminGuard();
+
+  const kind = (input.kind as PersonKind) || "TEAM_MEMBER";
 
   const updated = await prisma.aboutPerson.update({
     where: { id: input.id },
     data: {
-      kind: (input.kind as any) || ("TEAM_MEMBER" as any),
+      kind,
       name: input.name.trim(),
       roleLabel: input.roleLabel?.trim() || null,
       shortBio: input.shortBio?.trim() || null,
@@ -347,7 +354,7 @@ export async function updatePerson(input: {
     },
   });
 
-  return updated as any;
+  return updated as AboutPersonDTO;
 }
 
 export async function deletePerson(id: string) {
@@ -368,7 +375,7 @@ export async function reorderMiddleSections(input: { idsInOrder: string[] }) {
     select: { id: true, type: true },
   });
 
-  const forbidden = rows.filter((r) => r.type === ("HERO" as any) || r.type === ("TEAM" as any));
+  const forbidden = rows.filter((r) => r.type === "HERO" || r.type === "TEAM");
   if (forbidden.length) {
     throw new Error("HERO/TEAM dürfen nicht umsortiert werden.");
   }
@@ -402,5 +409,5 @@ export async function reorderMiddleSections(input: { idsInOrder: string[] }) {
     },
   });
 
-  return { ok: true, sections: updated as any };
+  return { ok: true, sections: updated as AboutSectionDTO[] };
 }

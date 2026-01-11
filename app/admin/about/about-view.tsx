@@ -19,6 +19,12 @@ function sectionAnchorId(id: string) {
   return `admin-about-section-${id}`;
 }
 
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "string") return err;
+  return "Fehler beim Sortieren";
+}
+
 export default function AboutView({
   initialSections,
   initialPeople,
@@ -52,9 +58,9 @@ export default function AboutView({
     setSavingOrder(true);
     try {
       const res = await reorderMiddleSections({ idsInOrder });
-      if (res?.sections) setSections(res.sections as any);
-    } catch (e: any) {
-      setOrderErr(e?.message || "Fehler beim Sortieren");
+      if (res.sections) setSections(res.sections);
+    } catch (e: unknown) {
+      setOrderErr(getErrorMessage(e));
     } finally {
       setSavingOrder(false);
     }
@@ -65,10 +71,10 @@ export default function AboutView({
     await persistMiddleOrder(idsInOrder);
   }
 
-  const sortable = useSortableList({
+  const sortable = useSortableList<AboutSectionDTO>({
     items: middleSectionsSorted,
     onReorderPersist: async (next) => {
-      const idToIndex = new Map(next.map((n: any) => [n.id, n.sortOrder]));
+      const idToIndex = new Map(next.map((n) => [n.id, n.sortOrder ?? 0]));
       const nextLocal = middleSectionsSorted
         .slice()
         .sort((a, b) => (idToIndex.get(a.id) ?? 0) - (idToIndex.get(b.id) ?? 0));
@@ -91,7 +97,7 @@ export default function AboutView({
   async function moveByArrow(id: string, dir: -1 | 1) {
     if (savingOrder) return;
 
-    const items = sortable.items as AboutSectionDTO[];
+    const items = sortable.items;
     const idx = items.findIndex((x) => x.id === id);
     if (idx < 0) return;
 
@@ -149,7 +155,7 @@ export default function AboutView({
       <SectionBox title="Bereiche">
         <div className="space-y-5 min-w-0">
           <SectionAddPicker
-            sections={sections as any}
+            sections={sections as AboutSectionDTO[]}
             onCreated={(created) => setSections((prev) => [...prev, created])}
             onScrollToSection={scrollToSection}
           />

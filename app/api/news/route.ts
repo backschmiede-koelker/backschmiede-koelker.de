@@ -63,27 +63,33 @@ export async function POST(req: Request) {
   const title = (b.title || "").trim();
   if (!title || !b.body) return NextResponse.json({ error: "title & body required" }, { status: 400 });
 
+  const publishedAt = b.publishedAt ? new Date(b.publishedAt) : new Date();
+  const baseData: Prisma.NewsCreateInput = {
+    title,
+    body: b.body,
+    imageUrl: toStoredPath(b.imageUrl),
+    tag: (b.tag || null)?.trim() || null,
+    ctaLabel: (b.ctaLabel || null)?.trim() || null,
+    ctaHref: (b.ctaHref || null)?.trim() || null,
+    publishedAt,
+    isActive: b.isActive ?? true,
+    slug: "",
+  };
+
   const slugBase = slugify(title);
   try {
     const created = await prisma.news.create({
       data: {
-        title,
-        body: b.body,
-        imageUrl: toStoredPath(b.imageUrl),
-        tag: (b.tag || null)?.trim() || null,
-        ctaLabel: (b.ctaLabel || null)?.trim() || null,
-        ctaHref: (b.ctaHref || null)?.trim() || null,
-        publishedAt: b.publishedAt ? new Date(b.publishedAt) : new Date(),
-        isActive: b.isActive ?? true,
+        ...baseData,
         slug: slugBase,
       },
     });
     return NextResponse.json(created, { status: 201 });
-  } catch (e: any) {
-    if (e?.code === "P2002") {
+  } catch (e: unknown) {
+    if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2002") {
       const alt = `${slugBase}-${Math.random().toString(36).slice(2,5)}`;
       const created = await prisma.news.create({
-        data: { ...b, title, slug: alt, publishedAt: b.publishedAt ? new Date(b.publishedAt) : new Date(), imageUrl: toStoredPath(b.imageUrl) } as any
+        data: { ...baseData, slug: alt }
       });
       return NextResponse.json(created, { status: 201 });
     }

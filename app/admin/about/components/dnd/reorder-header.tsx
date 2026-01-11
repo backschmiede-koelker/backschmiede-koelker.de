@@ -15,7 +15,7 @@ export default function ReorderHeader({
   disabled: boolean;
   isFirst: boolean;
   isLast: boolean;
-  bindDragHandle: any;
+  bindDragHandle: React.HTMLAttributes<HTMLDivElement>;
   onUp: () => void;
   onDown: () => void;
   leftMeta?: React.ReactNode;

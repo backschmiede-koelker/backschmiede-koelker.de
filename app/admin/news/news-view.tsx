@@ -6,6 +6,7 @@ import ImageUploader from "../../components/image-uploader";
 import SelectBox from "../../components/select-box";
 import { KNOWN_PAGES } from "../../lib/known-pages";
 import AdminPageHeader from "../components/admin-page-header";
+import type { News } from "../../types/news";
 
 const PREDEFINED_TAGS = ["Kein Tag ausgewählt", "Aktion", "Event", "Info"];
 const LABEL = "block text-sm font-medium leading-5 h-5 mb-1";
@@ -288,8 +289,14 @@ export default function AdminNewsView() {
   );
 }
 
-function NewsCard({ item, onSaved, onDelete }: {
-  item: any; onSaved?: () => void; onDelete?: () => void;
+function NewsCard({
+  item,
+  onSaved,
+  onDelete,
+}: {
+  item: News;
+  onSaved?: () => void;
+  onDelete?: () => void;
 }) {
   const [title, setTitle] = useState(item.title);
   const [body, setBody] = useState(item.body);
