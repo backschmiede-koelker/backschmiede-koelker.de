@@ -56,7 +56,7 @@ jobs:
 
   deploy:
     needs: build-and-push
-    runs-on: [self-hosted, github-deploy-01-web-01]
+    runs-on: [self-hosted, github-deploy-01-web-02]
     steps:
       - name: Login to GHCR (private images)
         env:
