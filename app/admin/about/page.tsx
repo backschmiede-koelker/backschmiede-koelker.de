@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import AboutView from "./about-view";
 import { Metadata } from "next";
+import type { AboutPersonDTO, AboutSectionDTO } from "./types";
 
 export const metadata: Metadata = {
   title: "Admin - Über uns | Backschmiede Kölker",
@@ -28,12 +29,12 @@ function mustBeAdmin(session: SessionLike) {
  * Idempotent: erstellt nur, wenn keiner existiert.
  */
 async function ensureHero() {
-  const existing = await prisma.aboutSection.findFirst({ where: { type: "HERO" as any } });
+  const existing = await prisma.aboutSection.findFirst({ where: { type: "HERO" } });
   if (existing) return;
 
   await prisma.aboutSection.create({
     data: {
-      type: "HERO" as any,
+      type: "HERO",
       slug: "hero",
       title: "Über uns",
       subtitle: null,
@@ -45,7 +46,10 @@ async function ensureHero() {
   });
 }
 
-async function getData() {
+async function getData(): Promise<{
+  sections: AboutSectionDTO[];
+  people: AboutPersonDTO[];
+}> {
   const [sections, people] = await Promise.all([
     prisma.aboutSection.findMany({
       orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
@@ -66,7 +70,10 @@ async function getData() {
     }),
   ]);
 
-  return { sections, people };
+  return {
+    sections: sections as AboutSectionDTO[],
+    people: people as AboutPersonDTO[],
+  };
 }
 
 export default async function AdminAboutPage() {
@@ -76,5 +83,5 @@ export default async function AdminAboutPage() {
   await ensureHero();
   const { sections, people } = await getData();
 
-  return <AboutView initialSections={sections as any} initialPeople={people as any} />;
+  return <AboutView initialSections={sections} initialPeople={people} />;
 }

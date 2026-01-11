@@ -8,5 +8,5 @@ export function setInitialTheme() {
     } else {
       document.documentElement.classList.remove('dark');
     }
-  } catch (_) {}
+  } catch {}
 }

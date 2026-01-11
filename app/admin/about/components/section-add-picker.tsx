@@ -55,7 +55,7 @@ export default function SectionAddPicker({
     setSaving(true);
     try {
       const created = await createSection({
-        type: type as any,
+        type,
         title: null,
         subtitle: null,
         body: null,
@@ -65,8 +65,8 @@ export default function SectionAddPicker({
       });
       onCreated(created);
       onScrollToSection(created.id);
-    } catch (e: any) {
-      setErr(e?.message || "Fehler beim Erstellen");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Fehler beim Erstellen");
     } finally {
       setSaving(false);
     }
@@ -77,7 +77,7 @@ export default function SectionAddPicker({
     setSaving(true);
     try {
       const created = await createSection({
-        type: "CUSTOM_TEXT" as any,
+        type: "CUSTOM_TEXT",
         title: title || null,
         subtitle: subtitle || null,
         body: body || null,
@@ -94,8 +94,8 @@ export default function SectionAddPicker({
       setBody("");
       setImageUrl("");
       setOpenText(false);
-    } catch (e: any) {
-      setErr(e?.message || "Fehler beim Erstellen");
+    } catch (e: unknown) {
+      setErr(e instanceof Error ? e.message : "Fehler beim Erstellen");
     } finally {
       setSaving(false);
     }

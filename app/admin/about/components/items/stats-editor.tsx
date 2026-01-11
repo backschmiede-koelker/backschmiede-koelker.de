@@ -30,10 +30,12 @@ export default function StatsEditor({
   }
 
   const statsSorted = useMemo(() => {
-    const aNum = (n: unknown) => (Number.isFinite(Number(n)) ? Number(n) : 0);
+    const aNum = (n: unknown) =>
+      typeof n === "number" && Number.isFinite(n) ? n : 0;
+
     return [...section.stats].sort(
       (a, b) =>
-        aNum((a as any).sortOrder) - aNum((b as any).sortOrder) ||
+        aNum(a.sortOrder) - aNum(b.sortOrder) ||
         String(a.id).localeCompare(String(b.id))
     );
   }, [section.stats]);
@@ -66,7 +68,7 @@ export default function StatsEditor({
   const sortable = useSortableList({
     items: statsSorted,
     onReorderPersist: async (next) => {
-      const idToIndex = new Map(next.map((n: any) => [n.id, n.sortOrder]));
+      const idToIndex = new Map(next.map((n) => [n.id, n.sortOrder]));
       const nextLocal = statsSorted
         .slice()
         .sort((a, b) => (idToIndex.get(a.id) ?? 0) - (idToIndex.get(b.id) ?? 0));
@@ -77,7 +79,7 @@ export default function StatsEditor({
   useEffect(() => {
     sortable.setLocalOrder(statsSorted);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [section.id, statsSorted.map((s) => `${s.id}:${(s as any).sortOrder}`).join("|")]);
+  }, [section.id, statsSorted.map((s) => `${s.id}:${s.sortOrder ?? 0}`).join("|")]);
 
   async function moveByArrow(id: string, dir: -1 | 1) {
     if (busy) return;
@@ -230,7 +232,7 @@ export default function StatsEditor({
                           id: it.id,
                           label: n.label,
                           value: n.value,
-                          sortOrder: (it as any).sortOrder ?? index,
+                          sortOrder: it.sortOrder ?? index,
                         });
                         await refreshSection();
                       } finally {

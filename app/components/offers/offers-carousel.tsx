@@ -19,15 +19,12 @@ export default function OffersCarousel({
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Wie viele Karten passen gerade nebeneinander (1 / 2 / 3 …)
-  const [visible, setVisible] = useState(1);
   // Index der linken („führenden“) Karte im aktuellen Fenster
   const [startIndex, setStartIndex] = useState(0);
   // Maximaler Startindex (damit wir nicht „über das Ende hinaus“ scrollen)
   const [maxStart, setMaxStart] = useState(0);
   // Einheitliche Kartenhöhe (gemessen an der höchsten Karte)
   const [cardHeight, setCardHeight] = useState<number | null>(null);
-
-  if (!items.length) return null;
 
   const getSlides = () => {
     const el = containerRef.current;
@@ -51,7 +48,6 @@ export default function OffersCarousel({
     const vis = Math.max(1, Math.floor(containerWidth / slideWidth));
     const newMaxStart = Math.max(0, items.length - vis);
 
-    setVisible(vis);
     setMaxStart(newMaxStart);
     setStartIndex((prev) => Math.min(prev, newMaxStart));
   };
@@ -132,9 +128,12 @@ export default function OffersCarousel({
       setStartIndex(clamped);
     };
 
-    el.addEventListener("scroll", handleScroll, { passive: true } as any);
-    return () => el.removeEventListener("scroll", handleScroll as any);
+    const scrollOptions: AddEventListenerOptions = { passive: true };
+    el.addEventListener("scroll", handleScroll, scrollOptions);
+    return () => el.removeEventListener("scroll", handleScroll, scrollOptions);
   }, [maxStart]);
+
+  if (!items.length) return null;
 
   return (
     <div className="relative" aria-label={ariaLabel}>

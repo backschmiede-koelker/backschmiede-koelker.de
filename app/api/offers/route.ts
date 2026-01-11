@@ -34,7 +34,6 @@ function slugify(s: string) {
 async function uniqueOfferSlug(base: string) {
   const root = slugify(base) || "angebot";
   let slug = root; let i = 1;
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const exists = await prisma.offer.findUnique({ where: { slug } });
     if (!exists) return slug;
@@ -43,7 +42,28 @@ async function uniqueOfferSlug(base: string) {
 }
 
 // ====== Mapping → DTO (absolute URLs) ======
-function toDTO(item: any) {
+const offerInclude = {
+  generic: true,
+  productNew: {
+    include: {
+      product: { select: { id: true, name: true, priceCents: true, unit: true } },
+    },
+  },
+  productDiscount: {
+    include: {
+      product: { select: { id: true, name: true, priceCents: true, unit: true } },
+    },
+  },
+  multibuyPrice: {
+    include: {
+      product: { select: { id: true, name: true, priceCents: true, unit: true } },
+    },
+  },
+} as const;
+
+type OfferWithDetails = Prisma.OfferGetPayload<{ include: typeof offerInclude }>;
+
+function toDTO(item: OfferWithDetails) {
   const common = {
     id: item.id,
     type: item.type,
@@ -208,25 +228,6 @@ export async function GET(req: Request) {
     const allWhere: Prisma.OfferWhereInput =
       listType === "all" ? { ...locationWhere } : {};
 
-    const includeDetails = {
-      generic: true,
-      productNew: {
-        include: {
-          product: { select: { id: true, name: true, priceCents: true, unit: true } },
-        },
-      },
-      productDiscount: {
-        include: {
-          product: { select: { id: true, name: true, priceCents: true, unit: true } },
-        },
-      },
-      multibuyPrice: {
-        include: {
-          product: { select: { id: true, name: true, priceCents: true, unit: true } },
-        },
-      },
-    };
-
     if (listType === "today") {
       const rows = await prisma.offer.findMany({
         where: todayWhere,
@@ -234,7 +235,7 @@ export async function GET(req: Request) {
           { priority: "desc" },
           { createdAt: "desc" },
         ],
-        include: includeDetails,
+        include: offerInclude,
       });
       return NextResponse.json({
         type: "today",
@@ -250,7 +251,7 @@ export async function GET(req: Request) {
           { priority: "desc" },
           { createdAt: "desc" },
         ],
-        include: includeDetails,
+        include: offerInclude,
       });
       return NextResponse.json({
         type: "upcoming",
@@ -265,7 +266,7 @@ export async function GET(req: Request) {
           { priority: "desc" },
           { createdAt: "desc" },
         ],
-        include: includeDetails,
+        include: offerInclude,
       });
       return NextResponse.json({
         type: "weekly",
@@ -279,7 +280,7 @@ export async function GET(req: Request) {
     const rows = await prisma.offer.findMany({
       where: allWhere,
       orderBy: [{ createdAt: "desc" }],
-      include: includeDetails,
+      include: offerInclude,
     });
     return NextResponse.json({ type: "all", items: rows.map(toDTO) });
   } catch (e) {
@@ -311,7 +312,7 @@ export async function POST(req: Request) {
         originalPriceCents?: number | null;
         unit?: string | null;
       };
-      payload: any;
+      payload: unknown;
     };
 
     if (!b?.type || !Object.values(OfferType).includes(b.type)) {
@@ -481,37 +482,18 @@ export async function POST(req: Request) {
 
     const full = await prisma.offer.findUnique({
       where: { id: created.id },
-      include: {
-        generic: true,
-        productNew: {
-          include: {
-            product: {
-              select: { id: true, name: true, priceCents: true, unit: true },
-            },
-          },
-        },
-        productDiscount: {
-          include: {
-            product: {
-              select: { id: true, name: true, priceCents: true, unit: true },
-            },
-          },
-        },
-        multibuyPrice: {
-          include: {
-            product: {
-              select: { id: true, name: true, priceCents: true, unit: true },
-            },
-          },
-        },
-      },
+      include: offerInclude,
     });
 
+    if (!full) {
+      return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+    }
+
     return NextResponse.json(toDTO(full), { status: 201 });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error(e);
     return NextResponse.json(
-      { error: e?.message || "Internal Error" },
+      { error: e instanceof Error ? e.message : "Internal Error" },
       { status: 500 },
     );
   }

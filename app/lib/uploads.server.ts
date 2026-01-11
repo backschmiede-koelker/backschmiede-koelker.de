@@ -53,5 +53,9 @@ export function assetUrlCandidates(input?: string | null): string[] {
 export async function safeUnlink(absPath: string | null) {
   if (!absPath) return false;
   try { await unlink(absPath); return true; }
-  catch (e: any) { if (e?.code === "ENOENT") return false; throw e; }
+  catch (e: unknown) {
+    const err = e as NodeJS.ErrnoException;
+    if (err?.code === "ENOENT") return false;
+    throw e;
+  }
 }

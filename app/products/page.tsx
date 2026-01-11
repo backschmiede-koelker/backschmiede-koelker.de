@@ -1,6 +1,7 @@
 // /app/products/page.tsx
 import type { Metadata } from "next";
 import ProductGrid from "../components/product-grid"
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Produkte | Backschmiede Kölker",
@@ -20,7 +21,9 @@ export default function Page() {
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold tracking-tight">Produkte</h1>
-      <ProductGrid />
+      <Suspense fallback={null}>
+        <ProductGrid />
+      </Suspense>
     </div>
   )
 }

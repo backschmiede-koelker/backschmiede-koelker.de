@@ -5,10 +5,11 @@ import { getJobBySlug } from "@/app/lib/jobs/db";
 import { JobDetail } from "@/app/components/jobs/job-detail";
 import { buildJobPostingJsonLd } from "@/app/components/jobs/job-schema";
 
-type Props = { params: { slug: string } };
+type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const job = await getJobBySlug(params.slug);
+  const { slug } = await params;
+  const job = await getJobBySlug(slug);
   if (!job) {
     return { title: "Stellenangebot", description: "Jobdetails" };
   }
@@ -26,7 +27,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function JobDetailPage({ params }: Props) {
-  const job = await getJobBySlug(params.slug);
+  const { slug } = await params;
+  const job = await getJobBySlug(slug);
   if (!job) return notFound();
 
   return (

@@ -1,10 +1,10 @@
 // /app/layout.tsx
-import "./globals.css";
 import { Providers } from "./providers/theme-provider";
 import LayoutWrapper from "./components/layout-wrapper";
 import Footer from "./components/footer";
 import { localBusinessJsonLd } from "./lib/seo";
 import AnalyticsBeacon from "./components/analytics-beacon";
+import { Suspense } from "react";
 
 const building = true;
 
@@ -52,7 +52,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </head>
         <body className="bg-zinc-950 text-zinc-100 overflow-x-hidden">
           <BuildingPage />
-          <AnalyticsBeacon />
+          <Suspense fallback={null}>
+            <AnalyticsBeacon />
+          </Suspense>
         </body>
       </html>
     );
@@ -72,7 +74,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="ml-0 md:ml-72">
             <Footer />
           </div>
-          <AnalyticsBeacon />
+          <Suspense fallback={null}>
+            <AnalyticsBeacon />
+          </Suspense>
         </Providers>
       </body>
     </html>

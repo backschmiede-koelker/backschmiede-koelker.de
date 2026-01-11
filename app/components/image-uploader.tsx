@@ -166,6 +166,7 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
       {(imageUrl || previewSrc) && (
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start">
           {/* 4) Vorschau */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={previewSrc || ""}
             alt=""

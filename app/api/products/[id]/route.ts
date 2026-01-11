@@ -49,7 +49,15 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   });
   if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const data: any = {};
+  const data: Partial<{
+    name: string;
+    slug: string;
+    priceCents: number;
+    unit: string;
+    imageUrl: string | null;
+    tags: string[];
+    isActive: boolean;
+  }> = {};
   if (typeof body.name === "string") data.name = body.name.trim();
   if (typeof body.slug === "string") data.slug = body.slug.trim();
   if (!body.slug && typeof body.name === "string") data.slug = slugify(body.name);
@@ -68,8 +76,8 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     }
 
     return NextResponse.json(updated);
-  } catch (e: any) {
-    if (e?.code === "P2002") {
+  } catch (e: unknown) {
+    if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2002") {
       if (data.slug) {
         const alt = `${data.slug}-${Math.random().toString(36).slice(2,5)}`;
         const updated = await prisma.product.update({
@@ -96,8 +104,10 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
     if (prev.imageUrl) await deleteAssetIfUnused(prev.imageUrl);
 
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    if (e?.code === "P2025") return NextResponse.json({ error: "Not found" }, { status: 404 });
+  } catch (e: unknown) {
+    if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
     console.error(e);
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }

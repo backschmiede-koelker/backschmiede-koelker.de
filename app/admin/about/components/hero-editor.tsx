@@ -90,8 +90,8 @@ export default function HeroEditor({
                     sortOrder: draft.sortOrder,
                   });
                   onUpdated(next);
-                } catch (e: any) {
-                  setErr(e?.message || "Fehler beim Speichern");
+                } catch (e: unknown) {
+                  setErr(e instanceof Error ? e.message : "Fehler beim Speichern");
                 } finally {
                   setSaving(false);
                 }

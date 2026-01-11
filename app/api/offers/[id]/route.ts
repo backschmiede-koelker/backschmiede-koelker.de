@@ -1,7 +1,7 @@
 // app/api/offers/[id]/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { OfferKind, Weekday, Location } from "@/generated/prisma/client";
+import { Prisma, OfferKind, Weekday, Location } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import {
   pathFromStoredPath,
@@ -23,7 +23,28 @@ const endOfDay = (d: Date) => {
   return z;
 };
 
-function toDTO(item: any) {
+const offerInclude = {
+  generic: true,
+  productNew: {
+    include: {
+      product: { select: { id: true, name: true, priceCents: true, unit: true } },
+    },
+  },
+  productDiscount: {
+    include: {
+      product: { select: { id: true, name: true, priceCents: true, unit: true } },
+    },
+  },
+  multibuyPrice: {
+    include: {
+      product: { select: { id: true, name: true, priceCents: true, unit: true } },
+    },
+  },
+} as const;
+
+type OfferWithDetails = Prisma.OfferGetPayload<{ include: typeof offerInclude }>;
+
+function toDTO(item: OfferWithDetails) {
   const common = {
     id: item.id,
     type: item.type,
@@ -112,30 +133,7 @@ export async function GET(
   const { id } = await ctx.params;
   const item = await prisma.offer.findUnique({
     where: { id },
-    include: {
-      generic: true,
-      productNew: {
-        include: {
-          product: {
-            select: { id: true, name: true, priceCents: true, unit: true },
-          },
-        },
-      },
-      productDiscount: {
-        include: {
-          product: {
-            select: { id: true, name: true, priceCents: true, unit: true },
-          },
-        },
-      },
-      multibuyPrice: {
-        include: {
-          product: {
-            select: { id: true, name: true, priceCents: true, unit: true },
-          },
-        },
-      },
-    },
+    include: offerInclude,
   });
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(toDTO(item));
@@ -167,7 +165,7 @@ export async function PUT(
         originalPriceCents: number | null;
         unit: string | null;
       }>;
-      payload?: any;
+      payload?: unknown;
     };
 
     const current = await prisma.offer.findUnique({
@@ -184,7 +182,24 @@ export async function PUT(
 
     const prevImageUrl = current.imageUrl ?? null;
 
-    const data: any = {};
+    const data: Partial<{
+      title: string;
+      subtitle: string | null;
+      imageUrl: string | null;
+      tags: string[];
+      isActive: boolean;
+      kind: OfferKind;
+      weekday: Weekday | null;
+      date: Date | null;
+      startDate: Date | null;
+      endDate: Date | null;
+      locations: Location[];
+      priority: number;
+      minBasketCents: number | null;
+      priceCents: number | null;
+      originalPriceCents: number | null;
+      unit: string | null;
+    }> = {};
     if (typeof b.base?.title === "string") data.title = b.base.title.trim();
     if (b.base?.subtitle !== undefined) data.subtitle = b.base.subtitle;
     if (b.base?.imageUrl !== undefined)
@@ -240,63 +255,86 @@ export async function PUT(
     const updated = await prisma.offer.update({ where: { id }, data });
 
     if (current.type === "GENERIC" && b.payload) {
+      const p = b.payload as {
+        body?: string | null;
+        ctaLabel?: string | null;
+        ctaHref?: string | null;
+      };
       await prisma.offerGeneric.update({
         where: { offerId: id },
         data: {
-          body: b.payload.body ?? null,
-          ctaLabel: b.payload.ctaLabel ?? null,
-          ctaHref: b.payload.ctaHref ?? null,
+          body: p.body ?? null,
+          ctaLabel: p.ctaLabel ?? null,
+          ctaHref: p.ctaHref ?? null,
         },
       });
     }
     if (current.type === "PRODUCT_NEW" && b.payload) {
+      const p = b.payload as {
+        productId?: string;
+        highlightLabel?: string | null;
+      };
       await prisma.offerProductNew.update({
         where: { offerId: id },
         data: {
-          productId: b.payload.productId ?? undefined,
-          highlightLabel: b.payload.highlightLabel ?? undefined,
+          productId: p.productId ?? undefined,
+          highlightLabel: p.highlightLabel ?? undefined,
         },
       });
     }
     if (current.type === "PRODUCT_DISCOUNT" && b.payload) {
+      const p = b.payload as {
+        productId?: string;
+        priceCents?: number | null;
+        originalPriceCents?: number | null;
+        unit?: string | null;
+      };
       await prisma.offerProductDiscount.update({
         where: { offerId: id },
         data: {
-          productId: b.payload.productId ?? undefined,
+          productId: p.productId ?? undefined,
           priceCents:
-            b.payload.priceCents != null
-              ? Number(b.payload.priceCents)
+            p.priceCents != null
+              ? Number(p.priceCents)
               : undefined,
           originalPriceCents:
-            b.payload.originalPriceCents == null
+            p.originalPriceCents == null
               ? null
-              : Number(b.payload.originalPriceCents),
-          unit: b.payload.unit ?? null,
+              : Number(p.originalPriceCents),
+          unit: p.unit ?? null,
         },
       });
     }
     if (current.type === "MULTIBUY_PRICE" && b.payload) {
+      const p = b.payload as {
+        productId?: string;
+        packQty?: number | null;
+        packPriceCents?: number | null;
+        comparePackQty?: number | null;
+        comparePriceCents?: number | null;
+        unit?: string | null;
+      };
       await prisma.offerMultibuyPrice.update({
         where: { offerId: id },
         data: {
-          productId: b.payload.productId ?? undefined,
+          productId: p.productId ?? undefined,
           packQty:
-            b.payload.packQty != null
-              ? Math.max(1, Number(b.payload.packQty))
+            p.packQty != null
+              ? Math.max(1, Number(p.packQty))
               : undefined,
           packPriceCents:
-            b.payload.packPriceCents != null
-              ? Number(b.payload.packPriceCents)
+            p.packPriceCents != null
+              ? Number(p.packPriceCents)
               : undefined,
           comparePackQty:
-            b.payload.comparePackQty == null
+            p.comparePackQty == null
               ? null
-              : Math.max(1, Number(b.payload.comparePackQty)),
+              : Math.max(1, Number(p.comparePackQty)),
           comparePriceCents:
-            b.payload.comparePriceCents == null
+            p.comparePriceCents == null
               ? null
-              : Number(b.payload.comparePriceCents),
-          unit: b.payload.unit ?? null,
+              : Number(p.comparePriceCents),
+          unit: p.unit ?? null,
         },
       });
     }
@@ -311,33 +349,14 @@ export async function PUT(
 
     const full = await prisma.offer.findUnique({
       where: { id },
-      include: {
-        generic: true,
-        productNew: {
-          include: {
-            product: {
-              select: { id: true, name: true, priceCents: true, unit: true },
-            },
-          },
-        },
-        productDiscount: {
-          include: {
-            product: {
-              select: { id: true, name: true, priceCents: true, unit: true },
-            },
-          },
-        },
-        multibuyPrice: {
-          include: {
-            product: {
-              select: { id: true, name: true, priceCents: true, unit: true },
-            },
-          },
-        },
-      },
+      include: offerInclude,
     });
 
-    return NextResponse.json(toDTO(full!));
+    if (!full) {
+      return NextResponse.json({ error: "Internal Error" }, { status: 500 });
+    }
+
+    return NextResponse.json(toDTO(full));
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
@@ -362,8 +381,8 @@ export async function DELETE(
     if (prev.imageUrl) await deleteAssetIfUnused(prev.imageUrl);
 
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    if (e?.code === "P2025")
+  } catch (e: unknown) {
+    if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2025")
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     console.error(e);
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });

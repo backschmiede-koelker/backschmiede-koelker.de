@@ -11,7 +11,7 @@ export type AboutSection = Prisma.AboutSectionGetPayload<{
   };
 }>;
 
-export type AboutPerson = Prisma.AboutPersonGetPayload<{}>;
+export type AboutPerson = Prisma.AboutPersonGetPayload<object>;
 
 type Jsonify<T> =
   T extends Date ? string :

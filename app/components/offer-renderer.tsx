@@ -113,6 +113,7 @@ export default function OfferRenderer({
   item: OfferDTO;
   context?: Context;
 }) {
+  void context;
   const imgSrc = publicAssetUrl(item.imageUrl || null);
   const hasImage = !!imgSrc;
   const hasBasePrice =

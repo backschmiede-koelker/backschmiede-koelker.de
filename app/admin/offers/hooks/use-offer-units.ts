@@ -8,18 +8,21 @@ export function useOfferUnits() {
 
   useEffect(() => {
     let alive = true;
-    function parseProductsJson(json: any) {
-      if (Array.isArray(json)) return json;
-      if (json && Array.isArray(json.items)) return json.items;
+    type ProductLike = { unit?: string | null };
+    function parseProductsJson(json: unknown): ProductLike[] {
+      if (Array.isArray(json)) return json as ProductLike[];
+      if (json && typeof json === "object" && Array.isArray((json as { items?: unknown }).items)) {
+        return (json as { items: ProductLike[] }).items;
+      }
       return [];
     }
     (async () => {
       try {
         const res = await fetch("/api/products?limit=50", { cache: "no-store" });
-        const json = await res.json();
+        const json = (await res.json()) as unknown;
         const products = parseProductsJson(json);
         const units = new Set<string>(["pro Stück"]);
-        products.forEach((p: any) => {
+        products.forEach((p) => {
           const u = (p?.unit || "").trim();
           if (u) units.add(u);
         });

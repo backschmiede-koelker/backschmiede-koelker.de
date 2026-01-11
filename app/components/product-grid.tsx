@@ -205,11 +205,14 @@ export default function ProductGrid() {
               className="group overflow-hidden rounded-xl border bg-white ring-1 ring-zinc-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:ring-amber-200 dark:border-zinc-700 dark:bg-zinc-900 dark:ring-zinc-700 dark:transition dark:hover:bg-zinc-800/80 dark:hover:ring-amber-400/30"
             >
               {img && (
-                <img
-                  src={img}
-                  alt={p.name}
-                  className="h-44 w-full object-cover transition group-hover:scale-[1.02]"
-                />
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={img}
+                    alt={p.name}
+                    className="h-44 w-full object-cover transition group-hover:scale-[1.02]"
+                  />
+                </>
               )}
               <div className="p-4">
                 <h3 className="line-clamp-1 font-semibold tracking-tight">{p.name}</h3>

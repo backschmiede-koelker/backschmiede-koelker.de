@@ -4,6 +4,17 @@ import { prisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { requireAdminOr401 } from "../../_auth";
 
+type SectionType =
+  | "HERO"
+  | "VALUES"
+  | "STATS"
+  | "TIMELINE"
+  | "TEAM"
+  | "GALLERY"
+  | "FAQ"
+  | "CTA"
+  | "CUSTOM_TEXT";
+
 export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {
   const denied = await requireAdminOr401();
   if (denied) return denied;
@@ -41,8 +52,17 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     sortOrder: number;
   }>;
 
-  const data: any = {};
-  if (typeof b.type === "string") data.type = b.type as any;
+  const data: Partial<{
+    type: SectionType;
+    slug: string;
+    title: string | null;
+    subtitle: string | null;
+    body: string | null;
+    imageUrl: string | null;
+    isActive: boolean;
+    sortOrder: number;
+  }> = {};
+  if (typeof b.type === "string") data.type = b.type as SectionType;
   if (typeof b.slug === "string") data.slug = b.slug.trim();
   if (b.title === null || typeof b.title === "string") data.title = b.title;
   if (b.subtitle === null || typeof b.subtitle === "string") data.subtitle = b.subtitle;
@@ -64,8 +84,10 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
   try {
     await prisma.aboutSection.delete({ where: { id } });
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    if (e?.code === "P2025") return NextResponse.json({ error: "Not found" }, { status: 404 });
+  } catch (e: unknown) {
+    if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
 }

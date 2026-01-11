@@ -11,12 +11,13 @@ import {
   locationLabel,
 } from "@/app/components/jobs/formatters";
 import AdminPageHeader from "../components/admin-page-header";
+import type { JobCategory } from "@/app/lib/jobs/types";
 
 export default function JobsView() {
   const { items, loading, reload, remove } = useJobs();
 
   const [q, setQ] = useState("");
-  const [filterCat, setFilterCat] = useState<string>("ALLE");
+  const [filterCat, setFilterCat] = useState<JobCategory | "ALLE">("ALLE");
 
   const highestPriority = useMemo(() => {
     if (!items.length) return null;
@@ -28,7 +29,7 @@ export default function JobsView() {
   }, [items]);
 
   const categories = useMemo(() => {
-    const s = new Set<string>();
+    const s = new Set<JobCategory>();
     items.forEach((j) => s.add(j.category));
     return Array.from(s);
   }, [items]);
@@ -138,7 +139,7 @@ export default function JobsView() {
                         "dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-700/70",
                   ].join(" ")}
                 >
-                  <span className="min-w-0 truncate">{categoryLabel(c as any)}</span>
+                  <span className="min-w-0 truncate">{categoryLabel(c)}</span>
                 </button>
               ))}
             </div>

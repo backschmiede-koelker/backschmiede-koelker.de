@@ -58,11 +58,14 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
     {/* Statt flex: eine 2-Spalten-Grid nur auf Mobile (Bild | Header) */}
     <div className="grid grid-cols-[56px,1fr] gap-3 sm:grid-cols-[56px,1fr]">
         {p.imageUrl && (
-        <img
-            src={p.imageUrl}
-            alt=""
-            className="h-14 w-14 rounded object-cover ring-1 ring-black/10 dark:ring-white/10"
-        />
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={p.imageUrl}
+              alt=""
+              className="h-14 w-14 rounded object-cover ring-1 ring-black/10 dark:ring-white/10"
+            />
+          </>
         )}
 
         {/* Rechts neben dem Bild: Name, Slug, Tags */}

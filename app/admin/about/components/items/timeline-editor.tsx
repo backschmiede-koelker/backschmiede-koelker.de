@@ -31,10 +31,12 @@ export default function TimelineEditor({
   }
 
   const timelineSorted = useMemo(() => {
-    const aNum = (n: unknown) => (Number.isFinite(Number(n)) ? Number(n) : 0);
+    const aNum = (n: unknown) =>
+      typeof n === "number" && Number.isFinite(n) ? n : 0;
+
     return [...section.timeline].sort(
       (a, b) =>
-        aNum((a as any).sortOrder) - aNum((b as any).sortOrder) ||
+        aNum(a.sortOrder) - aNum(b.sortOrder) ||
         String(a.id).localeCompare(String(b.id))
     );
   }, [section.timeline]);
@@ -68,7 +70,7 @@ export default function TimelineEditor({
   const sortable = useSortableList({
     items: timelineSorted,
     onReorderPersist: async (next) => {
-      const idToIndex = new Map(next.map((n: any) => [n.id, n.sortOrder]));
+      const idToIndex = new Map(next.map((n) => [n.id, n.sortOrder]));
       const nextLocal = timelineSorted
         .slice()
         .sort((a, b) => (idToIndex.get(a.id) ?? 0) - (idToIndex.get(b.id) ?? 0));
@@ -79,7 +81,7 @@ export default function TimelineEditor({
   useEffect(() => {
     sortable.setLocalOrder(timelineSorted);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [section.id, timelineSorted.map((t) => `${t.id}:${(t as any).sortOrder}`).join("|")]);
+  }, [section.id, timelineSorted.map((t) => `${t.id}:${t.sortOrder ?? 0}`).join("|")]);
 
   async function moveByArrow(id: string, dir: -1 | 1) {
     if (busy) return;
@@ -247,7 +249,7 @@ export default function TimelineEditor({
                           year: n.year,
                           title: n.title,
                           description: n.description || null,
-                          sortOrder: (it as any).sortOrder ?? index,
+                          sortOrder: it.sortOrder ?? index,
                         });
                         await refreshSection();
                       } finally {

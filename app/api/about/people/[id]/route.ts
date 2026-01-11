@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { requireAdminOr401 } from "../../_auth";
 
+type PersonKind = "OWNER" | "MANAGER" | "TEAM_MEMBER";
+
 export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {
   const denied = await requireAdminOr401();
   if (denied) return denied;
@@ -34,8 +36,21 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     sortOrder: number;
   }>;
 
-  const data: any = {};
-  if (typeof b.kind === "string") data.kind = b.kind as any;
+  const data: Partial<{
+    kind: PersonKind;
+    name: string;
+    roleLabel: string | null;
+    shortBio: string | null;
+    longBio: string | null;
+    avatarUrl: string | null;
+    phone: string | null;
+    email: string | null;
+    instagramHandle: string | null;
+    isShownOnAbout: boolean;
+    isShownInHero: boolean;
+    sortOrder: number;
+  }> = {};
+  if (typeof b.kind === "string") data.kind = b.kind as PersonKind;
   if (typeof b.name === "string") data.name = b.name.trim();
   if (b.roleLabel === null || typeof b.roleLabel === "string") data.roleLabel = b.roleLabel;
   if (b.shortBio === null || typeof b.shortBio === "string") data.shortBio = b.shortBio;
@@ -61,8 +76,10 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
   try {
     await prisma.aboutPerson.delete({ where: { id } });
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    if (e?.code === "P2025") return NextResponse.json({ error: "Not found" }, { status: 404 });
+  } catch (e: unknown) {
+    if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
 }

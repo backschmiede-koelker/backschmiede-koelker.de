@@ -17,6 +17,35 @@ import { WEEKDAY_OPTIONS } from "@/app/components/ui/weekdays";
 
 type OfferDTO = import("./offer-renderer").OfferDTO;
 type ProductLite = { id: string; name: string; priceCents: number; unit: string };
+type OfferBasePayload = {
+  title: string;
+  subtitle: string | null;
+  imageUrl: string | null;
+  isActive: boolean;
+  kind: OfferKind;
+  locations: Location[];
+  priority: number;
+  minBasketCents: number | null;
+  weekday?: Weekday;
+  date?: string;
+  startDate?: string;
+  endDate?: string;
+};
+
+type EmptyPayload = Record<string, never>;
+type OfferPayload =
+  | EmptyPayload
+  | { body: string; ctaLabel: string | null; ctaHref: string | null }
+  | { productId: string; highlightLabel: string }
+  | { productId: string; priceCents: number; originalPriceCents: number | null; unit: string | null }
+  | {
+      productId: string;
+      packQty: number;
+      packPriceCents: number;
+      comparePackQty: number | null;
+      comparePriceCents: number | null;
+      unit: string | null;
+    };
 
 function toYMD(d: Date) {
   const y = d.getFullYear();
@@ -46,18 +75,21 @@ export default function OfferCard({
   const [allUnits, setAllUnits] = useState<string[]>(["pro Stück"]);
   useEffect(() => {
     let alive = true;
-    function parseProductsJson(json: any) {
-      if (Array.isArray(json)) return json;
-      if (json && Array.isArray(json.items)) return json.items;
+    type ProductLike = { unit?: string | null };
+    function parseProductsJson(json: unknown): ProductLike[] {
+      if (Array.isArray(json)) return json as ProductLike[];
+      if (json && typeof json === "object" && Array.isArray((json as { items?: unknown }).items)) {
+        return (json as { items: ProductLike[] }).items;
+      }
       return [];
     }
     (async () => {
       try {
         const res = await fetch("/api/products?limit=50", { cache: "no-store" });
-        const json = await res.json();
+        const json = (await res.json()) as unknown;
         const items = parseProductsJson(json);
         const units = new Set<string>(["pro Stück"]);
-        items.forEach((p: any) => {
+        items.forEach((p) => {
           const u = (p?.unit || "").trim();
           if (u) units.add(u);
         });
@@ -81,9 +113,9 @@ export default function OfferCard({
 
   // item.kind / item.weekday / item.locations kommen aus OfferDTO (Prisma-Enums),
   // wir mappen sie einmal auf unsere eigenen Enums.
-  const [kind, setKind] = useState<OfferKind>(item.kind as any);
+  const [kind, setKind] = useState<OfferKind>(item.kind as OfferKind);
   const [weekday, setWeekday] = useState<Weekday>(
-    (item.weekday as any) ?? Weekday.MONDAY,
+    item.weekday ? (item.weekday as Weekday) : Weekday.MONDAY,
   );
 
   // Datumsfelder (leer, wenn DB leer → wir setzen Defaults per useEffect unten)
@@ -96,7 +128,7 @@ export default function OfferCard({
   );
 
   const [locations, setLocations] = useState<Location[]>(
-    (item.locations as any) ?? [],
+    (item.locations as Location[]) ?? [],
   );
   const [priority, setPriority] = useState<number>(
     Number.isFinite(Number(item.priority)) ? Number(item.priority) : 0,
@@ -139,7 +171,7 @@ export default function OfferCard({
 
   // PRODUCT_NEW
   const [pNewProduct, setPNewProduct] = useState<ProductLite | null>(
-    (item.productNew?.product as any) ?? null,
+    item.productNew?.product ?? null,
   );
   const [pNewLabel, setPNewLabel] = useState<string>(
     item.productNew?.highlightLabel ?? "NEU",
@@ -147,7 +179,7 @@ export default function OfferCard({
 
   // PRODUCT_DISCOUNT
   const [pDiscProduct, setPDiscProduct] = useState<ProductLite | null>(
-    (item.productDiscount?.product as any) ?? null,
+    item.productDiscount?.product ?? null,
   );
   const [pDiscPrice, setPDiscPrice] = useState<string>(
     item.productDiscount ? centsToEuroString(item.productDiscount.priceCents) : "",
@@ -172,7 +204,7 @@ export default function OfferCard({
 
   // MULTIBUY_PRICE
   const [pMultiProduct, setPMultiProduct] = useState<ProductLite | null>(
-    (item.multibuyPrice?.product as any) ?? null,
+    item.multibuyPrice?.product ?? null,
   );
   const [pMultiQty, setPMultiQty] = useState<string>(
     item.multibuyPrice ? String(item.multibuyPrice.packQty) : "",
@@ -231,7 +263,7 @@ export default function OfferCard({
     }
     setSaving(true);
     try {
-      const base: any = {
+      const base: OfferBasePayload = {
         title: title.trim(),
         subtitle: description.trim() || null,
         imageUrl: imageUrl || null,
@@ -248,7 +280,7 @@ export default function OfferCard({
         base.endDate = endDate;
       }
 
-      let payload: any = undefined;
+      let payload: OfferPayload = {};
       if (item.type === "GENERIC")
         payload = { body: description || "", ctaLabel: null, ctaHref: null };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { ApiNews } from "./types";
 import { NewsCard } from "./news-card";
@@ -49,24 +49,24 @@ export default function NewsCarousel({
     return Math.max(1, items.length) + 1; // empty-state zählt als 1
   }, [items, error]);
 
-  const getSlides = () => {
+  const getSlides = useCallback(() => {
     const el = containerRef.current;
     if (!el) return [] as HTMLDivElement[];
     return Array.from(
       el.querySelectorAll<HTMLDivElement>("[data-news-slide='1']")
     );
-  };
+  }, []);
 
-  const uniqSorted = (arr: number[]) => {
+  const uniqSorted = useCallback((arr: number[]) => {
     const out: number[] = [];
     const sorted = [...arr].sort((a, b) => a - b);
     for (const v of sorted) {
       if (!out.length || Math.abs(out[out.length - 1] - v) > 1) out.push(v);
     }
     return out;
-  };
+  }, []);
 
-  const recalcLayout = () => {
+  const recalcLayout = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
 
@@ -103,7 +103,7 @@ export default function NewsCarousel({
       startIndexRef.current = newMaxStart;
       setStartIndex(newMaxStart);
     }
-  };
+  }, [getSlides, uniqSorted]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -115,8 +115,7 @@ export default function NewsCarousel({
     window.addEventListener("resize", onResize);
 
     return () => window.removeEventListener("resize", onResize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slideCount]);
+  }, [slideCount, recalcLayout]);
 
   // Scroll Handler: rAF-throttled + Binary Search auf positionsRef
   useEffect(() => {
@@ -160,9 +159,10 @@ export default function NewsCarousel({
       });
     };
 
-    el.addEventListener("scroll", onScroll, { passive: true } as any);
+    const scrollOptions: AddEventListenerOptions = { passive: true };
+    el.addEventListener("scroll", onScroll, scrollOptions);
     return () => {
-      el.removeEventListener("scroll", onScroll as any);
+      el.removeEventListener("scroll", onScroll, scrollOptions);
       if (rafScrollRef.current) cancelAnimationFrame(rafScrollRef.current);
       rafScrollRef.current = null;
     };
@@ -226,7 +226,7 @@ export default function NewsCarousel({
     }
 
     prevLenRef.current = len;
-  }, [items?.length]);
+  }, [items?.length, recalcLayout]);
 
   const slideClass =
     "snap-start shrink-0 grow-0 flex h-full min-w-0 p-1 " +

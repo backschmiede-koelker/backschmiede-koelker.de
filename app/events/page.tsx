@@ -1,5 +1,6 @@
 // app/events/page.tsx
 import type { Metadata } from "next";
+import Link from "next/link";
 import EventsTimeline from "@/app/components/events/events-timeline";
 
 export const metadata: Metadata = {
@@ -44,7 +45,7 @@ export default function Page() {
 
       {/* ICS CTA */}
       <div className="mt-6 space-y-2">
-        <a
+        <Link
           href="/api/events/ics"
           className={[
             "w-full sm:w-auto",
@@ -61,7 +62,7 @@ export default function Page() {
           ].join(" ")}
         >
           In Kalender speichern
-        </a>
+        </Link>
 
         <p className="text-xs text-zinc-700 dark:text-zinc-300">
           Lade dir die <span className="font-medium">ICS-Datei</span> mit allen zukünftigen Terminen herunter und füge sie deinem Kalender hinzu.

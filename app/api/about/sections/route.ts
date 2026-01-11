@@ -4,6 +4,17 @@ import { prisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
 import { requireAdminOr401 } from "../_auth";
 
+type SectionType =
+  | "HERO"
+  | "VALUES"
+  | "STATS"
+  | "TIMELINE"
+  | "TEAM"
+  | "GALLERY"
+  | "FAQ"
+  | "CTA"
+  | "CUSTOM_TEXT";
+
 export async function GET(req: Request) {
   const denied = await requireAdminOr401();
   if (denied) return denied;
@@ -12,8 +23,9 @@ export async function GET(req: Request) {
   const type = (searchParams.get("type") || "").trim();
   const includeItems = searchParams.get("includeItems") === "1";
 
+  const typeFilter = type ? (type as SectionType) : undefined;
   const items = await prisma.aboutSection.findMany({
-    ...(type ? { where: { type: type as any } } : {}),
+    ...(typeFilter ? { where: { type: typeFilter } } : {}),
     orderBy: { sortOrder: "asc" },
     ...(includeItems
       ? {
@@ -48,14 +60,14 @@ export async function POST(req: Request) {
 
   const created = await prisma.aboutSection.create({
     data: {
-      type: b.type as any,
+      type: b.type as SectionType,
       slug: (b.slug || "").trim() || `${String(b.type).toLowerCase()}-${Date.now()}`,
       title: b.title ?? null,
       subtitle: b.subtitle ?? null,
       body: b.body ?? null,
       imageUrl: toStoredPath(b.imageUrl) ?? null,
       isActive: b.isActive ?? true,
-      sortOrder: Number.isFinite(b.sortOrder) ? (b.sortOrder as number) : 0,
+      sortOrder: Number.isFinite(b.sortOrder) ? b.sortOrder : 0,
     },
   });
 

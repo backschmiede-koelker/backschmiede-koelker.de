@@ -7,6 +7,14 @@ import { auth } from "@/auth";
 export const runtime = "nodejs";
 
 // ---------- Helpers ----------
+type CollectBody = {
+  path?: unknown;
+  utm?: {
+    source?: unknown;
+    medium?: unknown;
+    campaign?: unknown;
+  };
+};
 function dailyPepper(secret: string, day: string) {
   return crypto.createHmac("sha256", secret).update(day).digest("base64url");
 }
@@ -98,12 +106,12 @@ export async function POST(req: Request) {
     const ipHash = dailyIpHash(ip);
     const bot = isLikelyBot(ua);
 
-    const body = await req.json().catch(() => ({} as any));
-    const path: string = typeof body?.path === "string" ? body.path : "/";
-    const utm = body?.utm || {};
-    const utmSource: string | undefined = utm.source;
-    const utmMedium: string | undefined = utm.medium;
-    const utmCampaign: string | undefined = utm.campaign;
+    const body = (await req.json().catch(() => ({}))) as CollectBody;
+    const path = typeof body.path === "string" ? body.path : "/";
+    const utm = body.utm ?? {};
+    const utmSource = typeof utm.source === "string" ? utm.source : undefined;
+    const utmMedium = typeof utm.medium === "string" ? utm.medium : undefined;
+    const utmCampaign = typeof utm.campaign === "string" ? utm.campaign : undefined;
 
     await prisma.pageview.create({
       data: {

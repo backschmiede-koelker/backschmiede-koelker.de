@@ -1,7 +1,32 @@
 // app/api/jobs/[id]/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { Location, JobEmploymentType, JobSalaryUnit, JobCategory } from "@/generated/prisma/client";
+import { Prisma, Location, JobEmploymentType, JobSalaryUnit, JobCategory } from "@/generated/prisma/client";
+
+type JobUpdatePayload = Partial<{
+  title: string;
+  category: JobCategory;
+  teaser: string;
+  description: string;
+  locations: Location[];
+  employmentTypes: JobEmploymentType[];
+  responsibilities: string[];
+  qualifications: string[];
+  benefits: string[];
+  shift: string | null;
+  workloadNote: string | null;
+  salaryMinCents: number | null;
+  salaryMaxCents: number | null;
+  salaryUnit: JobSalaryUnit | null;
+  startsAsap: boolean;
+  startsAt: Date | null;
+  validThrough: Date | null;
+  applyEmail: string | null;
+  applyUrl: string | null;
+  contactPhone: string | null;
+  isActive: boolean;
+  priority: number;
+}>;
 
 function parseLocations(input: unknown): Location[] | undefined {
   if (!Array.isArray(input)) return undefined;
@@ -54,11 +79,11 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const body = (await req.json()) as any;
+  const body = (await req.json()) as Record<string, unknown>;
   const prev = await prisma.job.findUnique({ where: { id } });
   if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const data: any = {};
+  const data: JobUpdatePayload = {};
 
   if (typeof body.title === "string") data.title = body.title.trim();
   if (body.category !== undefined) data.category = parseCategory(body.category);
@@ -110,7 +135,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 
   if (data.startsAsap === true) data.startsAt = null;
 
-  const updated = await prisma.job.update({ where: { id }, data });
+  const updated = await prisma.job.update({ where: { id }, data: data as Prisma.JobUpdateInput });
   return NextResponse.json(updated);
 }
 
@@ -123,8 +148,10 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
   try {
     await prisma.job.delete({ where: { id } });
     return NextResponse.json({ ok: true });
-  } catch (e: any) {
-    if (e?.code === "P2025") return NextResponse.json({ error: "Not found" }, { status: 404 });
+  } catch (e: unknown) {
+    if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2025") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
     console.error(e);
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }

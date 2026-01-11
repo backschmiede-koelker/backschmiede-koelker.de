@@ -17,6 +17,7 @@ function GalleryTile({
         {/* Card */}
         <div className="relative overflow-hidden rounded-2xl bg-white/70 dark:bg-zinc-900/60 ring-1 ring-zinc-200/60 dark:ring-zinc-800/70 shadow-[0_14px_40px_rgba(0,0,0,0.10)] dark:shadow-[0_22px_60px_rgba(0,0,0,0.45)]">
           {/* Image */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={src}
             alt={alt || ""}

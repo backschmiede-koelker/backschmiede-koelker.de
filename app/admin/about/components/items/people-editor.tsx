@@ -13,6 +13,7 @@ import {
   updatePerson,
   createSection,
   updateSection,
+  SectionType,
 } from "../../actions";
 import { PERSON_KIND_OPTIONS } from "../options";
 import { useSortableList } from "../dnd/use-sortable-list";
@@ -46,11 +47,13 @@ export default function PeopleEditor({
   const [busy, setBusy] = useState(false);
 
   const { lead, staff } = useMemo(() => {
-    const aNum = (n: any) => (Number.isFinite(n) ? (n as number) : 0);
+    const aNum = (n: unknown) =>
+      typeof n === "number" && Number.isFinite(n) ? n : 0;
 
     const bySort = (a: AboutPersonDTO, b: AboutPersonDTO) =>
-      aNum((a as any).sortOrder) - aNum((b as any).sortOrder) ||
-      String(a.id).localeCompare(String(b.id));
+      aNum(a.sortOrder) - aNum(b.sortOrder) ||
+      String(a.id ?? "").localeCompare(String(b.id ?? ""));
+
 
     const lead = people.filter((p) => isLead(p.kind)).slice().sort(bySort);
     const staff = people.filter((p) => isStaff(p.kind)).slice().sort(bySort);
@@ -60,7 +63,7 @@ export default function PeopleEditor({
 
   const total = lead.length + staff.length;
 
-  async function persistGroupOrder(nextLocal: AboutPersonDTO[], _group: "lead" | "staff") {
+  async function persistGroupOrder(nextLocal: AboutPersonDTO[]) {
     setBusy(true);
     try {
       await Promise.all(
@@ -98,22 +101,22 @@ export default function PeopleEditor({
   const leadSortable = useSortableList({
     items: lead,
     onReorderPersist: async (next) => {
-      const idToIndex = new Map(next.map((n: any) => [n.id, n.sortOrder]));
+      const idToIndex = new Map(next.map((n) => [n.id, n.sortOrder]));
       const nextLocal = lead
         .slice()
         .sort((a, b) => (idToIndex.get(a.id) ?? 0) - (idToIndex.get(b.id) ?? 0));
-      await persistGroupOrder(nextLocal, "lead");
+      await persistGroupOrder(nextLocal);
     },
   });
 
   const staffSortable = useSortableList({
     items: staff,
     onReorderPersist: async (next) => {
-      const idToIndex = new Map(next.map((n: any) => [n.id, n.sortOrder]));
+      const idToIndex = new Map(next.map((n) => [n.id, n.sortOrder]));
       const nextLocal = staff
         .slice()
         .sort((a, b) => (idToIndex.get(a.id) ?? 0) - (idToIndex.get(b.id) ?? 0));
-      await persistGroupOrder(nextLocal, "staff");
+      await persistGroupOrder(nextLocal);
     },
   });
 
@@ -134,7 +137,7 @@ export default function PeopleEditor({
     nextLocal.splice(j, 0, moved);
 
     sortable.setLocalOrder(nextLocal);
-    await persistGroupOrder(nextLocal, group);
+    await persistGroupOrder(nextLocal);
   }
 
   return (
@@ -158,7 +161,7 @@ export default function PeopleEditor({
               <Button
                 onClick={async () => {
                   const created = await createSection({
-                    type: "TEAM" as any,
+                    type: "TEAM" as SectionType,
                     title: "Unser Team",
                     subtitle:
                       "Menschen, die jeden Morgen Teige kneten, Brote backen und Gäste beraten.",
@@ -478,7 +481,6 @@ function CreatePersonForm({
   const [name, setName] = useState("");
   const [roleLabel, setRoleLabel] = useState("");
   const [shortBio, setShortBio] = useState("");
-  const [longBio, setLongBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -580,7 +582,7 @@ function CreatePersonForm({
                     name,
                     roleLabel: roleLabel || null,
                     shortBio: shortBio || null,
-                    longBio: longBio || null,
+                    longBio: null,
                     avatarUrl: avatarUrl || null,
                     email: email || null,
                     phone: phone || null,
@@ -589,8 +591,9 @@ function CreatePersonForm({
                     sortOrder: nextSortOrder,
                   });
                   onCreated(created);
-                } catch (e: any) {
-                  setErr(e?.message || "Fehler beim Erstellen");
+                } catch (e: unknown) {
+                  const msg = e instanceof Error ? e.message : "Fehler beim Erstellen";
+                  setErr(msg);
                 } finally {
                   setSaving(false);
                 }
@@ -682,8 +685,9 @@ function PersonCard({
                   sortOrder: person.sortOrder ?? 0,
                 });
                 onUpdated(next);
-              } catch (e: any) {
-                setErr(e?.message || "Fehler beim Speichern");
+              } catch (e: unknown) {
+                const msg = e instanceof Error ? e.message : "Fehler beim Speichern";
+                setErr(msg);
               } finally {
                 setSaving(false);
               }

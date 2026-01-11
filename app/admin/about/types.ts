@@ -1,5 +1,5 @@
 // app/admin/about/types.ts
-import type { Prisma } from "@/generated/prisma/client";
+import type { Prisma, AboutPerson } from "@/generated/prisma/client";
 
 export type AboutSectionType =
   | "HERO"
@@ -22,4 +22,4 @@ export type AboutSectionDTO = Prisma.AboutSectionGetPayload<{
   };
 }> & { type: AboutSectionType };
 
-export type AboutPersonDTO = Prisma.AboutPersonGetPayload<{}>;
+export type AboutPersonDTO = AboutPerson;

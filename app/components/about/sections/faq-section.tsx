@@ -135,12 +135,11 @@ function FaqRow({
 }
 
 export default function AboutFaqSection({ section }: { section: AboutSectionDTO }) {
-  if (!section.faqs?.length) return null;
-
-  const faqs = section.faqs;
-
-  // Single-open feels “premium” and calmer.
+  // Single-open feels "premium" and calmer.
   const [openId, setOpenId] = React.useState<string | null>(null);
+
+  const faqs = section.faqs ?? [];
+  if (!faqs.length) return null;
 
   return (
     <AboutCard className="relative overflow-hidden">
