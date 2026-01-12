@@ -17,7 +17,14 @@ const STAND = "12.01.2026";
 
 export default function PrivacyPage() {
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 prose prose-zinc dark:prose-invert">
+    <main
+      className={[
+        "mx-auto w-full max-w-3xl px-4 py-10",
+        "prose prose-zinc dark:prose-invert",
+        "min-w-0 break-words",
+        "prose-a:break-words",
+      ].join(" ")}
+    >
       <h1>Datenschutzerklärung</h1>
       <p><em>Stand: {STAND}</em></p>
 
@@ -30,11 +37,20 @@ export default function PrivacyPage() {
           <br />
           Landrat-Schultz-Straße 1, 49497 Mettingen
           <br />
-          E-Mail: <a href="mailto:info@backschmiede-koelker.de">info@backschmiede-koelker.de</a>
+          E-Mail:{" "}
+          <a className="break-all" href="mailto:info@backschmiede-koelker.de">
+            info@backschmiede-koelker.de
+          </a>
           <br />
-          Telefon Recke: <a href="tel:+4915755353999">+49 1575 5353999</a>
+          Telefon Recke:{" "}
+          <a className="break-all" href="tel:+4915755353999">
+            +49 1575 5353999
+          </a>
           <br />
-          Telefon Mettingen: <a href="tel:+495452919611">+49 5452 919611</a>
+          Telefon Mettingen:{" "}
+          <a className="break-all" href="tel:+495452919611">
+            +49 5452 919611
+          </a>
         </p>
       </section>
 

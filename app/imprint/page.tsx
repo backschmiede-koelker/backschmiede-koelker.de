@@ -15,7 +15,14 @@ export const metadata: Metadata = {
 
 export default function ImpressumPage() {
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 prose prose-zinc dark:prose-invert">
+    <main
+      className={[
+        "mx-auto w-full max-w-3xl px-4 py-10",
+        "prose prose-zinc dark:prose-invert",
+        "min-w-0 break-words",
+        "prose-a:break-words",
+      ].join(" ")}
+    >
       <h1>Impressum</h1>
 
       <section>
@@ -41,22 +48,36 @@ export default function ImpressumPage() {
       <section>
         <h2>Kontakt</h2>
         <p>
-          Telefon Recke: <a href="tel:+4915755353999">+49 1575 5353999</a>
+          Telefon Recke:{" "}
+          <a className="break-all" href="tel:+4915755353999">
+            +49 1575 5353999
+          </a>
           <br />
-          Telefon Mettingen: <a href="tel:+495452919611">+49 5452 919611</a>
+          Telefon Mettingen:{" "}
+          <a className="break-all" href="tel:+495452919611">
+            +49 5452 919611
+          </a>
           <br />
-          E-Mail: <a href="mailto:info@backschmiede-koelker.de">info@backschmiede-koelker.de</a>
+          E-Mail:{" "}
+          <a className="break-all" href="mailto:info@backschmiede-koelker.de">
+            info@backschmiede-koelker.de
+          </a>
         </p>
       </section>
 
       <section>
         <h2>Registereintrag</h2>
-        <p>[TODO: Register (z. B. Handelsregister), Registergericht, Registernummer, oder halt nicht vorhanden hinschreiben]</p>
+        <p>
+          [TODO: Register (z. B. Handelsregister), Registergericht, Registernummer, oder halt nicht vorhanden
+          hinschreiben]
+        </p>
       </section>
 
       <section>
         <h2>Handwerksrolle / Kammer</h2>
-        <p>Eintragung in die Handwerksrolle: [TODO: Handwerkskammer und Handwerksrollennummer (NUR WENN EINTRAGUNGSPFLICHTIG)]</p>
+        <p>
+          Eintragung in die Handwerksrolle: [TODO: Handwerkskammer und Handwerksrollennummer (NUR WENN EINTRAGUNGSPFLICHTIG)]
+        </p>
       </section>
 
       <section>
