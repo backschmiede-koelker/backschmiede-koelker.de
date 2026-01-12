@@ -20,22 +20,22 @@ export default function AnalyticsBeacon() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    const dnt = navigator.doNotTrack === "1" || navigator.doNotTrack === "yes";
+    const gpc = (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true;
+    if (dnt || gpc) return;
+
     const body = {
       path: pathname || "/",
       utm: pickUTM(searchParams as unknown as URLSearchParams),
     };
 
-    const blob = new Blob([JSON.stringify(body)], { type: "application/json" });
-
-    // sendBeacon ist non-blocking; Fallback auf fetch(keepalive) für alte Browser
-    if (!navigator.sendBeacon || !navigator.sendBeacon("/api/collect", blob)) {
-      fetch("/api/collect", {
-        method: "POST",
-        body: JSON.stringify(body),
-        headers: { "content-type": "application/json" },
-        keepalive: true,
-      }).catch(() => {});
-    }
+    fetch("/api/collect", {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "content-type": "application/json" },
+      keepalive: true,
+      credentials: "omit",
+    }).catch(() => {});
   }, [pathname, searchParams]);
 
   return null;

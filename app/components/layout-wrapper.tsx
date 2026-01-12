@@ -15,7 +15,8 @@ const Snowfall = dynamic(
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [snowEnabled, setSnowEnabled] = useState(true);
+  const DEFAULT_SNOW_ENABLED = true;
+  const [snowEnabled, setSnowEnabled] = useState(DEFAULT_SNOW_ENABLED);
   const [snowflakeCount, setSnowflakeCount] = useState(160);
 
   const pathname = usePathname();
@@ -32,10 +33,19 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     if (stored === 'off') setSnowEnabled(false);
   }, []);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem('bk_snow_enabled', snowEnabled ? 'on' : 'off');
-  }, [snowEnabled]);
+  const handleToggleSnow = () => {
+    setSnowEnabled((prev) => {
+      const next = !prev;
+      try {
+        if (next === DEFAULT_SNOW_ENABLED) {
+          window.localStorage.removeItem('bk_snow_enabled');
+        } else {
+          window.localStorage.setItem('bk_snow_enabled', next ? 'on' : 'off');
+        }
+      } catch {}
+      return next;
+    });
+  };
 
   useEffect(() => {
     const calcSnowflakes = () => {
@@ -85,7 +95,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           onToggleSidebar={() => setSidebarOpen((v) => !v)}
           onCloseSidebar={() => setSidebarOpen(false)}
           isSnowing={snowEnabled}
-          onToggleSnow={() => setSnowEnabled((v) => !v)}
+          onToggleSnow={handleToggleSnow}
         />
 
         <main className={isHome ? 'flex-1 min-w-0' : 'flex-1 p-6 min-w-0'}>

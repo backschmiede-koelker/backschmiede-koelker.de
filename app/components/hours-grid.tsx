@@ -1,6 +1,7 @@
 // /app/components/hours-grid.tsx
 'use client';
 import * as React from 'react';
+import GoogleMapsAttribution from "./google-maps-attribution";
 
 type Place = { title: string; lines: string[]; source?: string };
 type Props = { left: Place; right: Place };
@@ -282,7 +283,8 @@ function PlaceCard({
 
         {source && (
           <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
-            Quelle: {source}
+            Quelle:{" "}
+            {source === "Google Maps" ? <GoogleMapsAttribution /> : <span>{source}</span>}
           </p>
         )}
       </div>

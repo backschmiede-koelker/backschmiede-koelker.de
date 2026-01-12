@@ -20,6 +20,11 @@ services:
       - web
       - db
     pull_policy: always
+    logging:
+      driver: "local"
+      options:
+        max-size: "1m"
+        max-file: "2"
 
 networks:
   web:

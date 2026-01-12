@@ -26,8 +26,7 @@ async function fetchHours(placeId: string) {
 
   const res = await fetch(url, { next: { revalidate: PLACES_REVALIDATE } })
   if (!res.ok) {
-    const txt = await res.text()
-    console.error('Places ERROR', res.status, txt)
+    console.error('Places ERROR', res.status)
     return null
   }
   return (await res.json()) as GooglePlacesHours
@@ -44,7 +43,7 @@ export async function readPlacesHours() {
 
     out[key] = {
       label: cfg.label,
-      source: data ? 'google' : 'fallback (Öffnungszeiten können abweichen)',
+      source: data ? 'Google Maps' : 'fallback (Öffnungszeiten können abweichen)',
       opening_hours: data?.regularOpeningHours || null,
       current_opening_hours: data?.currentOpeningHours || null,
       fallback: cfg.fallback,
