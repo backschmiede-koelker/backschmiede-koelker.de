@@ -62,13 +62,17 @@ export default function PrivacyPage() {
           sowie zur Fehleranalyse. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse).
         </p>
         <p>
+          Hinweis: Server-Logfiles können technisch bedingt auch IP-Adressen und User-Agent-Informationen enthalten.
+          Diese Logdaten werden nicht für unsere Analytics-Auswertungen verwendet, sondern dienen dem sicheren Betrieb
+          (z. B. Fehleranalyse/Angriffserkennung).
+        </p>
+        <p>
           Hostinganbieter / Auftragsverarbeiter: IONOS SE, Elgendorfer Str. 57, 56410 Montabaur, Deutschland.
           Die Auslieferung statischer Inhalte erfolgt über denselben Server.
         </p>
         <p>
           Speicherdauer der Logfiles: Wir speichern Server-Logfiles nur so lange, wie es für Sicherheit und Fehleranalyse
-          erforderlich ist. Logfiles werden im Rahmen der technischen Logrotation automatisch gelöscht bzw. überschrieben
-          (zeit- oder grössenbasiert).
+          erforderlich ist. Logfiles werden im Rahmen der technischen Logrotation automatisch gelöscht bzw. überschrieben.
         </p>
       </section>
 
@@ -92,37 +96,59 @@ export default function PrivacyPage() {
 
       <section>
         <h2>Reichweitenmessung / Analytics (eigene Lösung, ohne Cookies)</h2>
+
         <p>
-          Wir führen eine serverseitige Reichweitenmessung durch, um Seitenaufrufe und die Kennzahl
-          &quot;ungefähre Anzahl unterschiedlicher Besucher pro Tag&quot; (Unique Users/Day) zu ermitteln - ohne Cookies
-          und ohne geräteübergreifende Kennungen.
+          Wir führen eine serverseitige Reichweitenmessung durch, um die Nutzung unserer Website zu verstehen und zu
+          verbessern. Wir verwenden dafür keine Cookies, keinen Local Storage und keine geräteübergreifenden Kennungen.
         </p>
-        <p>Verarbeitet werden dabei:</p>
+
+        <p>
+          Wir verarbeiten dabei kurzzeitig folgende Informationen zur Aggregation und speichern ausschließlich aggregierte Zähler/Schätzwerte:
+        </p>
         <ul>
-          <li>Seitenpfad (ohne Querystring) und Zeitpunkt des Aufrufs (Tagesbezug)</li>
-          <li>Referrer-Host (nur Host, nicht die vollständige URL)</li>
+          <li>Seitenpfad (ohne Querystring/Fragment) und Zeitpunkt des Aufrufs (Tagesbezug)</li>
+          <li>Referrer-Host (nur der Host, nicht die vollständige URL)</li>
           <li>UTM-Parameter (Quelle/Medium/Kampagne), sofern in der URL vorhanden</li>
-          <li>Geräteklasse (mobile/desktop) und Sprache</li>
+          <li>Geräteklasse (mobile/desktop) und Sprache (zweistellig)</li>
+          <li>Browser-Familie (z. B. Chrome, Safari, Firefox, Edge, Sonstige) - ohne Versionsnummern</li>
+          <li>Betriebssystem-Familie (z. B. iOS, Android, Windows, macOS, Linux, Sonstige) - ohne Versionsnummern</li>
+          <li>Aggregierte technische Kennzahlen zur Server-Performance (z. B. Verarbeitungsdauer als p50/p95 und Durchschnitt)</li>
         </ul>
+
         <p>
-          Für die Kennzahl &quot;Unique Users/Day&quot; wird die IP-Adresse technisch beim Seitenaufruf übertragen. Wir
-          speichern keine IP-Adressen. Die IP-Adresse wird ausschließlich flüchtig verarbeitet, um aus IP und
-          Geräteklasse mit einem täglich wechselnden Geheimnis (HMAC) einen nicht rückrechenbaren Zählwert zu
-          erzeugen. Dieser Zählwert wird nur in einer HyperLogLog-Struktur pro Tag zur Schätzung gespeichert; einzelne
-          Werte werden nicht gespeichert.
+          Für Browser-/Betriebssystem-Familien werten wir den User-Agent technisch nur flüchtig aus. Den User-Agent selbst
+          speichern wir nicht; gespeichert werden ausschließlich aggregierte Zähler pro Tag.
         </p>
+
         <p>
-          Gespeichert werden nur aggregierte Tageszähler (Pageviews) sowie aggregierte Zähler nach Pfad, Referrer-Host,
-          UTM, Geräteklasse und Sprache.
+          Für die Kennzahl &quot;Unique Users pro Tag&quot; wird die IP-Adresse technisch beim Seitenaufruf übertragen.
+          Wir speichern keine IP-Adressen. Die IP-Adresse wird ausschließlich flüchtig verarbeitet, um aus IP-Adresse und
+          Geräteklasse mit einem täglich wechselnden Geheimnis (HMAC) einen nicht rückrechenbaren Zählwert zu erzeugen.
         </p>
+
         <p>
-          Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Reichweitenmessung und
-          Verbesserung der Website). Ein Zugriff auf Informationen in Ihrer Endeinrichtung (Cookies/Local Storage) für
-          die Analytics findet nicht statt.
+          Dieser Zählwert wird ausschließlich zur Schätzung der Anzahl unterschiedlicher Besucher pro Tag in einer
+          probabilistischen Zählstruktur (HyperLogLog) verwendet. Wir speichern keine Roh-Identifikatoren, keine
+          IP-Adressen, keine Cookies/IDs und erstellen keine Nutzerprofile. HyperLogLog dient der Schätzung von
+          Kardinalitäten ohne Speicherung einzelner Nutzerlisten.
         </p>
+
+        <p>
+          Gespeichert werden ausschließlich aggregierte Tageszähler (Pageviews) sowie aggregierte Zähler nach Pfad,
+          Referrer-Host, UTM, Geräteklasse, Sprache, Browser-Familie, Betriebssystem-Familie und aggregierte technische
+          Kennzahlen zur Server-Performance.
+        </p>
+
+        <p>
+          Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Reichweitenmessung und Verbesserung
+          der Website). Ein Zugriff auf Informationen in Ihrer Endeinrichtung (Cookies/Local Storage) für Analytics findet
+          nicht statt.
+        </p>
+
         <p>
           Wenn Ihr Browser Global Privacy Control (GPC) oder Do-Not-Track (DNT) sendet, messen wir nicht.
         </p>
+
         <p>Speicherdauer: Aggregierte Statistiken werden 12 Monate gespeichert.</p>
       </section>
 
@@ -158,20 +184,65 @@ export default function PrivacyPage() {
       </section>
 
       <section>
+        <h2>Google Maps Platform / Places API (serverseitige Abfrage von Öffnungszeiten)</h2>
+        <p>
+          Wir rufen in regelmäßigen Abständen Öffnungszeiten unserer Filialen über die Google Maps Platform (Places API) ab,
+          um diese auf unserer Website aktuell darzustellen. Die Abfrage erfolgt ausschließlich serverseitig von unserem
+          Server aus. Dabei stellt der Browser Ihres Endgeräts keine direkte Verbindung zu Google her.
+        </p>
+        <p>Verarbeitet/übermittelt werden dabei insbesondere:</p>
+        <ul>
+          <li>technische Verbindungsdaten des Servers (z. B. Server-IP-Adresse)</li>
+          <li>angefragte Place-ID und API-Request-Metadaten (z. B. Zeitpunkt, Statuscodes)</li>
+        </ul>
+        <p>
+          Es werden hierbei keine IP-Adressen oder sonstigen Identifikatoren von Website-Besuchern an Google übermittelt,
+          da die Abfrage nicht aus Ihrem Browser heraus erfolgt.
+        </p>
+        <p>
+          Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse), unser Angebot mit aktuellen
+          Öffnungszeiten bereitzustellen.
+        </p>
+        <p>
+          Empfänger: Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland.
+        </p>
+        <p>
+          Hinweis Drittland: Eine Verarbeitung von Daten durch Google außerhalb der EU/des EWR kann nicht ausgeschlossen
+          werden. Google stellt hierfür vertragliche Mechanismen (z. B. Standardvertragsklauseln) bereit.
+        </p>
+        <p>
+          Speicherdauer/Kriterien: Die abgerufenen Öffnungszeiten werden serverseitig zwischengespeichert und regelmäßig
+          aktualisiert. Personenbezogene Daten von Website-Besuchern werden in diesem Zusammenhang
+          nicht gespeichert.
+        </p>
+      </section>
+
+      <section>
         <h2>Empfänger und Auftragsverarbeitung</h2>
         <p>
-          Wir setzen Auftragsverarbeiter ein (insbesondere Hosting und E-Mail). Mit diesen bestehen Verträge zur
-          Auftragsverarbeitung gemäß Art. 28 DSGVO.
+          Wir setzen Dienstleister ein, die für uns als Auftragsverarbeiter tätig sind (insbesondere Hosting und E-Mail).
+          Mit diesen bestehen Verträge zur Auftragsverarbeitung gemäß Art. 28 DSGVO.
         </p>
         <ul>
           <li>IONOS SE, Elgendorfer Str. 57, 56410 Montabaur, Deutschland (VPS/Hosting, E-Mail)</li>
+        </ul>
+
+        <p>
+          Zusätzlich nutzen wir zur serverseitigen Abfrage von Öffnungszeiten die Google Maps Platform (Places API).
+          Dabei kann Google als Empfänger technischer Request-Daten auftreten:
+        </p>
+        <ul>
+          <li>Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (Places API)</li>
         </ul>
       </section>
 
       <section>
         <h2>Drittlandübermittlungen</h2>
         <p>
-          Eine Übermittlung in Drittländer (außerhalb EU/EWR) findet durch uns grundsätzlich nicht statt.
+          Eine Übermittlung in Drittländer (außerhalb EU/EWR) findet durch uns grundsätzlich nur statt, sofern wir Dienste
+          einsetzen, bei denen eine Verarbeitung außerhalb der EU/des EWR nicht ausgeschlossen werden kann (z. B. bei
+          bestimmten Google-Diensten). In diesen Fällen erfolgt die Übermittlung nur unter Einhaltung der gesetzlichen
+          Vorgaben (z. B. Standardvertragsklauseln).
         </p>
       </section>
 

@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-export const ANALYTICS_TTL_SECONDS = 60 * 60 * 24 * 400;
+export const ANALYTICS_TTL_SECONDS = 60 * 60 * 24 * 365;
 const MAX_PATH_LENGTH = 120;
 const MAX_DIM_LENGTH = 80;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -91,6 +91,62 @@ export function uniqueToken(masterSecret: string, day: string, ip: string, devic
   return crypto.createHmac("sha256", secret).update(`${ip}|${deviceClass}`).digest("base64url");
 }
 
+/**
+ * Grobe UA-Klassifizierung (ohne Versionen).
+ * Wir speichern den UA NICHT, sondern nur diese Familien als aggregierte Zähler.
+ */
+export function browserFamilyFromUA(ua: string | null): string {
+  const s = (ua || "").toLowerCase();
+
+  // Reihenfolge ist wichtig (Edge enthält "chrome", Opera enthält "chrome" etc.)
+  if (s.includes("edg/") || s.includes("edge/")) return "edge";
+  if (s.includes("opr/") || s.includes("opera")) return "opera";
+  if (s.includes("brave")) return "brave";
+  if (s.includes("vivaldi")) return "vivaldi";
+  if (s.includes("firefox/")) return "firefox";
+
+  // Safari kommt oft mit "version/x safari/..." und iOS WebViews etc.
+  const isSafari = s.includes("safari") && !s.includes("chrome") && !s.includes("chromium") && !s.includes("crios");
+  if (isSafari) return "safari";
+
+  // Chrome-Familie (inkl. iOS Chrome = crios)
+  if (s.includes("chrome") || s.includes("chromium") || s.includes("crios")) return "chrome";
+
+  // Samsung Internet
+  if (s.includes("samsungbrowser")) return "samsung";
+
+  // Android WebView
+  if (s.includes("wv") || s.includes("android") && s.includes("version/")) return "webview";
+
+  return "other";
+}
+
+export function osFamilyFromUA(ua: string | null): string {
+  const s = (ua || "").toLowerCase();
+
+  if (s.includes("iphone") || s.includes("ipad") || s.includes("ipod") || s.includes("ios")) return "ios";
+  if (s.includes("android")) return "android";
+  if (s.includes("windows")) return "windows";
+  if (s.includes("mac os x") || s.includes("macintosh")) return "macos";
+  if (s.includes("linux")) return "linux";
+
+  return "other";
+}
+
+/**
+ * Performance: Histogramm-Buckets (ms). Grob genug, um Fingerprinting zu vermeiden.
+ */
+export const PERF_BUCKETS_MS = [25, 50, 100, 200, 400, 800, 1500, 3000, 6000] as const;
+
+export function perfBucketLabel(ms: number): string {
+  const b = PERF_BUCKETS_MS;
+  if (ms <= b[0]) return `0-${b[0]}`;
+  for (let i = 1; i < b.length; i++) {
+    if (ms <= b[i]) return `${b[i - 1] + 1}-${b[i]}`;
+  }
+  return `${b[b.length - 1] + 1}+`;
+}
+
 export function analyticsKeys(prefix: string, day: string) {
   return {
     pv: `${prefix}pv:${day}`,
@@ -102,5 +158,16 @@ export function analyticsKeys(prefix: string, day: string) {
     utmCampaign: `${prefix}pv:utm_campaign:${day}`,
     device: `${prefix}pv:device:${day}`,
     lang: `${prefix}pv:lang:${day}`,
+    browser: `${prefix}pv:browser:${day}`,
+    os: `${prefix}pv:os:${day}`,
+
+    // Performance (aggregiert)
+    perfHist: `${prefix}perf:hist:${day}`, // bucket -> count
+    perfSumMs: `${prefix}perf:sum_ms:${day}`, // string number
+    perfCount: `${prefix}perf:count:${day}`, // string number
+
+    // Performance pro Path: avg = sum/count (keine Per-User Daten)
+    perfPathSumMs: `${prefix}perf:path:sum_ms:${day}`, // hash: path -> sum
+    perfPathCount: `${prefix}perf:path:count:${day}`, // hash: path -> count
   };
 }

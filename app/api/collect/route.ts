@@ -3,10 +3,13 @@ import { NextResponse } from "next/server";
 import {
   ANALYTICS_TTL_SECONDS,
   analyticsKeys,
+  browserFamilyFromUA,
   dayString,
   deviceClassFromUA,
   getAnalyticsConfig,
   languageFromHeader,
+  osFamilyFromUA,
+  perfBucketLabel,
   sanitizeDimValue,
   sanitizePath,
   sanitizeReferrerHost,
@@ -33,6 +36,8 @@ function getClientIP(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const start = Date.now();
+
   try {
     const dnt = req.headers.get("dnt") === "1";
     const gpc = req.headers.get("sec-gpc") === "1";
@@ -49,6 +54,10 @@ export async function POST(req: Request) {
     const lang = languageFromHeader(req.headers.get("accept-language"));
     const refHost = sanitizeReferrerHost(req.headers.get("referer"));
 
+    // Neu: grobe Familien (ohne Versionen)
+    const browserFamily = browserFamilyFromUA(ua);
+    const osFamily = osFamilyFromUA(ua);
+
     const utm = body.utm ?? {};
     const utmSource = sanitizeDimValue(utm.source);
     const utmMedium = sanitizeDimValue(utm.medium);
@@ -60,6 +69,7 @@ export async function POST(req: Request) {
     const redis = await getRedis();
     const multi = redis.multi();
 
+    // --- Pageview Aggregationen ---
     multi.incr(keys.pv);
     multi.hIncrBy(keys.path, path, 1);
     if (refHost) multi.hIncrBy(keys.ref, refHost, 1);
@@ -69,12 +79,29 @@ export async function POST(req: Request) {
     multi.hIncrBy(keys.device, deviceClass, 1);
     if (lang) multi.hIncrBy(keys.lang, lang, 1);
 
+    // Neu: Browser/OS Familien (aggregiert)
+    multi.hIncrBy(keys.browser, browserFamily, 1);
+    multi.hIncrBy(keys.os, osFamily, 1);
+
+    // --- Unique Users / Tag (HLL) ---
     const ip = getClientIP(req);
     if (ip) {
       const token = uniqueToken(masterSecret, day, ip, deviceClass);
       multi.pfAdd(keys.uv, token);
     }
 
+    // --- Performance (serverseitig, aggregiert) ---
+    const durMs = Math.max(0, Date.now() - start);
+    const bucket = perfBucketLabel(durMs);
+    multi.hIncrBy(keys.perfHist, bucket, 1);
+    multi.incrBy(keys.perfSumMs, durMs);
+    multi.incr(keys.perfCount);
+
+    // Performance pro Path: sum/count -> avg (keine Per-User/Session Daten)
+    multi.hIncrBy(keys.perfPathSumMs, path, durMs);
+    multi.hIncrBy(keys.perfPathCount, path, 1);
+
+    // TTL auf alles
     const ttlKeys = new Set<string>([
       keys.pv,
       keys.uv,
@@ -85,6 +112,13 @@ export async function POST(req: Request) {
       keys.utmCampaign,
       keys.device,
       keys.lang,
+      keys.browser,
+      keys.os,
+      keys.perfHist,
+      keys.perfSumMs,
+      keys.perfCount,
+      keys.perfPathSumMs,
+      keys.perfPathCount,
     ]);
     ttlKeys.forEach((key) => multi.expire(key, ANALYTICS_TTL_SECONDS));
 

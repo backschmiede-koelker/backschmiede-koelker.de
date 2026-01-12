@@ -51,12 +51,12 @@ export default function ImpressumPage() {
 
       <section>
         <h2>Registereintrag</h2>
-        <p>[TODO: Register (z. B. Handelsregister), Registergericht, Registernummer, oder halt nicht vorhanden]</p>
+        <p>[TODO: Register (z. B. Handelsregister), Registergericht, Registernummer, oder halt nicht vorhanden hinschreiben]</p>
       </section>
 
       <section>
         <h2>Handwerksrolle / Kammer</h2>
-        <p>Eintragung in die Handwerksrolle: [TODO: Handwerkskammer und Handwerksrollennummer]</p>
+        <p>Eintragung in die Handwerksrolle: [TODO: Handwerkskammer und Handwerksrollennummer (NUR WENN EINTRAGUNGSPFLICHTIG)]</p>
       </section>
 
       <section>
