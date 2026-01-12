@@ -71,8 +71,9 @@ export default function PrivacyPage() {
           <li>Local Storage &quot;bk_snow_enabled&quot; für die Schneefall-Animation</li>
         </ul>
         <p>
-          Diese Einstellungen speichern wir lokal auf Ihrem Endgerät. Rechtsgrundlage ist § 25 Abs. 2 TDDDG
-          (ehem. TTDSG) i. V. m. Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der komfortablen Darstellung).
+          Diese Einstellungen speichern wir lokal auf Ihrem Endgerät, wenn Sie die Standardwerte aktiv ändern.
+          Rechtsgrundlage ist § 25 Abs. 2 TDDDG (ehem. TTDSG) i. V. m. Art. 6 Abs. 1 lit. f DSGVO (berechtigtes
+          Interesse an der komfortablen Darstellung).
         </p>
         <p>
           Für die Reichweitenmessung setzen wir keine Cookies oder ähnlichen Identifier ein.

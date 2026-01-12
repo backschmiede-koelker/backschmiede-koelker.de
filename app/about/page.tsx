@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 async function getAbout(): Promise<{ sections: AboutSectionDTO[]; persons: AboutPersonDTO[] }> {
-  const res = await fetch(`${process.env.NEXTAUTH_URL ?? ""}/api/about`, {
+  const res = await fetch(`${process.env.AUTH_URL ?? ""}/api/about`, {
     cache: "no-store",
   });
 
