@@ -35,7 +35,14 @@ docker compose `
   -f "C:\Repository\ServerSoftware\webserver-02\cdn\compose.local.yml" `
   up -d
 ```
-5. Start backschmiede-koelker_local:
+5. Start redis:
+```bash
+docker compose `
+  --env-file "C:\Repository\ServerSoftware\webserver-02\redis\.env.prod" `
+  -f "C:\Repository\ServerSoftware\webserver-02\redis\compose.yml" `
+  up -d
+```
+6. Start backschmiede-koelker_local:
 ```bash
 # prisma generate for VS Code:
 npx dotenv -e .env.local -- prisma generate
@@ -65,28 +72,35 @@ docker compose `
   -f ".\compose.local.yml" `
   down
 ```
-2. Stop cdn_local:
+2. Stop redis:
+```bash
+docker compose `
+  --env-file "C:\Repository\ServerSoftware\webserver-02\redis\.env.prod" `
+  -f "C:\Repository\ServerSoftware\webserver-02\redis\compose.yml" `
+  down
+```
+3. Stop cdn_local:
 ```bash
 docker compose `
   --env-file "C:\Repository\ServerSoftware\webserver-02\cdn\.env.local" `
   -f "C:\Repository\ServerSoftware\webserver-02\cdn\compose.local.yml" `
   down
 ```
-3. Stop postgres_local:
+4. Stop postgres_local:
 ```bash
 docker compose `
   --env-file "C:\Repository\ServerSoftware\webserver-02\postgresql\.env.local" `
   -f "C:\Repository\ServerSoftware\webserver-02\postgresql\compose.local.yml" `
   down
 ```
-4. Stop traefik_local:
+5. Stop traefik_local:
 ```bash
 docker compose `
   --env-file "C:\Repository\ServerSoftware\webserver-02\traefik\.env.local" `
   -f "C:\Repository\ServerSoftware\webserver-02\traefik\compose.local.yml" `
   down
 ```
-5. Disconnect VPN
+6. Disconnect VPN
 
 
 

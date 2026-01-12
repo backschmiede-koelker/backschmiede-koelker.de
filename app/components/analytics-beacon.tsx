@@ -29,17 +29,13 @@ export default function AnalyticsBeacon() {
       utm: pickUTM(searchParams as unknown as URLSearchParams),
     };
 
-    const blob = new Blob([JSON.stringify(body)], { type: "application/json" });
-
-    // sendBeacon ist non-blocking; Fallback auf fetch(keepalive) für alte Browser
-    if (!navigator.sendBeacon || !navigator.sendBeacon("/api/collect", blob)) {
-      fetch("/api/collect", {
-        method: "POST",
-        body: JSON.stringify(body),
-        headers: { "content-type": "application/json" },
-        keepalive: true,
-      }).catch(() => {});
-    }
+    fetch("/api/collect", {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "content-type": "application/json" },
+      keepalive: true,
+      credentials: "omit",
+    }).catch(() => {});
   }, [pathname, searchParams]);
 
   return null;

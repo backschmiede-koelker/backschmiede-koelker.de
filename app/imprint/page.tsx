@@ -25,7 +25,9 @@ export default function ImpressumPage() {
           <br />
           [TODO: Rechtsform, z. B. Einzelunternehmen / GmbH]
           <br />
-          [TODO: Ladungsfähige Anschrift]
+          [TODO: Inhaber/Vertretungsberechtigter Name]
+          <br />
+          Landrat-Schultz-Straße 1, 49497 Mettingen
         </p>
         <p>
           Betriebsstätten:
@@ -48,13 +50,8 @@ export default function ImpressumPage() {
       </section>
 
       <section>
-        <h2>Vertretungsberechtigter</h2>
-        <p>Josua Kölker (Inhaber)</p>
-      </section>
-
-      <section>
         <h2>Registereintrag</h2>
-        <p>[TODO: Register (z. B. Handelsregister), Registergericht, Registernummer]</p>
+        <p>[TODO: Register (z. B. Handelsregister), Registergericht, Registernummer, oder halt nicht vorhanden]</p>
       </section>
 
       <section>
@@ -64,20 +61,18 @@ export default function ImpressumPage() {
 
       <section>
         <h2>Umsatzsteuer</h2>
-        <p>USt-IdNr.: [TODO: vorhanden / nicht vorhanden / Kleinunternehmer nach § 19 UStG]</p>
-        <p>Wirtschafts-IdNr.: [TODO: falls vorhanden]</p>
-      </section>
-
-      <section>
-        <h2>Verantwortlich i.S.d. § 18 Abs. 2 MStV</h2>
-        <p>Josua Kölker</p>
+        <p>
+          USt-IdNr.: [TODO: falls vorhanden, sonst entfernen]
+          <br />
+          Hinweis Kleinunternehmer: [TODO: nur falls wirklich § 19 UStG zutrifft]
+        </p>
       </section>
 
       <section>
         <h2>Streitbeilegung</h2>
         <p>
-          Wir sind [TODO: verpflichtet/nicht verpflichtet] und [TODO: bereit/nicht bereit], an einem
-          Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+          Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer
+          Verbraucherschlichtungsstelle teilzunehmen.
         </p>
       </section>
 
