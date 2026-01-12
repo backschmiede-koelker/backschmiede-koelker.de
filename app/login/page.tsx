@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Admin Login | Backschmiede Kölker",
   description: "Sicherer Zugang zum Adminbereich der Backschmiede Kölker.",
   alternates: { canonical: "/login" },
+  robots: { index: false, follow: false, nocache: true },
   openGraph: {
     title: "Admin Login | Backschmiede Kölker",
     description: "Sicherer Zugang zum Adminbereich der Backschmiede Kölker.",

@@ -116,6 +116,7 @@ export default async function Page() {
                         fill
                         className="object-cover"
                         priority
+                        sizes="(min-width: 1280px) 340px, 0px"
                       />
                     </div>
                     <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/85 px-3 py-1.5 text-xs font-medium text-zinc-700 backdrop-blur dark:bg-zinc-900/70 dark:text-zinc-200 border border-emerald-800/10 dark:border-emerald-300/10">
@@ -133,6 +134,7 @@ export default async function Page() {
                         fill
                         className="object-cover"
                         priority
+                        sizes="(min-width: 1280px) 340px, 0px"
                       />
                     </div>
                     <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/85 px-3 py-1.5 text-xs font-medium text-zinc-700 backdrop-blur dark:bg-zinc-900/70 dark:text-zinc-200 border border-emerald-800/10 dark:border-emerald-300/10">
@@ -163,6 +165,7 @@ export default async function Page() {
                         fill
                         className="object-cover"
                         priority
+                        sizes="(max-width: 1279px) 320px, 0px"
                       />
                     </div>
                     <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/85 px-3 py-1.5 text-xs font-medium text-zinc-700 backdrop-blur dark:bg-zinc-900/70 dark:text-zinc-200 border border-emerald-800/10 dark:border-emerald-300/10">
@@ -188,6 +191,7 @@ export default async function Page() {
                         fill
                         className="object-cover"
                         priority
+                        sizes="(max-width: 1279px) 320px, 0px"
                       />
                     </div>
                     <div className="absolute inset-x-3 bottom-3 rounded-lg bg-white/85 px-3 py-1.5 text-xs font-medium text-zinc-700 backdrop-blur dark:bg-zinc-900/70 dark:text-zinc-200 border border-emerald-800/10 dark:border-emerald-300/10">

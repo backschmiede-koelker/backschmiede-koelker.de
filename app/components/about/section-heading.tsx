@@ -5,14 +5,17 @@ export default function AboutSectionHeading({
   title,
   subtitle,
   eyebrow,
+  as = "h2",
   align = "left",
 }: {
   title?: string | null;
   subtitle?: string | null;
   eyebrow?: string | null;
+  as?: "h1" | "h2";
   align?: "left" | "center";
 }) {
   const isCenter = align === "center";
+  const HeadingTag: React.ElementType = as;
 
   return (
     <header className={["mb-4 md:mb-6", isCenter ? "text-center" : ""].join(" ")}>
@@ -28,7 +31,9 @@ export default function AboutSectionHeading({
         </span>
       )}
       {title && (
-        <h2 className="text-xl md:text-3xl font-bold tracking-tight">{title}</h2>
+        <HeadingTag className="text-xl md:text-3xl font-bold tracking-tight">
+          {title}
+        </HeadingTag>
       )}
       {subtitle && (
         <p

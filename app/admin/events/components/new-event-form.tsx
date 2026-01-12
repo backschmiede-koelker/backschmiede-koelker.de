@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from "react";
 import ImageUploader from "@/app/components/image-uploader";
+import { LOCATION_OPTIONS, type LocationKey, locationLabel } from "@/app/lib/locations";
 
 function toLocalInputValue(iso: string) {
   const d = new Date(iso);
@@ -20,6 +21,7 @@ export default function NewEventForm({ onCreated }: { onCreated?: () => void }) 
   const [startsAt, setStartsAt] = useState(nowIso);
   const [endsAt, setEndsAt] = useState<string | null>(null);
   const [isActive, setIsActive] = useState(true);
+  const [locations, setLocations] = useState<LocationKey[]>(["RECKE", "METTINGEN"]);
 
   const [saving, setSaving] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -27,6 +29,12 @@ export default function NewEventForm({ onCreated }: { onCreated?: () => void }) 
   const captionOk = !!caption.trim();
   const startsOk = Number.isFinite(new Date(startsAt).getTime());
   const formOk = captionOk && startsOk;
+
+  function onToggleLocation(l: LocationKey) {
+    setLocations((prev) =>
+      prev.includes(l) ? prev.filter((x) => x !== l) : [...prev, l]
+    );
+  }
 
   async function create() {
     if (!formOk) {
@@ -45,6 +53,7 @@ export default function NewEventForm({ onCreated }: { onCreated?: () => void }) 
           startsAt,
           endsAt,
           isActive,
+          locations,
         }),
       });
 
@@ -153,6 +162,36 @@ export default function NewEventForm({ onCreated }: { onCreated?: () => void }) 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             />
+          </div>
+
+          <div className="min-w-0">
+            <label className="text-sm font-medium">
+              Filialen
+              <span className="ml-1 text-xs text-zinc-500">
+                (Standard: beide)
+              </span>
+            </label>
+
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {LOCATION_OPTIONS.map((l) => {
+                const active = locations.includes(l);
+                return (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => onToggleLocation(l)}
+                    className={[
+                      "rounded-full px-3 py-1 text-xs font-semibold ring-1 transition",
+                      active
+                        ? "bg-emerald-100 ring-emerald-300 text-emerald-900 dark:bg-emerald-900/30 dark:ring-emerald-700 dark:text-emerald-200"
+                        : "bg-zinc-100 ring-zinc-300 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-200",
+                    ].join(" ")}
+                  >
+                    {locationLabel(l)}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <ImageUploader folder="events" imageUrl={imageUrl} onChange={setImageUrl} />

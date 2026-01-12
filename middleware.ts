@@ -2,6 +2,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { v4 as uuid } from "uuid";
+import { BUILDING } from "@/app/lib/flags";
 
 type ReqWithAuth = NextRequest & {
   auth?: { user?: { role?: string | null } } | null;
@@ -63,6 +64,10 @@ export default auth((req: ReqWithAuth) => {
   if (pathname.startsWith("/api/events")) {
     if (req.method === "GET") return base;
     return isAdmin ? base : redirectWithCookies("/login");
+  }
+
+  if (BUILDING && pathname === "/") {
+    return NextResponse.redirect(new URL("/building", url.origin));
   }
 
   return base;

@@ -1,9 +1,11 @@
 // app/api/events/route.ts
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
-import { Prisma } from "@/generated/prisma/client";
+import { Prisma, Location } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
+
+const ALL_LOCATIONS = new Set(Object.values(Location));
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -60,6 +62,7 @@ export async function GET(req: Request) {
         startsAt: true,
         endsAt: true,
         isActive: true,
+        locations: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -87,6 +90,7 @@ export async function GET(req: Request) {
         startsAt: true,
         endsAt: true,
         isActive: true,
+        locations: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -109,6 +113,7 @@ export async function GET(req: Request) {
       startsAt: true,
       endsAt: true,
       isActive: true,
+      locations: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -126,6 +131,7 @@ export async function POST(req: Request) {
     startsAt: string; // ISO
     endsAt?: string | null; // ISO
     isActive?: boolean;
+    locations?: string[];
   };
 
   const caption = String(b.caption ?? "").trim();
@@ -141,6 +147,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "endsAt invalid" }, { status: 400 });
   }
 
+  const locationsRaw = Array.isArray(b.locations) ? b.locations : [];
+  const locations = locationsRaw
+    .map((x) => String(x).toUpperCase().trim())
+    .filter((x): x is Location => ALL_LOCATIONS.has(x as Location)) as Location[];
+
   const created = await getPrisma().event.create({
     data: {
       caption,
@@ -149,6 +160,7 @@ export async function POST(req: Request) {
       startsAt,
       endsAt: endsAt ?? null,
       isActive: b.isActive ?? true,
+      locations,
     },
     select: {
       id: true,
@@ -158,6 +170,7 @@ export async function POST(req: Request) {
       startsAt: true,
       endsAt: true,
       isActive: true,
+      locations: true,
       createdAt: true,
       updatedAt: true,
     },

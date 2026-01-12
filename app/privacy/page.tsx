@@ -25,7 +25,8 @@ export default function PrivacyPage() {
           Hauptstraße 10, 49509 Recke<br />
           Landrat-Schultz-Straße 1, 49497 Mettingen<br />
           E-Mail: <a href="mailto:info@backschmiede-koelker.de">info@backschmiede-koelker.de</a><br />
-          Telefon: <a href="tel:+49">+49 (Telefon eintragen)</a>
+          Telefon Recke: <a href="tel:+4915755353999">+49 1575 5353999</a><br />
+          Telefon Mettingen: <a href="tel:+495452919611">+49 5452 919611</a>
         </p>
       </section>
 

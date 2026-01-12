@@ -11,20 +11,40 @@ export default function Footer() {
     city,
     phoneHref,
     phoneLabel,
+    mapHref,
   }: {
     title: string;
     street: React.ReactNode;
     city: string;
     phoneHref: string;
     phoneLabel: string;
+    mapHref?: string;
   }) {
     return (
       <div className="h-full rounded-2xl border border-emerald-800/10 dark:border-emerald-300/10 bg-white/70 dark:bg-white/5 p-4 shadow-sm">
         <div className="text-sm opacity-80">Standort</div>
         <h3 className="mt-1 text-base font-semibold">{title}</h3>
         <div className="mt-2 text-sm leading-6">
-          <div className="whitespace-pre-line">{street}</div>
-          <div>{city}</div>
+          {mapHref ? (
+            <a
+              href={mapHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block decoration-emerald-600/40
+                        hover:text-emerald-700 hover:decoration-emerald-600
+                        dark:hover:text-emerald-300 dark:decoration-emerald-300/30 dark:hover:decoration-emerald-300
+                        transition-colors"
+              aria-label={`Adresse auf Google Maps öffnen: ${title}`}
+            >
+              <div className="whitespace-pre-line">{street}</div>
+              <div>{city}</div>
+            </a>
+          ) : (
+            <>
+              <div className="whitespace-pre-line">{street}</div>
+              <div>{city}</div>
+            </>
+          )}
         </div>
         <div className="mt-3 text-sm">
           Telefon:{" "}
@@ -65,6 +85,7 @@ export default function Footer() {
             city="49509 Recke"
             phoneHref="tel:+4915755353999"
             phoneLabel="+49 1575 5353999"
+            mapHref="https://maps.app.goo.gl/v7fAobfiUPDe8xTV6"
           />
           <LocationCard
             title="Mettingen"
@@ -72,6 +93,7 @@ export default function Footer() {
             city="49497 Mettingen"
             phoneHref="tel:+495452919611"
             phoneLabel="+49 5452 919611"
+            mapHref="https://maps.app.goo.gl/gyHqK9nJXGHv4oxX6"
           />
         </div>
       </div>

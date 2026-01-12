@@ -5,6 +5,7 @@ import SelectBox from "./select-box"
 import ImageUploader from "./image-uploader"
 import { PRICE_RE, parseEuroToCents } from "../lib/format"
 import { parseTags } from "../lib/tags"
+import { ALLERGENS, ALLERGEN_LABEL, type Allergen } from "@/app/lib/allergens";
 
 type Props = {
   allUnits: string[]
@@ -21,9 +22,16 @@ export default function NewProductForm({ allUnits, allTags, onCreated }: Props) 
   const [imageUrl, setImageUrl] = useState("")
   const [tagInput, setTagInput] = useState("")
   const [chosenTags, setChosenTags] = useState<string[]>([])
+  const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [isActive, setIsActive] = useState(true)
   const [showErrors, setShowErrors] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  function toggleAllergen(a: Allergen) {
+    setAllergens((prev) =>
+      prev.includes(a) ? prev.filter((x) => x !== a) : [...prev, a]
+    );
+  }
 
   function addTagFromInput() {
     const parts = parseTags(tagInput)
@@ -55,6 +63,7 @@ export default function NewProductForm({ allUnits, allTags, onCreated }: Props) 
         unit: finalUnit,
         imageUrl: imageUrl || null,
         tags: chosenTags,
+        allergens: allergens,
         isActive: !!isActive,
       }
       const res = await fetch("/api/products", {
@@ -76,6 +85,7 @@ export default function NewProductForm({ allUnits, allTags, onCreated }: Props) 
       setImageUrl("")
       setTagInput("")
       setChosenTags([])
+      setAllergens([])
       setIsActive(true)
       setShowErrors(false)
       onCreated?.()
@@ -239,6 +249,54 @@ export default function NewProductForm({ allUnits, allTags, onCreated }: Props) 
             Tag hinzufügen
           </button>
         </div>
+      </div>
+
+      <div className="min-w-0">
+        <label className="text-sm font-medium">
+          Allergene <span className="ml-1 text-xs text-zinc-500">(optional)</span>
+        </label>
+
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          {ALLERGENS.map((a) => {
+            const active = allergens.includes(a);
+            return (
+              <button
+                key={a}
+                type="button"
+                onClick={() => toggleAllergen(a)}
+                className={[
+                  "rounded-full px-3 py-1 text-xs font-semibold ring-1 transition",
+                  active
+                    ? "bg-rose-100 ring-rose-300 text-rose-900 dark:bg-rose-900/30 dark:ring-rose-700 dark:text-rose-200"
+                    : "bg-zinc-100 ring-zinc-300 text-zinc-800 hover:bg-zinc-200 dark:bg-zinc-800 dark:ring-zinc-700 dark:text-zinc-200",
+                ].join(" ")}
+              >
+                {ALLERGEN_LABEL[a]}
+              </button>
+            );
+          })}
+        </div>
+
+        {allergens.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {allergens.map((a) => (
+              <span
+                key={a}
+                className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-3 py-1 text-xs ring-1 ring-rose-300 text-rose-900 dark:bg-rose-900/30 dark:ring-rose-700 dark:text-rose-200"
+              >
+                {ALLERGEN_LABEL[a]}
+                <button
+                  type="button"
+                  aria-label={`${ALLERGEN_LABEL[a]} entfernen`}
+                  onClick={() => toggleAllergen(a)}
+                  className="-mr-1 rounded p-0.5 hover:bg-black/5 dark:hover:bg-white/10"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Status + Speichern */}
