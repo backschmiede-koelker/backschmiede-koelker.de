@@ -14,6 +14,7 @@ import {
   FaCalendarDays,
 } from "react-icons/fa6";
 import { signOut } from "@/auth";
+import { WEBSITE_VERSION } from "@/version";
 
 export const metadata: Metadata = {
   title: "Admin | Backschmiede Kölker",
@@ -269,6 +270,10 @@ export default function AdminHome() {
               Zeiträume sind inklusiv - Start und Ende zählen mit (Berlin-Zeit).
             </li>
           </ul>
+
+          <div className="mt-3 text-xs text-zinc-600 dark:text-zinc-400">
+            Version: <span className="font-mono">{WEBSITE_VERSION}</span>
+          </div>
         </div>
       </section>
     </main>
