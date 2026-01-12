@@ -86,7 +86,7 @@ export default function AboutHeroSection({
 
             {/* Heading: WHITE bekommt mehr Kontrast über Wrapper */}
             <div className="rounded-3xl bg-white/55 dark:bg-transparent backdrop-blur-[2px] p-0">
-              <AboutSectionHeading title={title} subtitle={subtitle} />
+              <AboutSectionHeading title={title} subtitle={subtitle} as="h1" />
             </div>
 
             {/* Chips */}

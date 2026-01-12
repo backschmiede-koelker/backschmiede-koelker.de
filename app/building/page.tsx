@@ -1,10 +1,18 @@
-// app/_building/page.tsx
+// app/building/page.tsx
 import { Suspense } from "react";
 import AnalyticsBeacon from "../components/analytics-beacon";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Im Aufbau | Backschmiede Kölker - Handwerk aus Recke & Mettingen",
+  description: "Diese Seite befindet sich im Aufbau.",
+  alternates: { canonical: "/building" },
+  robots: { index: false, follow: false, nocache: true },
+};
 
 export default function BuildingPage() {
   return (
-    <div className="fixed inset-0 z-[9999] min-h-dvh w-full bg-zinc-950 text-zinc-100 flex items-center justify-center px-5 py-10">
+    <div className="overflow-hidden fixed inset-0 z-[9999] min-h-dvh w-full bg-zinc-950 text-zinc-100 flex items-center justify-center px-5 py-10">
       <div className="w-full max-w-xl">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-7 sm:p-10">
           <p className="text-xs sm:text-sm text-zinc-400 tracking-widest uppercase">
