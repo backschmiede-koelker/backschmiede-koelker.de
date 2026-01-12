@@ -20,6 +20,10 @@ export default function AnalyticsBeacon() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    const dnt = navigator.doNotTrack === "1" || navigator.doNotTrack === "yes";
+    const gpc = (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true;
+    if (dnt || gpc) return;
+
     const body = {
       path: pathname || "/",
       utm: pickUTM(searchParams as unknown as URLSearchParams),

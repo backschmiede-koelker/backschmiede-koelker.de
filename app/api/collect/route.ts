@@ -19,12 +19,24 @@ function dailyPepper(secret: string, day: string) {
   return crypto.createHmac("sha256", secret).update(day).digest("base64url");
 }
 
+function maskIp(ip: string) {
+  if (ip.includes(":")) {
+    const parts = ip.split(":").filter(Boolean);
+    const head = parts.slice(0, 3).join(":");
+    return head ? `${head}::` : ip;
+  }
+  const parts = ip.split(".");
+  if (parts.length === 4) return `${parts[0]}.${parts[1]}.${parts[2]}.0`;
+  return ip;
+}
+
 function dailyIpHash(ip: string | null) {
   if (!ip) return null;
   const day = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   const secret = process.env.IP_SALT ?? "";
   const pepper = dailyPepper(secret, day);
-  return crypto.createHash("sha256").update(`${ip}|${day}|${pepper}`).digest("base64url");
+  const masked = maskIp(ip);
+  return crypto.createHash("sha256").update(`${masked}|${day}|${pepper}`).digest("base64url");
 }
 
 function getClientIP(req: Request) {
@@ -85,15 +97,15 @@ function countryFromHeaders(req: Request) {
   return /^[A-Z]{2}$/.test(cc) ? cc : undefined;
 }
 
-function cookieValue(req: Request, name: string) {
-  const cookie = req.headers.get("cookie") || "";
-  const m = cookie.match(new RegExp(`(?:^|;\\s*)${name}=([^;]+)`));
-  return m ? decodeURIComponent(m[1]) : undefined;
-}
-
 // ---------- Handler ----------
 export async function POST(req: Request) {
   try {
+    const dnt = req.headers.get("dnt") === "1";
+    const gpc = req.headers.get("sec-gpc") === "1";
+    if (dnt || gpc) {
+      return new NextResponse(null, { status: 204 });
+    }
+
     const session = await auth();
     const isAdmin = session?.user?.role === "ADMIN";
 
@@ -101,7 +113,6 @@ export async function POST(req: Request) {
     const lang = primaryLang(req.headers.get("accept-language"));
     const refHost = refHostFromHeader(req.headers.get("referer"));
     const country = countryFromHeaders(req);
-    const sid = cookieValue(req, "sid");
     const ip = getClientIP(req);
     const ipHash = dailyIpHash(ip);
     const bot = isLikelyBot(ua);
@@ -124,7 +135,6 @@ export async function POST(req: Request) {
         device: deviceFromUA(ua),
         browser: browserFromUA(ua),
         country,
-        sessionId: sid,
         ipHash,
         isBot: bot,
         isAdmin,

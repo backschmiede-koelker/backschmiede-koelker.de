@@ -10,11 +10,11 @@ import AdminPageHeaderServer from "../components/admin-page-header-server";
 
 export const metadata: Metadata = {
   title: "Admin - Analytics | Backschmiede Kölker",
-  description: "Anonyme Analytics, Trafficquellen und Kampagnen für die Backschmiede Kölker einsehen.",
+  description: "Cookieless Analytics, Trafficquellen und Kampagnen für die Backschmiede Kölker einsehen.",
   alternates: { canonical: "/admin/analytics" },
   openGraph: {
     title: "Admin - Analytics | Backschmiede Kölker",
-    description: "Anonyme Analytics, Trafficquellen und Kampagnen für die Backschmiede Kölker einsehen.",
+    description: "Cookieless Analytics, Trafficquellen und Kampagnen für die Backschmiede Kölker einsehen.",
     url: "/admin/analytics",
     type: "website",
   },
@@ -194,7 +194,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
     <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 md:px-8 py-8 md:py-12 min-w-0 overflow-x-hidden">
       <AdminPageHeaderServer
         title="Analytics"
-        subtitle="Übersichtliche, anonyme Zahlen für Deine Website."
+        subtitle="Übersichtliche, cookieless Zahlen ohne Cookies oder Identifier."
       />
 
       {/* Filter */}
@@ -241,7 +241,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Pr
       {/* Besucher pro Tag */}
       <Card
         title="Besucher pro Tag"
-        help="Zeigt, wie viele unterschiedliche Personen pro Tag auf der Website waren. Mehrere Aufrufe derselben Person am selben Tag zählen hier als 1."
+        help="Schätzung: zählt unterschiedliche Besuche pro Tag anhand eines täglich rotierenden, gekürzten IP-Hashs. Keine Cookies; mehrere Personen hinter einem Anschluss können als 1 gezählt werden."
         className="mt-5"
       >
         <LineChart data={uData} yLabel="Besucher" xLabel="Datum" className="w-full" />
