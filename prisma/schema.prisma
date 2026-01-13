@@ -192,44 +192,61 @@ model OfferMultibuyPrice {
   @@schema("backschmiede_koelker")
 }
 
-model ContentBlock {
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  content   String
+model TgtgCta {
+  id String @id @default(cuid())
+
+  // Singleton-Key, damit wir exakt 1 Datensatz haben
+  slug String @unique @default("default")
+
+  title       String
+  subtitle    String?
+  description String?
+
+  // Location-spezifische Untertitel / Links / Hinweise
+  reckeSubtitle     String?
+  mettingenSubtitle String?
+
+  tgtgAppLinkRecke     String
+  tgtgAppLinkMettingen String
+
+  reckeHinweis      String?
+  mettingenHinweis  String?
+  allgemeinerHinweis String?
+
+  steps    TgtgCtaStep[]
+  faqItems TgtgCtaFaqItem[]
+
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 
   @@schema("backschmiede_koelker")
 }
 
-model Pageview {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
+model TgtgCtaStep {
+  id        String @id @default(cuid())
+  ctaId     String
+  sortOrder Int    @default(0)
 
-  path         String
-  referrerHost String?
-  utmSource    String?
-  utmMedium    String?
-  utmCampaign  String?
+  title       String
+  description String
 
-  lang    String?
-  device  String?
-  browser String?
-  country String?
+  cta TgtgCta @relation(fields: [ctaId], references: [id], onDelete: Cascade)
 
-  sessionId String?
-  ipHash    String?
-  isBot     Boolean @default(false)
-  isAdmin   Boolean @default(false)
+  @@index([ctaId, sortOrder])
+  @@schema("backschmiede_koelker")
+}
 
-  @@index([createdAt])
-  @@index([path, createdAt])
-  @@index([referrerHost])
-  @@index([utmSource, utmMedium, utmCampaign])
-  @@index([device])
-  @@index([browser])
-  @@index([lang])
+model TgtgCtaFaqItem {
+  id        String @id @default(cuid())
+  ctaId     String
+  sortOrder Int    @default(0)
 
+  question String
+  answer   String
+
+  cta TgtgCta @relation(fields: [ctaId], references: [id], onDelete: Cascade)
+
+  @@index([ctaId, sortOrder])
   @@schema("backschmiede_koelker")
 }
 

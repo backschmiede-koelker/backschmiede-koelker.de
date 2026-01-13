@@ -1,33 +1,121 @@
 // /app/components/tgtg-cta.tsx
-'use client';
-import { ChevronRight } from 'lucide-react';
-import * as React from 'react';
+"use client";
+
+import { ChevronRight } from "lucide-react";
+import * as React from "react";
 
 type LocationInfo = {
-  key: 'RECKE' | 'METTINGEN';
+  key: "RECKE" | "METTINGEN";
   label: string;
-  tgtgShareUrl: string; // mobile -> App, desktop -> Installationsseite
+  tgtgShareUrl: string;
+  subtitle: string;
+  hint: string;
+};
+
+type Step = { title: string; description: string };
+type FaqItem = { question: string; answer: string };
+
+export type TgtgCtaContent = {
+  title: string;
+  subtitle?: string | null;
+  description?: string | null;
+
+  reckeSubtitle?: string | null;
+  mettingenSubtitle?: string | null;
+
+  tgtgAppLinkRecke: string;
+  tgtgAppLinkMettingen: string;
+
+  reckeHinweis?: string | null;
+  mettingenHinweis?: string | null;
+  allgemeinerHinweis?: string | null;
+
+  steps: Step[];
+  faqItems: FaqItem[];
 };
 
 type Props = {
-  locations?: LocationInfo[];
+  content?: TgtgCtaContent;
 };
 
-const DEFAULT_LOCATIONS: LocationInfo[] = [
-  {
-    key: 'RECKE',
-    label: 'Recke',
-    tgtgShareUrl: 'https://share.toogoodtogo.com/item/142593183634493376/',
-  },
-  {
-    key: 'METTINGEN',
-    label: 'Mettingen',
-    tgtgShareUrl: 'https://share.toogoodtogo.com/item/146056137368565632/',
-  },
-];
+const FALLBACK = {
+  title: "Too Good To Go - Überraschungstüten",
+  subtitle: "Lebensmittel retten",
+  description:
+    "Spare und rette frische Backwaren vom Tag. Verfügbarkeit & Abholfenster findest du immer aktuell in der Too Good To Go App.",
+  reckeSubtitle: "Überraschungstüte reservieren",
+  mettingenSubtitle: "Überraschungstüte reservieren",
+  tgtgAppLinkRecke: "https://share.toogoodtogo.com/item/142593183634493376/",
+  tgtgAppLinkMettingen: "https://share.toogoodtogo.com/item/146056137368565632/",
+  reckeHinweis: "Abholfenster & Verfügbarkeit: bitte in der App prüfen.",
+  mettingenHinweis: "Abholfenster & Verfügbarkeit: bitte in der App prüfen.",
+  allgemeinerHinweis:
+    "Hinweis: Mengen sind begrenzt und variieren je Tag - in der App siehst du immer den aktuellen Stand.",
+  steps: [
+    {
+      title: "Standort öffnen",
+      description:
+        "Auf Recke oder Mettingen klicken - du landest direkt beim passenden Eintrag in Too Good To Go.",
+    },
+    {
+      title: "Tüte reservieren",
+      description: "In der App auswählen & bezahlen - du erhältst eine Bestätigung.",
+    },
+    {
+      title: "Zur Zeit abholen",
+      description:
+        "Abholfenster steht in der App - bitte rechtzeitig erscheinen und Bestätigung zeigen.",
+    },
+    {
+      title: "Genießen & sparen",
+      description: "Frische Backwaren zum kleinen Preis - und Lebensmittel gerettet!",
+    },
+  ],
+  faqItems: [
+    {
+      question: "Wo sehe ich Abholzeiten und Verfügbarkeit?",
+      answer:
+        "Direkt in der Too Good To Go App beim jeweiligen Standort - dort sind die Abholfenster und die Verfügbarkeit immer aktuell.",
+    },
+    {
+      question: "Was steckt in der Überraschungstüte?",
+      answer:
+        "Eine gemischte Auswahl vom Tag (z. B. Brötchen, Brote, süßes Gebäck) - abhängig davon, was übrig ist.",
+    },
+    {
+      question: "Kann ich mehrere Tüten reservieren?",
+      answer:
+        "Wenn genug verfügbar ist: ja. Die App zeigt die aktuelle Anzahl beim jeweiligen Standort.",
+    },
+    {
+      question: "Was, wenn ich es nicht rechtzeitig schaffe?",
+      answer:
+        "Bitte plane genug Zeit ein - Abholung ist nur im in der App angegebenen Zeitfenster möglich.",
+    },
+  ],
+} satisfies {
+  title: string;
+  subtitle: string;
+  description: string;
+  reckeSubtitle: string;
+  mettingenSubtitle: string;
+  tgtgAppLinkRecke: string;
+  tgtgAppLinkMettingen: string;
+  reckeHinweis: string;
+  mettingenHinweis: string;
+  allgemeinerHinweis: string;
+  steps: Step[];
+  faqItems: FaqItem[];
+};
 
-// Einzelnes FAQ-Item mit Animation
-function FAQItem({ question, children }: { question: string; children: React.ReactNode }) {
+// Einzelnes FAQ-Item mit Animation (unverändert)
+function FAQItem({
+  question,
+  children,
+}: {
+  question: string;
+  children: React.ReactNode;
+}) {
   const [open, setOpen] = React.useState(false);
   const contentRef = React.useRef<HTMLDivElement | null>(null);
   const [maxHeight, setMaxHeight] = React.useState(0);
@@ -42,8 +130,8 @@ function FAQItem({ question, children }: { question: string; children: React.Rea
     const onResize = () => {
       if (contentRef.current) setMaxHeight(contentRef.current.scrollHeight);
     };
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, [open]);
 
   return (
@@ -57,7 +145,7 @@ function FAQItem({ question, children }: { question: string; children: React.Rea
         <span className="text-sm font-medium">{question}</span>
         <span
           className={`inline-flex h-5 w-5 items-center justify-center text-xs transition-transform duration-200 ${
-            open ? 'rotate-90' : ''
+            open ? "rotate-90" : ""
           }`}
           aria-hidden
         >
@@ -76,7 +164,48 @@ function FAQItem({ question, children }: { question: string; children: React.Rea
   );
 }
 
-export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
+export default function TgtgCta({ content }: Props) {
+  const title = (content?.title || FALLBACK.title).trim();
+  const subtitle = (content?.subtitle ?? FALLBACK.subtitle).trim();
+  const description = (content?.description ?? FALLBACK.description).trim();
+
+  const reckeSubtitle = (content?.reckeSubtitle ?? FALLBACK.reckeSubtitle).trim();
+  const mettingenSubtitle = (content?.mettingenSubtitle ?? FALLBACK.mettingenSubtitle).trim();
+
+  const reckeLink = (content?.tgtgAppLinkRecke || FALLBACK.tgtgAppLinkRecke).trim();
+  const mettingenLink = (content?.tgtgAppLinkMettingen || FALLBACK.tgtgAppLinkMettingen).trim();
+
+  const reckeHinweis = (content?.reckeHinweis ?? FALLBACK.reckeHinweis).trim();
+  const mettingenHinweis = (content?.mettingenHinweis ?? FALLBACK.mettingenHinweis).trim();
+  const allgemeinerHinweis = (content?.allgemeinerHinweis ?? FALLBACK.allgemeinerHinweis).trim();
+
+  const steps: Step[] =
+    content?.steps?.length && content.steps.every((s) => s?.title && s?.description)
+      ? content.steps
+      : FALLBACK.steps;
+
+  const faqItems: FaqItem[] =
+    content?.faqItems?.length && content.faqItems.every((f) => f?.question && f?.answer)
+      ? content.faqItems
+      : FALLBACK.faqItems;
+
+  const locations: LocationInfo[] = [
+    {
+      key: "RECKE",
+      label: "Recke",
+      tgtgShareUrl: reckeLink,
+      subtitle: reckeSubtitle,
+      hint: reckeHinweis,
+    },
+    {
+      key: "METTINGEN",
+      label: "Mettingen",
+      tgtgShareUrl: mettingenLink,
+      subtitle: mettingenSubtitle,
+      hint: mettingenHinweis,
+    },
+  ];
+
   return (
     <section
       aria-labelledby="tgtg-title"
@@ -104,17 +233,14 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
           <svg width="12" height="12" viewBox="0 0 24 24" className="shrink-0" aria-hidden>
             <path d="M3 21s6-1 10-5 5-10 5-10-6 1-10 5-5 10-5 10Z" fill="currentColor" />
           </svg>
-          Lebensmittel retten
+          {subtitle}
         </div>
 
         <h3 id="tgtg-title" className="mt-2 text-2xl font-semibold leading-tight">
-          Too&nbsp;Good&nbsp;To&nbsp;Go - Überraschungstüten
+          {title}
         </h3>
 
-        <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">
-          Spare und rette frische Backwaren vom Tag. Verfügbarkeit &amp; Abholfenster findest du immer aktuell in der
-          Too&nbsp;Good&nbsp;To&nbsp;Go App.
-        </p>
+        <p className="mt-1 text-sm text-zinc-700 dark:text-zinc-300">{description}</p>
       </header>
 
       {/* Desktop: Buttons + Anleitung nebeneinander, FAQ darunter (full width) */}
@@ -142,9 +268,7 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
                   </span>
                   <div className="min-w-0">
                     <div className="font-semibold leading-tight">{loc.label}</div>
-                    <div className="text-xs text-zinc-600 dark:text-zinc-300">
-                      Überraschungstüte reservieren
-                    </div>
+                    <div className="text-xs text-zinc-600 dark:text-zinc-300">{loc.subtitle}</div>
                   </div>
                   <span
                     className="ml-auto translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
@@ -165,15 +289,13 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
                 </a>
 
                 <p className="mt-2 text-[11px] text-amber-900/80 dark:text-amber-200/80">
-                  Abholfenster &amp; Verfügbarkeit: bitte in der App prüfen.
+                  {loc.hint}
                 </p>
               </div>
             ))}
           </div>
 
-          <p className="text-xs text-zinc-600 dark:text-zinc-300">
-            Hinweis: Mengen sind begrenzt und variieren je Tag - in der App siehst du immer den aktuellen Stand.
-          </p>
+          <p className="text-xs text-zinc-600 dark:text-zinc-300">{allgemeinerHinweis}</p>
         </div>
 
         {/* Anleitung */}
@@ -183,31 +305,14 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
           </h4>
 
           <ol className="space-y-3">
-            {[
-              {
-                t: 'Standort öffnen',
-                d: 'Auf Recke oder Mettingen klicken - du landest direkt beim passenden Eintrag in Too Good To Go.',
-              },
-              {
-                t: 'Tüte reservieren',
-                d: 'In der App auswählen & bezahlen - du erhältst eine Bestätigung.',
-              },
-              {
-                t: 'Zur Zeit abholen',
-                d: 'Abholfenster steht in der App - bitte rechtzeitig erscheinen und Bestätigung zeigen.',
-              },
-              {
-                t: 'Genießen & sparen',
-                d: 'Frische Backwaren zum kleinen Preis - und Lebensmittel gerettet!',
-              },
-            ].map((s, i) => (
-              <li key={i} className="flex gap-3">
+            {steps.map((s, i) => (
+              <li key={`${i}-${s.title}`} className="flex gap-3">
                 <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-[12px] font-bold text-white">
                   {i + 1}
                 </span>
                 <div>
-                  <div className="font-medium">{s.t}</div>
-                  <div className="text-sm text-zinc-700 dark:text-zinc-300">{s.d}</div>
+                  <div className="font-medium">{s.title}</div>
+                  <div className="text-sm text-zinc-700 dark:text-zinc-300">{s.description}</div>
                 </div>
               </li>
             ))}
@@ -217,22 +322,11 @@ export default function TgtgCta({ locations = DEFAULT_LOCATIONS }: Props) {
         {/* FAQ full width (unter Buttons + Anleitung) */}
         <div className="lg:col-span-2">
           <div className="rounded-xl border border-emerald-800/10 bg-white/80 p-3 dark:border-emerald-300/15 dark:bg-white/5">
-            <FAQItem question="Wo sehe ich Abholzeiten und Verfügbarkeit?">
-              Direkt in der Too&nbsp;Good&nbsp;To&nbsp;Go App beim jeweiligen Standort - dort sind die Abholfenster und
-              die Verfügbarkeit immer aktuell.
-            </FAQItem>
-
-            <FAQItem question="Was steckt in der Überraschungstüte?">
-              Eine gemischte Auswahl vom Tag (z.&nbsp;B. Brötchen, Brote, süßes Gebäck) - abhängig davon, was übrig ist.
-            </FAQItem>
-
-            <FAQItem question="Kann ich mehrere Tüten reservieren?">
-              Wenn genug verfügbar ist: ja. Die App zeigt die aktuelle Anzahl beim jeweiligen Standort.
-            </FAQItem>
-
-            <FAQItem question="Was, wenn ich es nicht rechtzeitig schaffe?">
-              Bitte plane genug Zeit ein - Abholung ist nur im in der App angegebenen Zeitfenster möglich.
-            </FAQItem>
+            {faqItems.map((f, idx) => (
+              <FAQItem key={`${idx}-${f.question}`} question={f.question}>
+                {f.answer}
+              </FAQItem>
+            ))}
           </div>
         </div>
       </div>

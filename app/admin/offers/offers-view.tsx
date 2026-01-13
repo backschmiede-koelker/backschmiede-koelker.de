@@ -21,6 +21,7 @@ import { useOfferUnits } from "./hooks/use-offer-units";
 import { useOfferForm } from "./hooks/use-offer-form";
 import OfferList from "./components/offer-list";
 import AdminPageHeader from "../components/admin-page-header";
+import TgtgAdminPanel from "./components/tgtg-admin-panel";
 
 export default function AdminOffersView() {
   const { items, loading, reload } = useOffers();
@@ -34,6 +35,8 @@ export default function AdminOffersView() {
         title="Angebote"
         subtitle="Wähle unten einen Typ und fülle nur die wenigen Felder aus. Fertig."
       /> 
+
+      <TgtgAdminPanel />
           
       <SectionCard className="relative z-30 overflow-visible">
         {/* Typ-Auswahl */}

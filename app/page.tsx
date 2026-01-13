@@ -6,7 +6,7 @@ import { FaWheatAwn, FaLeaf, FaHeart } from "react-icons/fa6";
 
 import HeroScrollCta from "./components/hero-scroll-cta";
 import Hours from "./components/hours";
-import TgtgCta from "./components/tgtg-cta";
+import TgtgCtaServer from "./components/tgtg-cta.server";
 import News from "./components/news/news";
 import TodayOffersSection from "./components/offers/today-offers-section";
 import UpcomingOffersSection from "./components/offers/upcoming-offers-section";
@@ -297,7 +297,7 @@ export default async function Page() {
 
         {/* To Good To Go - immer sichtbar, sorgt dafür dass die Section nie „leer“ wirkt */}
         <div className="mt-8">
-          <TgtgCta />
+          <TgtgCtaServer />
         </div>
       </section>
 
