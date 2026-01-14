@@ -7,12 +7,14 @@ function unauthorized() {
   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 }
 
-export async function PUT(req: Request, ctx: { params: { id: string } }) {
+type Ctx = { params: Promise<{ id: string }> };
+
+export async function PUT(req: Request, { params }: Ctx) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") return unauthorized();
 
+  const { id } = await params;
   const prisma = getPrisma();
-  const { id } = ctx.params;
 
   const body = (await req.json()) as { title?: string; description?: string };
 
@@ -28,12 +30,12 @@ export async function PUT(req: Request, ctx: { params: { id: string } }) {
   return NextResponse.json(updated);
 }
 
-export async function DELETE(_: Request, ctx: { params: { id: string } }) {
+export async function DELETE(_: Request, { params }: Ctx) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") return unauthorized();
 
+  const { id } = await params;
   const prisma = getPrisma();
-  const { id } = ctx.params;
 
   // ctaId holen, danach löschen, danach sortOrder normalisieren
   const step = await prisma.tgtgCtaStep.findUnique({
