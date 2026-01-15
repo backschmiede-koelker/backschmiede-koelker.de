@@ -23,6 +23,7 @@ import type { ExceptionForm, HoursPayload, SiteSettingsForm } from "./types";
 import type { LocationKey } from "@/app/lib/locations";
 
 type SessionLike = { user?: { role?: string | null } | null } | null | undefined;
+type SaveScope = "HERO" | "SUBTITLES" | "HOURS" | "FOOTER";
 
 function mustBeAdmin(session: SessionLike) {
   if (session?.user?.role !== "ADMIN") redirect("/login");
@@ -140,32 +141,44 @@ async function replaceExceptions(location: LocationKey, exceptions: ExceptionFor
 }
 
 export async function saveSiteSettings(input: {
+  scope: SaveScope;
   settings: SiteSettingsForm;
   weeklyHours: HoursPayload;
   exceptions: Record<LocationKey, ExceptionForm[]>;
 }) {
   await adminGuard();
 
-  const before = await snapshotCurrent();
-  const after = snapshotPayload({
-    weeklyHours: input.weeklyHours,
-    exceptions: input.exceptions,
-  });
+  try {
+    let syncError: string | null = null;
 
-  await updateSiteSettings(input.settings);
-  await updateWeeklyHours("METTINGEN", input.weeklyHours.METTINGEN);
-  await updateWeeklyHours("RECKE", input.weeklyHours.RECKE);
-  await replaceExceptions("METTINGEN", input.exceptions.METTINGEN);
-  await replaceExceptions("RECKE", input.exceptions.RECKE);
-
-  let syncError: string | null = null;
-  if (JSON.stringify(before) !== JSON.stringify(after)) {
-    try {
-      await syncBusinessHoursOrThrow(after);
-    } catch (err: unknown) {
-      syncError = getErrorMessage(err);
+    if (input.scope !== "HOURS") {
+      await updateSiteSettings(input.settings);
     }
-  }
 
-  return { ok: true, syncError };
+    if (input.scope === "HOURS") {
+      const before = await snapshotCurrent();
+      const after = snapshotPayload({
+        weeklyHours: input.weeklyHours,
+        exceptions: input.exceptions,
+      });
+
+      await updateWeeklyHours("METTINGEN", input.weeklyHours.METTINGEN);
+      await updateWeeklyHours("RECKE", input.weeklyHours.RECKE);
+      await replaceExceptions("METTINGEN", input.exceptions.METTINGEN);
+      await replaceExceptions("RECKE", input.exceptions.RECKE);
+
+      if (JSON.stringify(before) !== JSON.stringify(after)) {
+        try {
+          await syncBusinessHoursOrThrow(after);
+        } catch (err: unknown) {
+          syncError = getErrorMessage(err);
+        }
+      }
+    }
+
+    return { ok: true, syncError };
+  } catch (err: unknown) {
+    console.error("saveSiteSettings failed", err);
+    return { ok: false, error: getErrorMessage(err) };
+  }
 }
