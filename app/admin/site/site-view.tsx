@@ -55,10 +55,6 @@ export default function AdminSiteView({
 
   const [activeLocation, setActiveLocation] =
     useState<LocationKey>("METTINGEN");
-  const [heroUploadBusy, setHeroUploadBusy] = useState<Record<LocationKey, boolean>>({
-    METTINGEN: false,
-    RECKE: false,
-  });
 
   const [newExceptionDate, setNewExceptionDate] = useState<Record<
     LocationKey,
@@ -77,7 +73,6 @@ export default function AdminSiteView({
 
   const activeWeek = weeklyHours[activeLocation];
   const activeExceptions = exceptions[activeLocation];
-  const heroBusy = heroUploadBusy.METTINGEN || heroUploadBusy.RECKE;
 
   function updateSetting<K extends keyof SiteSettingsForm>(
     key: K,
@@ -210,10 +205,6 @@ export default function AdminSiteView({
     setSuccess(null);
     setSyncError(null);
 
-    if (scope === "HERO" && heroBusy) {
-      setError("Bitte warten, Bild-Upload läuft noch.");
-      return;
-    }
 
     if (scope !== "HOURS") {
       if (!settings.heroImageMettingen.trim()) {
@@ -301,10 +292,10 @@ export default function AdminSiteView({
           <button
             type="button"
             onClick={() => save("HERO")}
-            disabled={savingScope != null || heroBusy}
+            disabled={savingScope != null}
             className="w-full sm:w-auto rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
           >
-            {savingHero ? "Speichere…" : heroBusy ? "Upload läuft…" : "Speichern"}
+            {savingHero ? "Speichere…" : "Speichern"}
           </button>
         </div>
 
@@ -383,10 +374,6 @@ export default function AdminSiteView({
                   folder="site"
                   imageUrl={settings.heroImageMettingen}
                   onChange={(url) => updateSetting("heroImageMettingen", url)}
-                  allowRemove
-                  onBusyChange={(busy) =>
-                    setHeroUploadBusy((prev) => ({ ...prev, METTINGEN: busy }))
-                  }
                 />
               </div>
             </div>
@@ -400,10 +387,6 @@ export default function AdminSiteView({
                   folder="site"
                   imageUrl={settings.heroImageRecke}
                   onChange={(url) => updateSetting("heroImageRecke", url)}
-                  allowRemove
-                  onBusyChange={(busy) =>
-                    setHeroUploadBusy((prev) => ({ ...prev, RECKE: busy }))
-                  }
                 />
               </div>
             </div>

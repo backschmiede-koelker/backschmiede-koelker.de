@@ -9,8 +9,6 @@ type Props = {
   imageUrl: string;
   /** Erwartet **DB-Speicherwert** ("folder/file") oder "" zum Löschen */
   onChange: (url: string) => void;
-  allowRemove?: boolean;
-  onBusyChange?: (busy: boolean) => void;
 };
 
 /** Liefert die bevorzugte CDN-Basis (Env) oder errät sie aus der aktuellen Domain (→ cdn.<host>) */
@@ -47,18 +45,11 @@ function absoluteCdnUrl(input?: string | null): string | null {
   return viaHelper || null;
 }
 
-export default function ImageUploader({
-  folder,
-  imageUrl,
-  onChange,
-  allowRemove = true,
-  onBusyChange,
-}: Props) {
+export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [previewOverride, setPreviewOverride] = useState<string | null>(null); // lokale Vorschau (Blob/CDN)
-  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Aus Prop (DB-Wert oder absolut) eine anzeigbare URL ableiten - kann vom override übersteuert werden
@@ -70,13 +61,9 @@ export default function ImageUploader({
     setPreviewOverride(null);
   }, [imageUrl]);
 
-  useEffect(() => {
-    onBusyChange?.(uploading || deleting);
-  }, [uploading, deleting, onBusyChange]);
 
   // Beim Entfernen
   async function removeCurrentImage() {
-    if (!allowRemove) return;
     if (!imageUrl) {
       onChange("");
       setPreviewOverride(null);
@@ -103,21 +90,13 @@ export default function ImageUploader({
     setPreviewOverride(blobUrl);
 
     setUploading(true);
-    setError(null);
     try {
       const fd = new FormData();
       fd.append("file", file);
       fd.append("folder", folder);
       fd.append("nameBase", file.name.replace(/\.[^.]+$/, ""));
       const res = await fetch("/api/upload", { method: "POST", body: fd });
-      if (!res.ok) {
-        let message = "Upload fehlgeschlagen";
-        try {
-          const payload = (await res.json()) as { error?: string };
-          if (payload?.error) message = payload.error;
-        } catch {}
-        throw new Error(message);
-      }
+      if (!res.ok) throw new Error("Upload failed");
       const { url } = (await res.json()) as { url: string }; // **DB-Speicherwert**: "folder/file.ext"
 
       // Optionale Alt-Datei abräumen (fail-silent)
@@ -135,10 +114,6 @@ export default function ImageUploader({
 
       // 3) Parent mit **DB-Speicherwert** updaten
       onChange(url);
-    } catch (err) {
-      setPreviewOverride(null);
-      const message = err instanceof Error ? err.message : "Upload fehlgeschlagen";
-      setError(message);
     } finally {
       setUploading(false);
     }
@@ -223,7 +198,7 @@ export default function ImageUploader({
                 type="button"
                 onClick={removeCurrentImage}
                 className="text-xs underline text-red-600 disabled:opacity-60 text-left sm:text-left"
-                disabled={deleting || !allowRemove}
+                disabled={deleting}
               >
                 {deleting ? "Löscht…" : "Bild entfernen"}
               </button>
@@ -231,12 +206,6 @@ export default function ImageUploader({
           </div>
         </div>
       )}
-
-      {error ? (
-        <div className="mt-3 text-xs text-red-600 dark:text-red-300">
-          {error}
-        </div>
-      ) : null}
     </div>
   );
 }
