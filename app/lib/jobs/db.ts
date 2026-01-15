@@ -1,5 +1,5 @@
 // app/lib/jobs/db.ts
-import { getPrisma } from "@/lib/prisma";
+import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
   Prisma,
   Job as PrismaJob,
@@ -90,6 +90,9 @@ export async function fetchJobs(filter?: {
   emp?: string;
   activeOnly?: boolean;
 }) {
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
   const where: Prisma.JobWhereInput = {};
 
   if (filter?.activeOnly !== false) {
@@ -150,11 +153,17 @@ export async function allJobsAdmin() {
 }
 
 export async function getJobBySlug(slug: string) {
+  if (!isDatabaseConfigured()) {
+    return undefined;
+  }
   const j = await getPrisma().job.findUnique({ where: { slug } });
   return j ? mapJob(j) : undefined;
 }
 
 export async function getJobById(id: string) {
+  if (!isDatabaseConfigured()) {
+    return undefined;
+  }
   const j = await getPrisma().job.findUnique({ where: { id } });
   return j ? mapJob(j) : undefined;
 }

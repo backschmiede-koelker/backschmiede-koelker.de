@@ -1,7 +1,7 @@
 // app/lib/opening-hours.server.ts
 import "server-only";
 
-import { getPrisma } from "@/lib/prisma";
+import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { locations } from "@/app/data/locations";
 import type { Location, Weekday } from "@/generated/prisma/client";
 import {
@@ -111,6 +111,17 @@ async function ensureOpeningHoursDefaults() {
 }
 
 export async function getWeeklyHours(location: Location): Promise<WeeklyHoursDTO[]> {
+  if (!isDatabaseConfigured()) {
+    const fallbackLines =
+      location === "METTINGEN"
+        ? locations.mettingen.fallback.weekday_text
+        : locations.recke.fallback.weekday_text;
+    const fallbackMap = fallbackIntervalsByWeekday(fallbackLines);
+    return WEEKDAY_ORDER.map((weekday) => ({
+      weekday,
+      intervals: normalizeIntervals(fallbackMap[weekday] ?? []),
+    }));
+  }
   await ensureOpeningHoursDefaults();
   const rows = await getPrisma().openingHour.findMany({
     where: { location },
@@ -161,6 +172,9 @@ export async function updateWeeklyHours(
 }
 
 export async function listExceptions(location: Location): Promise<OpeningExceptionDTO[]> {
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
   const rows = await getPrisma().openingException.findMany({
     where: { location },
     orderBy: { date: "asc" },

@@ -1,6 +1,6 @@
 // app/lib/tgtg-cta.server.ts
 import "server-only";
-import { getPrisma } from "@/lib/prisma";
+import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 
 export type TgtgCtaDTO = {
   slug: string;
@@ -56,6 +56,33 @@ const DEFAULTS: Omit<TgtgCtaDTO, "slug"> = {
 };
 
 export async function ensureTgtgCta(): Promise<TgtgCtaDTO> {
+  if (!isDatabaseConfigured()) {
+    return {
+      slug: "default",
+      title: DEFAULTS.title,
+      subtitle: DEFAULTS.subtitle,
+      description: DEFAULTS.description,
+      reckeSubtitle: DEFAULTS.reckeSubtitle,
+      mettingenSubtitle: DEFAULTS.mettingenSubtitle,
+      tgtgAppLinkRecke: DEFAULTS.tgtgAppLinkRecke,
+      tgtgAppLinkMettingen: DEFAULTS.tgtgAppLinkMettingen,
+      reckeHinweis: DEFAULTS.reckeHinweis,
+      mettingenHinweis: DEFAULTS.mettingenHinweis,
+      allgemeinerHinweis: DEFAULTS.allgemeinerHinweis,
+      steps: DEFAULTS.steps.map((s, idx) => ({
+        id: `fallback-step-${idx}`,
+        sortOrder: s.sortOrder,
+        title: s.title,
+        description: s.description,
+      })),
+      faqItems: DEFAULTS.faqItems.map((f, idx) => ({
+        id: `fallback-faq-${idx}`,
+        sortOrder: f.sortOrder,
+        question: f.question,
+        answer: f.answer,
+      })),
+    };
+  }
   const prisma = getPrisma();
 
   const existing = await prisma.tgtgCta.findUnique({

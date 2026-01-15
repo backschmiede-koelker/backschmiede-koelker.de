@@ -1,12 +1,13 @@
 // app/lib/legal.server.ts
 import "server-only";
 
-import { getPrisma } from "@/lib/prisma";
+import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
   DEFAULT_LEGAL_DOCUMENTS,
   DEFAULT_LEGAL_SETTINGS,
   type LegalDocSeed,
 } from "./legal-defaults";
+import { fallbackLegalDocument, fallbackLegalSettings } from "./legal-fallback";
 import type { LegalBlockType, LegalDocType } from "@/generated/prisma/client";
 
 export type LegalBlockDTO = {
@@ -149,6 +150,9 @@ function cleanOptional(value: string | null | undefined) {
 }
 
 export async function getOrCreateLegalSettings(): Promise<LegalSettingsDTO> {
+  if (!isDatabaseConfigured()) {
+    return fallbackLegalSettings();
+  }
   await ensureLegalDefaults();
   const settings = await getPrisma().legalSettings.findUnique({
     where: { id: "singleton" },
@@ -186,6 +190,9 @@ export async function updateLegalSettings(input: {
 }
 
 export async function getOrCreateLegal(type: LegalDocType): Promise<LegalDocumentDTO> {
+  if (!isDatabaseConfigured()) {
+    return fallbackLegalDocument(type);
+  }
   await ensureLegalDefaults();
   const doc = await getPrisma().legalDocument.findUnique({
     where: { type },

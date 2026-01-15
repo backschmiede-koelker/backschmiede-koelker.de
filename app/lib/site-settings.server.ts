@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getPrisma } from "@/lib/prisma";
+import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 
 export type SiteSettingsDTO = {
   id: string;
@@ -66,6 +66,9 @@ function cleanOptional(value: string | null | undefined) {
 }
 
 export async function getOrCreateSiteSettings(): Promise<SiteSettingsDTO> {
+  if (!isDatabaseConfigured()) {
+    return { id: "fallback", ...DEFAULT_SITE_SETTINGS };
+  }
   const prisma = getPrisma();
   const existing = await prisma.siteSettings.findUnique({
     where: { id: "singleton" },

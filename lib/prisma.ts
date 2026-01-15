@@ -5,6 +5,16 @@ import { Pool } from "pg";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
+function isBuildPhase() {
+  const phase = process.env.NEXT_PHASE;
+  return phase === "phase-production-build" || phase === "phase-production-export";
+}
+
+export function isDatabaseConfigured() {
+  if (isBuildPhase()) return false;
+  return !!process.env.DATABASE_URL;
+}
+
 export function getPrisma() {
   if (globalForPrisma.prisma) return globalForPrisma.prisma;
 
