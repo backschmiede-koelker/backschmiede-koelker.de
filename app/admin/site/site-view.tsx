@@ -213,10 +213,16 @@ export default function AdminSiteView({
     setSavingScope(scope);
     try {
       const res = await saveSiteSettings({
+        scope,
         settings,
         weeklyHours,
         exceptions,
       });
+
+      if (!res.ok) {
+        setError(res.error || "Fehler beim Speichern.");
+        return;
+      }
 
       const label =
         scope === "HERO"
