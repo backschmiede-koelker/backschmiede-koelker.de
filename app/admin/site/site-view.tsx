@@ -215,6 +215,17 @@ export default function AdminSiteView({
       return;
     }
 
+    if (scope !== "HOURS") {
+      if (!settings.heroImageMettingen.trim()) {
+        setError("Hero Bild Mettingen darf nicht leer sein.");
+        return;
+      }
+      if (!settings.heroImageRecke.trim()) {
+        setError("Hero Bild Recke darf nicht leer sein.");
+        return;
+      }
+    }
+
     if (validationError) {
       setError(validationError);
       return;
@@ -372,7 +383,7 @@ export default function AdminSiteView({
                   folder="site"
                   imageUrl={settings.heroImageMettingen}
                   onChange={(url) => updateSetting("heroImageMettingen", url)}
-                  allowRemove={false}
+                  allowRemove
                   onBusyChange={(busy) =>
                     setHeroUploadBusy((prev) => ({ ...prev, METTINGEN: busy }))
                   }
@@ -389,7 +400,7 @@ export default function AdminSiteView({
                   folder="site"
                   imageUrl={settings.heroImageRecke}
                   onChange={(url) => updateSetting("heroImageRecke", url)}
-                  allowRemove={false}
+                  allowRemove
                   onBusyChange={(busy) =>
                     setHeroUploadBusy((prev) => ({ ...prev, RECKE: busy }))
                   }
