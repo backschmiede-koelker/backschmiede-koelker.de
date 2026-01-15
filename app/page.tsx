@@ -10,7 +10,7 @@ import TgtgCtaServer from "./components/tgtg-cta.server";
 import News from "./components/news/news";
 import TodayOffersSection from "./components/offers/today-offers-section";
 import UpcomingOffersSection from "./components/offers/upcoming-offers-section";
-import { getPrisma } from "@/lib/prisma";
+import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
   DEFAULT_SITE_SETTINGS,
   getOrCreateSiteSettings,
@@ -37,6 +37,7 @@ function heroImageSrc(value: string | null | undefined, fallback: string): strin
 
 /** Prüft serverseitig via DB, ob mindestens eine aktive News existiert */
 async function getNewsPresence() {
+  if (!isDatabaseConfigured()) return true;
   try {
     const count = await getPrisma().news.count({ where: { isActive: true } });
     return count > 0;
