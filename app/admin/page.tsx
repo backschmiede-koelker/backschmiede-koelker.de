@@ -12,6 +12,8 @@ import {
   FaNewspaper,
   FaBriefcase,
   FaCalendarDays,
+  FaHouse,
+  FaScaleBalanced,
 } from "react-icons/fa6";
 import { signOut } from "@/auth";
 import { WEBSITE_VERSION } from "@/version";
@@ -36,7 +38,12 @@ type Accent =
   | "rose"
   | "lime"
   | "cyan"
-  | "slate";
+  | "slate"
+  | "indigo"
+  | "fuchsia"
+  | "teal"
+  | "orange"
+  | "pink";
 
 const ACCENT_STYLES: Record<
   Accent,
@@ -96,6 +103,39 @@ const ACCENT_STYLES: Record<
       "bg-slate-600/15 text-slate-700 dark:text-slate-300 ring-slate-600/20",
     iconBg: "bg-slate-500/10",
     focus: "focus-visible:ring-slate-500/50",
+  },
+  indigo: {
+    ring: "ring-indigo-600/20 hover:ring-indigo-600/30",
+    badge:
+      "bg-indigo-600/15 text-indigo-700 dark:text-indigo-300 ring-indigo-600/20",
+    iconBg: "bg-indigo-500/10",
+    focus: "focus-visible:ring-indigo-500/50",
+  },
+  fuchsia: {
+    ring: "ring-fuchsia-600/20 hover:ring-fuchsia-600/30",
+    badge:
+      "bg-fuchsia-600/15 text-fuchsia-700 dark:text-fuchsia-300 ring-fuchsia-600/20",
+    iconBg: "bg-fuchsia-500/10",
+    focus: "focus-visible:ring-fuchsia-500/50",
+  },
+  teal: {
+    ring: "ring-teal-600/20 hover:ring-teal-600/30",
+    badge: "bg-teal-600/15 text-teal-700 dark:text-teal-300 ring-teal-600/20",
+    iconBg: "bg-teal-500/10",
+    focus: "focus-visible:ring-teal-500/50",
+  },
+  orange: {
+    ring: "ring-orange-600/20 hover:ring-orange-600/30",
+    badge:
+      "bg-orange-600/15 text-orange-700 dark:text-orange-300 ring-orange-600/20",
+    iconBg: "bg-orange-500/10",
+    focus: "focus-visible:ring-orange-500/50",
+  },
+  pink: {
+    ring: "ring-pink-600/20 hover:ring-pink-600/30",
+    badge: "bg-pink-600/15 text-pink-700 dark:text-pink-300 ring-pink-600/20",
+    iconBg: "bg-pink-500/10",
+    focus: "focus-visible:ring-pink-500/50",
   },
 };
 
@@ -208,11 +248,25 @@ export default function AdminHome() {
 
       <section className="grid gap-3.5 sm:gap-4 md:gap-4 sm:grid-cols-2">
         <AdminTile
+          href="/admin/site"
+          title="Startseite"
+          subtitle="Hero, Öffnungszeiten & Footer bearbeiten"
+          Icon={FaHouse}
+          accent="emerald"
+        />
+        <AdminTile
+          href="/admin/legal"
+          title="Rechtliches"
+          subtitle="Impressum & Datenschutz verwalten"
+          Icon={FaScaleBalanced}
+          accent="slate"
+        />
+        <AdminTile
           href="/admin/products"
           title="Produkte"
           subtitle="Artikel, Preise, Einheiten & Bilder verwalten"
           Icon={FaListUl}
-          accent="emerald"
+          accent="indigo"
         />
         <AdminTile
           href="/admin/offers"

@@ -6,11 +6,34 @@ import { FaWheatAwn, FaLeaf, FaHeart } from "react-icons/fa6";
 
 import HeroScrollCta from "./components/hero-scroll-cta";
 import Hours from "./components/hours";
-import TgtgCta from "./components/tgtg-cta";
+import TgtgCtaServer from "./components/tgtg-cta.server";
 import News from "./components/news/news";
 import TodayOffersSection from "./components/offers/today-offers-section";
 import UpcomingOffersSection from "./components/offers/upcoming-offers-section";
 import { getPrisma } from "@/lib/prisma";
+import {
+  DEFAULT_SITE_SETTINGS,
+  getOrCreateSiteSettings,
+} from "./lib/site-settings.server";
+import { publicAssetUrl } from "@/app/lib/uploads";
+
+/** Fix: Next <Image> braucht eine URL die entweder absolut ist oder mit "/" beginnt.
+ *  Unsere Uploads werden als DB-Wert "folder/file.ext" gespeichert → das ist für next/image "Invalid URL".
+ *  Diese Helper mappt Upload-Pfade korrekt (CDN oder /uploads/...), lässt aber normale Public-Assets ("/...") in Ruhe.
+ */
+function heroImageSrc(value: string | null | undefined, fallback: string): string {
+  const raw = (value ?? "").trim();
+  const fb = (fallback ?? "").trim();
+
+  const resolveOne = (v: string): string | null => {
+    if (!v) return null;
+    if (/^(https?:|data:|blob:)/i.test(v)) return v;
+    if (v.startsWith("/")) return v; // public/… oder bereits /uploads/…
+    return publicAssetUrl(v); // → http(s) CDN oder /uploads/<stored>
+  };
+
+  return resolveOne(raw) || resolveOne(fb) || "/"; // "/" als last-resort (sollte nie passieren)
+}
 
 /** Prüft serverseitig via DB, ob mindestens eine aktive News existiert */
 async function getNewsPresence() {
@@ -39,6 +62,16 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const hasNews = await getNewsPresence();
+  const site = await getOrCreateSiteSettings().catch(() => ({
+    id: "fallback",
+    ...DEFAULT_SITE_SETTINGS,
+  }));
+
+  const heroTags = [
+    site.heroTag1 || DEFAULT_SITE_SETTINGS.heroTag1,
+    site.heroTag2 || DEFAULT_SITE_SETTINGS.heroTag2,
+    site.heroTag3 || DEFAULT_SITE_SETTINGS.heroTag3,
+  ];
 
   return (
     <>
@@ -59,7 +92,7 @@ export default async function Page() {
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 dark:border-emerald-300/15 bg-white/75 dark:bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                Frisch gebacken in Mettingen &amp; Recke
+                {site.heroBadge || DEFAULT_SITE_SETTINGS.heroBadge}
               </div>
 
               <h1
@@ -67,17 +100,16 @@ export default async function Page() {
                 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl"
               >
                 <span className="bg-gradient-to-r from-emerald-700 via-emerald-600 to-amber-600 bg-clip-text text-transparent dark:from-emerald-300 dark:via-teal-200 dark:to-amber-300">
-                  Backschmiede Kölker
+                  {site.heroTitleLine1 || DEFAULT_SITE_SETTINGS.heroTitleLine1}
                 </span>
                 <br />
                 <span className="text-zinc-900 dark:text-zinc-100">
-                  Handwerk. Zeit. Gute Zutaten.
+                  {site.heroTitleLine2 || DEFAULT_SITE_SETTINGS.heroTitleLine2}
                 </span>
               </h1>
 
               <p className="mt-4 text-base leading-7 text-zinc-700 dark:text-zinc-300">
-                Brote, Brötchen und Kuchen mit langer Teigführung, eigenem
-                Sauerteig und viel Liebe. Komm vorbei - wir freuen uns auf dich!
+                {site.heroDescription || DEFAULT_SITE_SETTINGS.heroDescription}
               </p>
 
               {/* CTA: Öffnungszeiten & Angebote */}
@@ -90,15 +122,15 @@ export default async function Page() {
               <ul className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm lg:justify-start">
                 <li className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 dark:border-emerald-300/10 bg-white/60 dark:bg-white/10 px-3 py-1.5 text-zinc-800 dark:text-zinc-200">
                   <FaWheatAwn aria-hidden className="text-[14px]" />
-                  Eigener Sauerteig
+                  {heroTags[0]}
                 </li>
                 <li className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 dark:border-emerald-300/10 bg-white/60 dark:bg-white/10 px-3 py-1.5 text-zinc-800 dark:text-zinc-200">
                   <FaLeaf aria-hidden className="text-[14px]" />
-                  Regional &amp; ehrlich
+                  {heroTags[1]}
                 </li>
                 <li className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 dark:border-emerald-300/10 bg-white/60 dark:bg-white/10 px-3 py-1.5 text-zinc-800 dark:text-zinc-200">
                   <FaHeart aria-hidden className="text-[14px]" />
-                  Mit Liebe gebacken
+                  {heroTags[2]}
                 </li>
               </ul>
             </div>
@@ -111,7 +143,7 @@ export default async function Page() {
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-800/10 bg-white/60 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5">
                     <div className="relative aspect-[4/3] w-full">
                       <Image
-                        src="/mettingen-draussen-alt.png"
+                        src={heroImageSrc(site.heroImageMettingen, DEFAULT_SITE_SETTINGS.heroImageMettingen)}
                         alt="Mettingen"
                         fill
                         className="object-cover"
@@ -129,7 +161,7 @@ export default async function Page() {
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-800/10 bg-white/60 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5">
                     <div className="relative aspect-[4/3] w-full">
                       <Image
-                        src="/recke-tuer-ballons.jpg"
+                        src={heroImageSrc(site.heroImageRecke, DEFAULT_SITE_SETTINGS.heroImageRecke)}
                         alt="Recke"
                         fill
                         className="object-cover"
@@ -160,7 +192,7 @@ export default async function Page() {
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-800/10 bg-white/60 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5">
                     <div className="relative aspect-[4/3] w-full">
                       <Image
-                        src="/mettingen-draussen-alt.png"
+                        src={heroImageSrc(site.heroImageMettingen, DEFAULT_SITE_SETTINGS.heroImageMettingen)}
                         alt="Mettingen"
                         fill
                         className="object-cover"
@@ -186,7 +218,7 @@ export default async function Page() {
                   <div className="relative overflow-hidden rounded-2xl border border-emerald-800/10 bg-white/60 shadow-sm backdrop-blur dark:border-emerald-300/15 dark:bg-white/5">
                     <div className="relative aspect-[4/3] w-full">
                       <Image
-                        src="/recke-tuer-ballons.jpg"
+                        src={heroImageSrc(site.heroImageRecke, DEFAULT_SITE_SETTINGS.heroImageRecke)}
                         alt="Recke"
                         fill
                         className="object-cover"
@@ -234,12 +266,14 @@ export default async function Page() {
           className="mx-auto mt-0 w-full max-w-5xl px-4 scroll-mt-20"
           aria-labelledby="aktuelles-title"
         >
-          <h2
-            className="mb-4 text-center text-3xl font-bold"
-            id="aktuelles-title"
-          >
+          <h2 className="mb-1 text-center text-3xl font-bold" id="aktuelles-title">
             Aktuelles
           </h2>
+          {site.subtitleNews ? (
+            <p className="mb-3 text-center text-sm text-zinc-600 dark:text-zinc-300">
+              {site.subtitleNews}
+            </p>
+          ) : null}
 
           <div
             className="
@@ -273,31 +307,26 @@ export default async function Page() {
         aria-labelledby="angebote-title"
       >
         <header className="mb-4 text-center">
-          <h2
-            className="text-3xl font-bold"
-            id="angebote-title"
-          >
+          <h2 className="text-3xl font-bold" id="angebote-title">
             Angebote
           </h2>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-            Hier findest du unsere aktuellen Spezialpreise und Aktionen - heute
-            und für die nächsten Tage.
-          </p>
+          {site.subtitleOffers ? (
+            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+              {site.subtitleOffers}
+            </p>
+          ) : null}
         </header>
 
-        {/* HEUTE - zeigt nur etwas, wenn auch wirklich Angebote existieren */}
         <Suspense fallback={null}>
           <TodayOffersSection />
         </Suspense>
 
-        {/* DEMNÄCHST - wird automatisch ausgeblendet, wenn leer */}
         <Suspense fallback={null}>
           <UpcomingOffersSection />
         </Suspense>
 
-        {/* To Good To Go - immer sichtbar, sorgt dafür dass die Section nie „leer“ wirkt */}
         <div className="mt-8">
-          <TgtgCta />
+          <TgtgCtaServer />
         </div>
       </section>
 
@@ -307,12 +336,14 @@ export default async function Page() {
         className="mx-auto mt-12 w-full max-w-5xl px-4 scroll-mt-20"
         aria-labelledby="oeffnungszeiten-title"
       >
-        <h2
-          className="mb-4 text-center text-3xl font-bold"
-          id="oeffnungszeiten-title"
-        >
+        <h2 className="mb-2 text-center text-3xl font-bold" id="oeffnungszeiten-title">
           Öffnungszeiten
         </h2>
+        {site.subtitleHours ? (
+          <p className="mb-2 text-center text-sm text-zinc-600 dark:text-zinc-300">
+            {site.subtitleHours}
+          </p>
+        ) : null}
         <div className="rounded-3xl border border-emerald-800/10 bg-white/70 p-4 shadow-sm dark:border-emerald-300/15 dark:bg-white/5 sm:p-6">
           <Hours />
         </div>

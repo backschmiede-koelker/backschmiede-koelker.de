@@ -1,21 +1,31 @@
 // /app/components/footer.tsx
 import Link from "next/link";
 import { FaEnvelope, FaLock } from "react-icons/fa6";
+import {
+  DEFAULT_SITE_SETTINGS,
+  getOrCreateSiteSettings,
+} from "../lib/site-settings.server";
 
-export default function Footer() {
+function toTelHref(phone: string) {
+  return `tel:${phone.replace(/\s+/g, "")}`;
+}
+
+export default async function Footer() {
   const year = new Date().getFullYear();
+  const site = await getOrCreateSiteSettings().catch(() => ({
+    id: "fallback",
+    ...DEFAULT_SITE_SETTINGS,
+  }));
 
   function LocationCard({
     title,
-    street,
-    city,
+    address,
     phoneHref,
     phoneLabel,
     mapHref,
   }: {
     title: string;
-    street: React.ReactNode;
-    city: string;
+    address: string;
     phoneHref: string;
     phoneLabel: string;
     mapHref?: string;
@@ -36,13 +46,11 @@ export default function Footer() {
                         transition-colors"
               aria-label={`Adresse auf Google Maps öffnen: ${title}`}
             >
-              <div className="whitespace-pre-line">{street}</div>
-              <div>{city}</div>
+              <div className="whitespace-pre-line">{address}</div>
             </a>
           ) : (
             <>
-              <div className="whitespace-pre-line">{street}</div>
-              <div>{city}</div>
+              <div className="whitespace-pre-line">{address}</div>
             </>
           )}
         </div>
@@ -60,9 +68,9 @@ export default function Footer() {
     <footer className="mt-16 border-t border-emerald-800/10 dark:border-emerald-300/10 bg-white/70 dark:bg-zinc-900/60 backdrop-blur text-zinc-800 dark:text-zinc-200">
       <div className="mx-auto w-full max-w-5xl px-4 py-6">
         <div>
-          <h2 className="text-base font-semibold">Backschmiede Kölker</h2>
+          <h2 className="text-base font-semibold">{site.footerTitle}</h2>
           <p className="mt-1 text-sm opacity-80">
-            Handwerkliche Backwaren aus Mettingen &amp; Recke - täglich frisch, mit Zeit, Herz und guten Zutaten.
+            {site.footerSubtitle}
           </p>
         </div>
 
@@ -72,8 +80,11 @@ export default function Footer() {
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
               <FaEnvelope className="text-lg" />
             </span>
-            <a href="mailto:info@backschmiede-koelker.de" className="text-sm font-medium hover:underline">
-              info@backschmiede-koelker.de
+            <a
+              href={`mailto:${site.footerEmail}`}
+              className="text-sm font-medium hover:underline"
+            >
+              {site.footerEmail}
             </a>
           </div>
         </div>
@@ -81,18 +92,16 @@ export default function Footer() {
         <div className="mt-6 grid gap-4 lg:grid-cols-2 items-stretch">
           <LocationCard
             title="Recke"
-            street={<span className="whitespace-nowrap">Hauptstraße&nbsp;10</span>}
-            city="49509 Recke"
-            phoneHref="tel:+4915755353999"
-            phoneLabel="+49 1575 5353999"
+            address={site.footerAddressRecke}
+            phoneHref={toTelHref(site.footerPhoneRecke)}
+            phoneLabel={site.footerPhoneRecke}
             mapHref="https://maps.app.goo.gl/v7fAobfiUPDe8xTV6"
           />
           <LocationCard
             title="Mettingen"
-            street={<span className="whitespace-nowrap">Landrat-Schultz-Straße&nbsp;1</span>}
-            city="49497 Mettingen"
-            phoneHref="tel:+495452919611"
-            phoneLabel="+49 5452 919611"
+            address={site.footerAddressMettingen}
+            phoneHref={toTelHref(site.footerPhoneMettingen)}
+            phoneLabel={site.footerPhoneMettingen}
             mapHref="https://maps.app.goo.gl/gyHqK9nJXGHv4oxX6"
           />
         </div>
