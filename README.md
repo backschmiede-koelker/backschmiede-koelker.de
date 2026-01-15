@@ -118,6 +118,7 @@ docker compose --env-file .env.prod -f compose.yml up -d
 
 
 
+
 # maybe obsolete:
 First, run the development server:
 
