@@ -1,3 +1,4 @@
+// app/lib/legal-defaults.ts
 export const LEGAL_CONTACT_TOKENS = {
   email: "{{email}}",
   phoneRecke: "{{phoneRecke}}",
@@ -313,33 +314,34 @@ export const DEFAULT_LEGAL_DOCUMENTS: LegalDocSeed[] = [
         ],
       },
       {
-        heading: "Google Maps Platform / Places API (serverseitige Abfrage von Öffnungszeiten)",
+        heading: "Google Business Profile API (serverseitiger Abgleich von Öffnungszeiten)",
         blocks: [
           {
             type: "PARAGRAPH",
             text:
-              "Wir rufen in regelmäßigen Abständen Öffnungszeiten unserer Filialen über die Google Maps Platform (Places API) ab, um diese auf unserer Website aktuell darzustellen. Die Abfrage erfolgt ausschließlich serverseitig von unserem Server aus. Dabei stellt der Browser Ihres Endgeräts keine direkte Verbindung zu Google her.",
+              "Wir pflegen die Öffnungszeiten (wöchentliche Öffnungszeiten sowie Ausnahmen wie Sonderöffnungen/Schließtage) intern und können diese serverseitig an die Google-Unternehmensprofile unserer Filialen übertragen, damit die Angaben in Google Maps und im Unternehmensprofil aktuell sind. Die Übertragung wird ausschließlich durch autorisierte Mitarbeiter im Administrationsbereich ausgelöst.",
           },
           {
             type: "PARAGRAPH",
-            text: "Verarbeitet/übermittelt werden dabei insbesondere:",
+            text: "Dabei werden an Google insbesondere übermittelt/verarbeitet:",
           },
           {
             type: "LIST",
             items: [
-              "technische Verbindungsdaten des Servers (z. B. Server-IP-Adresse)",
-              "angefragte Place-ID und API-Request-Metadaten (z. B. Zeitpunkt, Statuscodes)",
+              "Öffnungszeiten (Regular Hours) je Wochentag",
+              "Ausnahmen/Sonderöffnungszeiten (Special Hours), inklusive Schließtage",
+              "technische Request-Daten unseres Servers (z. B. Server-IP-Adresse, Zeitpunkt, Statuscodes)",
             ],
           },
           {
             type: "PARAGRAPH",
             text:
-              "Es werden hierbei keine IP-Adressen oder sonstigen Identifikatoren von Website-Besuchern an Google übermittelt, da die Abfrage nicht aus Ihrem Browser heraus erfolgt.",
+              "Es werden hierbei keine Daten von Website-Besuchern an Google übermittelt, da der Abgleich nicht aus dem Browser heraus erfolgt, sondern ausschließlich serverseitig.",
           },
           {
             type: "PARAGRAPH",
             text:
-              "Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse), unser Angebot mit aktuellen Öffnungszeiten bereitzustellen.",
+              "Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse), aktuelle Öffnungszeiten in unseren Google-Unternehmensprofilen bereitzustellen.",
           },
           {
             type: "PARAGRAPH",
@@ -354,7 +356,7 @@ export const DEFAULT_LEGAL_DOCUMENTS: LegalDocSeed[] = [
           {
             type: "PARAGRAPH",
             text:
-              "Speicherdauer/Kriterien: Die abgerufenen Öffnungszeiten werden serverseitig zwischengespeichert und regelmäßig aktualisiert. Personenbezogene Daten von Website-Besuchern werden in diesem Zusammenhang nicht gespeichert.",
+              "Speicherdauer/Kriterien: Wir speichern die Öffnungszeiten intern in unserer Datenbank. Protokolle/Fehlerlogs zum Abgleich werden nur so lange aufbewahrt, wie es für Betrieb, Sicherheit und Fehleranalyse erforderlich ist.",
           },
         ],
       },
@@ -375,12 +377,12 @@ export const DEFAULT_LEGAL_DOCUMENTS: LegalDocSeed[] = [
           {
             type: "PARAGRAPH",
             text:
-              "Zusätzlich nutzen wir zur serverseitigen Abfrage von Öffnungszeiten die Google Maps Platform (Places API). Dabei kann Google als Empfänger technischer Request-Daten auftreten:",
+              "Für den serverseitigen Abgleich von Öffnungszeiten in unseren Google-Unternehmensprofilen nutzen wir die Google Business Profile API. Dabei kann Google als Empfänger technischer Request-Daten auftreten:",
           },
           {
             type: "LIST",
             items: [
-              "Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (Places API)",
+              "Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland (Google Business Profile API)",
             ],
           },
         ],
