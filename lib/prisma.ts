@@ -1,9 +1,11 @@
-// lib/prisma.ts
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient;
+  pgPool?: Pool;
+};
 
 function isBuildPhase() {
   const phase = process.env.NEXT_PHASE;
@@ -21,14 +23,26 @@ export function getPrisma() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) throw new Error("DATABASE_URL is not set");
 
-  const pool = new Pool({ connectionString });
+  // Pool auch cachen
+  const pool =
+    globalForPrisma.pgPool ??
+    new Pool({
+      connectionString,
+      max: 5, // optional, aber empfehlenswert
+    });
+
+  globalForPrisma.pgPool = pool;
+
   const adapter = new PrismaPg(pool);
 
   const client = new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error", "warn"], // warn in prod hilft enorm
   });
 
-  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = client;
+  globalForPrisma.prisma = client;
   return client;
 }
