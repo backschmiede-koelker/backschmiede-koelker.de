@@ -1,2 +1,2 @@
 // version.ts
-export const WEBSITE_VERSION = "1.1.3";
+export const WEBSITE_VERSION = "1.1.4";
