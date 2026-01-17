@@ -25,6 +25,10 @@ function mustBeAdmin(session: SessionLike) {
 
 async function adminGuard() {
   const session = (await auth()) as SessionLike;
+  console.log("[admin/legal] session", {
+    hasSession: !!session,
+    role: session?.user?.role ?? null,
+  });
   mustBeAdmin(session);
 }
 
@@ -78,8 +82,19 @@ export async function saveBlock(input: {
   text?: string | null;
   items?: string[];
 }) {
-  await adminGuard();
-  return updateLegalBlock(input);
+  const started = Date.now();
+  try {
+    await adminGuard();
+    console.log("saveBlock:start", { id: input.id, type: input.type, textLen: input.text?.length, itemsLen: input.items?.length });
+
+    const res = await updateLegalBlock(input);
+
+    console.log("saveBlock:ok", { id: input.id, ms: Date.now() - started });
+    return res;
+  } catch (err) {
+    console.error("[admin/legal] saveBlock:err", err);
+    throw err;
+  }
 }
 
 export async function removeBlock(id: string) {
