@@ -5,6 +5,8 @@ import { Product } from "../types/product"
 import SelectBox from "./select-box"
 import { centsToEuroString, parseEuroToCents, PRICE_RE } from "../lib/format"
 import { ALLERGENS, ALLERGEN_LABEL, type Allergen } from "@/app/lib/allergens";
+import ImageUploader from "./image-uploader";
+import { toStoredPath } from "@/app/lib/uploads";
 
 type Props = {
   product: Product
@@ -21,6 +23,8 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
   const [editCustomUnitMode, setEditCustomUnitMode] = useState(false)
   const [editCustomUnit, setEditCustomUnit] = useState("")
   const [editAllergens, setEditAllergens] = useState<Allergen[]>(p.allergens ?? []);
+  const [editImageUrl, setEditImageUrl] = useState(p.imageUrl ?? "");
+
 
   function toggleAllergen(a: Allergen) {
     setEditAllergens((prev) =>
@@ -31,14 +35,25 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
   const epInvalid = Number.isNaN(parseEuroToCents(editPrice || ""))
 
   const changed = useMemo(() => {
-    const cents = parseEuroToCents(editPrice || "")
+    const cents = parseEuroToCents(editPrice || "");
     const allergensChanged =
       [...(p.allergens ?? [])].sort().join(",") !== [...editAllergens].sort().join(",");
-    if (Number.isNaN(cents)) return false
-    const unitFinal = (editCustomUnitMode ? (editCustomUnit || "").trim() : editUnit) || "pro Stück"
-    return cents !== p.priceCents || 
-    unitFinal !== (p.unit || "pro Stück") || editIsActive !== p.isActive || allergensChanged
-  }, [editPrice, editUnit, editIsActive, editCustomUnitMode, editCustomUnit, editAllergens, p])
+
+    if (Number.isNaN(cents)) return false;
+
+    const unitFinal = (editCustomUnitMode ? (editCustomUnit || "").trim() : editUnit) || "pro Stück";
+
+    const prevImg = toStoredPath(p.imageUrl) || "";
+    const nextImg = toStoredPath(editImageUrl) || "";
+
+    return (
+      cents !== p.priceCents ||
+      unitFinal !== (p.unit || "pro Stück") ||
+      editIsActive !== p.isActive ||
+      allergensChanged ||
+      prevImg !== nextImg
+    );
+  }, [editPrice, editUnit, editIsActive, editCustomUnitMode, editCustomUnit, editAllergens, editImageUrl, p]);
 
   async function saveInline() {
     setEditSaving(true)
@@ -57,6 +72,7 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
           unit: finalUnit,
           isActive: active,
           allergens: editAllergens,
+          imageUrl: editImageUrl ? editImageUrl : null,
         }),
       })
       if (!res.ok) {
@@ -73,15 +89,21 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
     <li className="rounded-2xl border bg-white/90 p-4 ring-1 ring-black/5 shadow-sm dark:bg-zinc-900/80 dark:ring-white/10">
     {/* Statt flex: eine 2-Spalten-Grid nur auf Mobile (Bild | Header) */}
     <div className="grid grid-cols-[56px,1fr] gap-3 sm:grid-cols-[56px,1fr]">
-        {p.imageUrl && (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={p.imageUrl}
-              alt=""
-              className="h-14 w-14 rounded object-cover ring-1 ring-black/10 dark:ring-white/10"
-            />
-          </>
+        {p.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={p.imageUrl}
+            alt=""
+            className="h-14 w-14 rounded object-cover ring-1 ring-black/10 dark:ring-white/10"
+          />
+        ) : (
+          <div className="h-14 w-14 rounded bg-zinc-100 ring-1 ring-zinc-200 grid place-items-center dark:bg-zinc-800 dark:ring-zinc-700">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M3 17l5-5 4 4 3-3 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M14.5 8.5h.01" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+            </svg>
+          </div>
         )}
 
         {/* Rechts neben dem Bild: Name, Slug, Tags */}
@@ -103,6 +125,11 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
             ))}
             </div>
         )}
+        </div>
+
+        <div className="col-span-2 mt-4 admin-uploader-clip">
+          <div className="text-xs text-zinc-500 mb-2">Bild</div>
+          <ImageUploader folder="products" imageUrl={editImageUrl} onChange={setEditImageUrl} />
         </div>
 
         {/* Ab hier: volle Breite unter dem Bild */}
@@ -239,23 +266,40 @@ export default function ProductCard({ product: p, allUnits, onSaved, onDelete }:
 
         {/* Row 3: Aktionen - volle Breite */}
         <div className="col-span-2">
-            <div className="mt-4 flex flex-col gap-5 sm:flex-row">
-                <button
-                    onClick={saveInline}
-                    disabled={!changed || epInvalid || !!editSaving}
-                    className="w-full sm:w-auto rounded-md bg-emerald-600 px-3 py-2 text-sm text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-60"
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 min-w-0">
+              {!toStoredPath(editImageUrl) && (
+                <div
+                  className={[
+                    "w-full sm:w-auto",
+                    "rounded-lg border border-amber-500/30 bg-amber-50/70",
+                    "px-3 py-2 text-xs leading-snug text-zinc-700",
+                    "dark:bg-amber-900/20 dark:text-zinc-200 dark:border-amber-300/20",
+                    "break-words",
+                    "sm:max-w-[280px]",
+                  ].join(" ")}
                 >
-                    {editSaving ? "Speichere…" : "Änderungen speichern"}
-                </button>
+                  Tipp: Mit Bildern sehen Produkte besser aus - du kannst trotzdem ohne Bild speichern.
+                </div>
+              )}
 
-                <button
-                    className="w-full sm:w-auto rounded-md px-3 py-2 text-sm text-red-600 ring-1 ring-red-200 hover:bg-red-50 hover:ring-red-300 dark:text-red-400 dark:ring-red-800/60 dark:hover:bg-red-900/20"
-                    onClick={onDelete}
-                    title="Dieses Produkt löschen"
-                >
-                    Löschen
-                </button>
+              <button
+                onClick={saveInline}
+                disabled={!changed || epInvalid || !!editSaving}
+                className="w-full sm:w-auto rounded-md bg-emerald-600 px-3 py-2 text-sm text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-60"
+              >
+                {editSaving ? "Speichere…" : "Änderungen speichern"}
+              </button>
             </div>
+
+            <button
+              className="w-full sm:w-auto rounded-md px-3 py-2 text-sm text-red-600 ring-1 ring-red-200 hover:bg-red-50 hover:ring-red-300 dark:text-red-400 dark:ring-red-800/60 dark:hover:bg-red-900/20"
+              onClick={onDelete}
+              title="Dieses Produkt löschen"
+            >
+              Löschen
+            </button>
+          </div>
         </div>
     </div>
     </li>

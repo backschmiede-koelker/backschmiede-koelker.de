@@ -206,16 +206,27 @@ export default function ProductGrid() {
               key={p.id}
               className="group overflow-hidden rounded-xl border bg-white ring-1 ring-zinc-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:ring-amber-200 dark:border-zinc-700 dark:bg-zinc-900 dark:ring-zinc-700 dark:transition dark:hover:bg-zinc-800/80 dark:hover:ring-amber-400/30"
             >
-              {img && (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+              <div className="h-44 w-full bg-zinc-100 dark:bg-zinc-800 grid place-items-center overflow-hidden">
+                {img ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={img}
                     alt={p.name}
                     className="h-44 w-full object-cover transition group-hover:scale-[1.02]"
                   />
-                </>
-              )}
+                ) : (
+                  <div className="flex flex-col items-center gap-2 px-3 text-center">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="opacity-70">
+                      <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M3 17l5-5 4 4 3-3 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <path d="M14.5 8.5h.01" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+                    </svg>
+                    <div className="text-xs text-zinc-600 dark:text-zinc-300 leading-snug break-words">
+                      Kein Bild hinterlegt
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="p-4">
                 <h3 className="line-clamp-1 font-semibold tracking-tight">{p.name}</h3>
                 <p className="mt-0.5 line-clamp-1 text-xs text-zinc-500">{p.tags.join(" · ")}</p>

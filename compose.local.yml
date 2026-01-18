@@ -12,23 +12,16 @@ services:
         );
         npx prisma generate;
         npx prisma migrate dev;
+        npx prisma db seed;
         npm run dev
       "
+    env_file:
+      - .env.local
     environment:
-      NODE_ENV: ${NODE_ENV}
-      HOST: 0.0.0.0
-      PORT: ${PORT}
-      DATABASE_URL: ${DATABASE_URL}
-      UPLOAD_DIR: /uploads
-      NEXT_PUBLIC_BASE_ASSET_URL: ${NEXT_PUBLIC_BASE_ASSET_URL}
-      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
-      NEXT_PUBLIC_BUILDING: ${NEXT_PUBLIC_BUILDING}
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: "500"
       WATCHPACK_POLLING: "true"
       WATCHPACK_POLLING_INTERVAL: "500"
-      ADMIN_USERNAME: ${ADMIN_USERNAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     volumes:
       - ./:/app
       - ./uploads:/uploads
