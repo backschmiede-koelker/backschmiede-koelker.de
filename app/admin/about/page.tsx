@@ -6,6 +6,9 @@ import AboutView from "./about-view";
 import { Metadata } from "next";
 import type { AboutPersonDTO, AboutSectionDTO } from "./types";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Admin - Über uns | Backschmiede Kölker",
   description: "Beschreibe hier die verschiedenen Abschnitte der 'Über uns'-Seite.",

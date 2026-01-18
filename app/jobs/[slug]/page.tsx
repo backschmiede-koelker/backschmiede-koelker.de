@@ -5,6 +5,9 @@ import { getJobBySlug } from "@/app/lib/jobs/db";
 import { JobDetail } from "@/app/components/jobs/job-detail";
 import { buildJobPostingJsonLd } from "@/app/components/jobs/job-schema";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

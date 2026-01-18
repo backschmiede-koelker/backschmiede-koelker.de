@@ -7,6 +7,9 @@ import AdminPageHeaderServer from "../components/admin-page-header-server";
 import { PERF_BUCKETS_MS, analyticsKeys, getAnalyticsConfig, listDays, parseRange } from "@/lib/analytics";
 import { getRedis } from "@/lib/redis";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Admin - Analytics | Backschmiede Kölker",
   description: "Cookieless Analytics für die Backschmiede Kölker einsehen.",

@@ -4,6 +4,7 @@ import AdminLegalView from "./legal-view";
 import { getOrCreateLegal, getOrCreateLegalSettings } from "@/app/lib/legal.server";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Admin - Rechtliches | Backschmiede Kölker",
