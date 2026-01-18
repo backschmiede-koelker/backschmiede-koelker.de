@@ -190,6 +190,8 @@ export async function updateLegalSettings(input: {
 }
 
 export async function getOrCreateLegal(type: LegalDocType): Promise<LegalDocumentDTO> {
+  console.log("[legal] read", { type, hasDbUrl: !!process.env.DATABASE_URL, skipBuild: process.env.SKIP_DB_DURING_BUILD });
+
   if (!isDatabaseConfigured()) {
     return fallbackLegalDocument(type);
   }
@@ -294,13 +296,28 @@ export async function updateLegalBlock(input: {
   text?: string | null;
   items?: string[];
 }): Promise<LegalBlockDTO> {
-  const updated = await getPrisma().legalBlock.update({
+  const prisma = getPrisma();
+
+  console.log("[legal] updateLegalBlock input", {
+    id: input.id,
+    type: input.type,
+    text: input.text,
+    items: input.items,
+  });
+
+  const before = await prisma.legalBlock.findUnique({ where: { id: input.id } });
+  console.log("[legal] before", { id: input.id, text: before?.text });
+
+  const updated = await prisma.legalBlock.update({
     where: { id: input.id },
     data: {
       text: input.type === "PARAGRAPH" ? cleanOptional(input.text) : null,
-      items: input.type === "LIST" ? input.items ?? [] : undefined,
+      items: input.type === "LIST" ? input.items ?? [] : [],
     },
   });
+
+  console.log("[legal] after", { id: updated.id, text: updated.text });
+
   return toBlockDTO({
     id: updated.id,
     type: updated.type,
