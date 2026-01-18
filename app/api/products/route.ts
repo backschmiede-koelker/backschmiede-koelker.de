@@ -1,6 +1,7 @@
 // app/api/products/route.ts
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { withAdminGuard } from "@/lib/auth-guards";
 import { Prisma, Allergen } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
@@ -56,7 +57,7 @@ function slugify(s: string) {
     .toLowerCase().trim().replace(/\s+/g, "-").replace(/-+/g, "-");
 }
 
-export async function POST(req: Request) {
+export const POST = withAdminGuard(async (req: Request) => {
   const b = (await req.json()) as {
     name: string;
     priceCents: number;
@@ -92,4 +93,4 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
-}
+});

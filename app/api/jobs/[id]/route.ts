@@ -1,6 +1,7 @@
 // app/api/jobs/[id]/route.ts
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { withAdminGuard } from "@/lib/auth-guards";
 import { Prisma, Location, JobEmploymentType, JobSalaryUnit, JobCategory } from "@/generated/prisma/client";
 
 type JobUpdatePayload = Partial<{
@@ -77,7 +78,7 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
   return NextResponse.json(job);
 }
 
-export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
+export const PATCH = withAdminGuard(async (req: Request, ctx: { params: Promise<{ id: string }> }) => {
   const { id } = await ctx.params;
   const body = (await req.json()) as Record<string, unknown>;
   const prev = await getPrisma().job.findUnique({ where: { id } });
@@ -137,13 +138,11 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 
   const updated = await getPrisma().job.update({ where: { id }, data: data as Prisma.JobUpdateInput });
   return NextResponse.json(updated);
-}
+});
 
-export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }) {
-  return PATCH(req, ctx);
-}
+export const PUT = PATCH;
 
-export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> }) {
+export const DELETE = withAdminGuard(async (req: Request, ctx: { params: Promise<{ id: string }> }) => {
   const { id } = await ctx.params;
   try {
     await getPrisma().job.delete({ where: { id } });
@@ -155,4 +154,4 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
     console.error(e);
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
-}
+});

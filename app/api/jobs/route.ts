@@ -1,6 +1,7 @@
 // app/api/jobs/route.ts
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { requireAdmin, withAdminGuard } from "@/lib/auth-guards";
 import { Prisma, Location, JobEmploymentType, JobSalaryUnit, JobCategory } from "@/generated/prisma/client";
 import { allJobsAdmin } from "@/app/lib/jobs/db";
 
@@ -61,6 +62,8 @@ export async function GET(req: Request) {
 
   const adminView = searchParams.get("admin") === "1" || searchParams.get("view") === "admin";
   if (adminView) {
+    const denied = await requireAdmin();
+    if (denied) return denied;
     const jobs = await allJobsAdmin();
     return NextResponse.json({ items: jobs });
   }
@@ -115,7 +118,7 @@ export async function GET(req: Request) {
   return NextResponse.json({ items: jobs });
 }
 
-export async function POST(req: Request) {
+export const POST = withAdminGuard(async (req: Request) => {
   const b = (await req.json()) as {
     title: string;
     category?: string;
@@ -199,4 +202,4 @@ export async function POST(req: Request) {
   });
 
   return NextResponse.json(created, { status: 201 });
-}
+});

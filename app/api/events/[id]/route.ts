@@ -1,6 +1,7 @@
 // app/api/events/[id]/route.ts
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { withAdminGuard } from "@/lib/auth-guards";
 import { Location } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { pathFromStoredPath, safeUnlink, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
@@ -48,7 +49,7 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
   );
 }
 
-export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }) {
+export const PUT = withAdminGuard(async (req: Request, ctx: { params: Promise<{ id: string }> }) => {
   const { id } = await ctx.params;
 
   const body = (await req.json()) as Partial<{
@@ -135,9 +136,9 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     { ...updated, imageUrl: toAbsoluteAssetUrlServer(updated.imageUrl) },
     { headers: { "Cache-Control": "no-store" } }
   );
-}
+});
 
-export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> }) {
+export const DELETE = withAdminGuard(async (req: Request, ctx: { params: Promise<{ id: string }> }) => {
   const { id } = await ctx.params;
 
   const prev = await getPrisma().event.findUnique({
@@ -152,4 +153,4 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
   if (prev.imageUrl) await deleteAssetIfUnused(prev.imageUrl);
 
   return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
-}
+});

@@ -5,6 +5,7 @@ import { mkdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import crypto from "node:crypto";
 import { getPrisma } from "@/lib/prisma";
+import { withAdminGuard } from "@/lib/auth-guards";
 import { toStoredPath } from "@/app/lib/uploads";
 import { pathFromStoredPath, safeUnlink } from "@/app/lib/uploads.server";
 
@@ -19,7 +20,7 @@ function fileSlug(s: string) {
     .toLowerCase().trim().replace(/\s+/g, "-").replace(/-+/g, "-");
 }
 
-export async function POST(req: Request) {
+export const POST = withAdminGuard(async (req: Request) => {
   const form = await req.formData();
   const file = form.get("file") as File | null;
   const folderRaw = (form.get("folder") as string | null) ?? "products";
@@ -45,7 +46,7 @@ export async function POST(req: Request) {
   // Nur **DB-Speicherwert** zurückgeben (ohne '/uploads', ohne Host)
   const stored = `${folder}/${filename}`;
   return NextResponse.json({ url: stored });
-}
+});
 
 async function deleteByStoredPathIfUnused(stored?: string | null) {
   const s = toStoredPath(stored);
@@ -64,7 +65,7 @@ async function deleteByStoredPathIfUnused(stored?: string | null) {
   }
 }
 
-export async function DELETE(req: Request) {
+export const DELETE = withAdminGuard(async (req: Request) => {
   try {
     const { url } = (await req.json()) as { url?: string };
     if (!url) return NextResponse.json({ error: "Missing 'url'" }, { status: 400 });
@@ -74,4 +75,4 @@ export async function DELETE(req: Request) {
     console.error(e);
     return NextResponse.json({ error: "Failed to delete" }, { status: 500 });
   }
-}
+});

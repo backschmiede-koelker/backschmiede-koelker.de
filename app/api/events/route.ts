@@ -1,6 +1,7 @@
 // app/api/events/route.ts
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { withAdminGuard } from "@/lib/auth-guards";
 import { Prisma, Location } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
@@ -123,7 +124,7 @@ export async function GET(req: Request) {
   return NextResponse.json(mapped, { headers: { "Cache-Control": "no-store" } });
 }
 
-export async function POST(req: Request) {
+export const POST = withAdminGuard(async (req: Request) => {
   const b = (await req.json()) as {
     caption: string;
     description?: string | null;
@@ -180,4 +181,4 @@ export async function POST(req: Request) {
     { ...created, imageUrl: toAbsoluteAssetUrlServer(created.imageUrl) },
     { status: 201, headers: { "Cache-Control": "no-store" } }
   );
-}
+});

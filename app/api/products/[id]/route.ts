@@ -1,6 +1,7 @@
 // app/api/products/[id]/route.ts
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import { withAdminGuard } from "@/lib/auth-guards";
 import { Allergen } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import { pathFromStoredPath, safeUnlink, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
@@ -32,7 +33,7 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
   return NextResponse.json({ ...item, imageUrl: toAbsoluteAssetUrlServer(item.imageUrl) });
 }
 
-export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }) {
+export const PUT = withAdminGuard(async (req: Request, ctx: { params: Promise<{ id: string }> }) => {
   const { id } = await ctx.params;
   const body = await req.json() as Partial<{
     name: string;
@@ -95,9 +96,9 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
     console.error(e);
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> }) {
+export const DELETE = withAdminGuard(async (req: Request, ctx: { params: Promise<{ id: string }> }) => {
   const { id } = await ctx.params;
   try {
     const prev = await getPrisma().product.findUnique({ where: { id }, select: { imageUrl: true } });
@@ -115,4 +116,4 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
     console.error(e);
     return NextResponse.json({ error: "Internal Error" }, { status: 500 });
   }
-}
+});
