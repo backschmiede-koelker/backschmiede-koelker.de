@@ -7,13 +7,8 @@ const globalForPrisma = globalThis as unknown as {
   pgPool?: Pool;
 };
 
-function isBuildPhase() {
-  const phase = process.env.NEXT_PHASE;
-  return phase === "phase-production-build" || phase === "phase-production-export";
-}
-
 export function isDatabaseConfigured() {
-  if (isBuildPhase()) return false;
+  if (process.env.SKIP_DB_DURING_BUILD === "1") return false;
   return !!process.env.DATABASE_URL;
 }
 
