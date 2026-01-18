@@ -50,7 +50,7 @@ export default function NewProductForm({ allUnits, allTags, onCreated }: Props) 
   const hasImage = !!imageUrl
   const hasTags = chosenTags.length > 0
   const unitOk = customUnitMode ? !!customUnit.trim() : !!unit.trim()
-  const formValid = hasTitle && !priceInvalidNew && hasImage && hasTags && unitOk
+  const formValid = hasTitle && !priceInvalidNew && hasTags && unitOk
 
   async function create() {
     if (!formValid) { setShowErrors(true); return }
@@ -306,13 +306,30 @@ export default function NewProductForm({ allUnits, allTags, onCreated }: Props) 
           Aktiv anzeigen
         </label>
 
-        <button
-          className="rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-60"
-          onClick={create}
-          disabled={saving || !formValid}
-        >
-          {saving ? "Speichere…" : "Anlegen"}
-        </button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end sm:gap-3 min-w-0">
+          {!hasImage && (
+            <div
+              className={[
+                "w-full sm:w-auto",
+                "rounded-lg border border-amber-500/30 bg-amber-50/70",
+                "px-3 py-2 text-xs leading-snug text-zinc-700",
+                "dark:bg-amber-900/20 dark:text-zinc-200 dark:border-amber-300/20",
+                "break-words",
+                "sm:max-w-[280px]",
+              ].join(" ")}
+            >
+              Tipp: Produkte mit Bildern wirken ansprechender – du kannst aber auch ohne Bild speichern.
+            </div>
+          )}
+
+          <button
+            className="w-full sm:w-auto rounded-md bg-emerald-600 px-4 py-2 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-60"
+            onClick={create}
+            disabled={saving || !formValid}
+          >
+            {saving ? "Speichere…" : "Anlegen"}
+          </button>
+        </div>
       </div>
     </div>
   )
