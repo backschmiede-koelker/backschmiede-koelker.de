@@ -62,6 +62,8 @@ docker compose --env-file .\.env.local -f .\compose.local.yml up --force-recreat
 
 # Build inside container:
 docker compose --env-file ".\.env.local" -f compose.local.yml exec -e NODE_ENV=production backschmiede-koelker_local sh -lc 'npm run build'
+# Build outside container:
+npm run build:no-db
 ```
 
 

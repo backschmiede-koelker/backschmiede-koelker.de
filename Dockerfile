@@ -16,6 +16,7 @@ ARG NEXT_PUBLIC_BASE_ASSET_URL
 ARG NEXT_PUBLIC_BASE_URL
 ENV NEXT_PUBLIC_BASE_ASSET_URL=$NEXT_PUBLIC_BASE_ASSET_URL
 ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
+ENV SKIP_DB_DURING_BUILD=1
 
 # Next build (standalone)
 RUN npm run build
@@ -24,6 +25,7 @@ RUN npm run build
 FROM node:24-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV SKIP_DB_DURING_BUILD=0
 
 RUN apt-get update -y \
   && apt-get install -y --no-install-recommends openssl ca-certificates \
