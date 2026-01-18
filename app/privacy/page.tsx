@@ -16,13 +16,25 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function PrivacyPage() {
-  const document = await getOrCreateLegal("PRIVACY").catch(() =>
-    fallbackLegalDocument("PRIVACY"),
-  );
-  const settings = await getOrCreateLegalSettings().catch(() =>
-    fallbackLegalSettings(),
-  );
+  const document = await getOrCreateLegal("PRIVACY").catch((e) => {
+    console.error("[privacy] getOrCreateLegal failed", e);
+    return fallbackLegalDocument("PRIVACY");
+  });
+
+  console.log("[privacy page] doc", {
+    id: document.id,
+    firstBlockId: document.sections?.[0]?.blocks?.[0]?.id,
+    firstBlockText: document.sections?.[0]?.blocks?.[0]?.text,
+  });
+
+  const settings = await getOrCreateLegalSettings().catch((e) => {
+    console.error("[privacy] getOrCreateLegalSettings failed", e);
+    return fallbackLegalSettings();
+  });
 
   return (
     <main
