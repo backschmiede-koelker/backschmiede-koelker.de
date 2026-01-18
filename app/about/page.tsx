@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import AboutSectionRenderer from "@/app/components/about/section-renderer";
 import type { AboutApiResponse, AboutPersonDTO, AboutSectionDTO } from "./types";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Über uns | Backschmiede Kölker",
   description:

@@ -5,6 +5,9 @@ import { getOrCreateSiteSettings } from "@/app/lib/site-settings.server";
 import { getWeeklyHours, listExceptions } from "@/app/lib/opening-hours.server";
 import type { ExceptionsPayload, HoursPayload, SiteSettingsForm } from "./types";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Admin - Startseite | Backschmiede Kölker",
   description: "Hero, Öffnungszeiten und Footer der Startseite bearbeiten.",

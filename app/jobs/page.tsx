@@ -7,6 +7,9 @@ import { buildJobsListJsonLd } from "@/app/components/jobs/job-schema";
 import { fetchJobs } from "@/app/lib/jobs/db";
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Stellenangebote | Backschmiede Kölker",
   description: "Jobs in Backstube, Verkauf & mehr - fair, planbar, Teamspirit. Jetzt bewerben!",
