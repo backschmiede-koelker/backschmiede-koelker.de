@@ -16,13 +16,25 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ImpressumPage() {
-  const document = await getOrCreateLegal("IMPRINT").catch(() =>
-    fallbackLegalDocument("IMPRINT"),
-  );
-  const settings = await getOrCreateLegalSettings().catch(() =>
-    fallbackLegalSettings(),
-  );
+  const document = await getOrCreateLegal("IMPRINT").catch((e) => {
+    console.error("[imprint] getOrCreateLegal failed", e);
+    return fallbackLegalDocument("IMPRINT");
+  });
+
+  console.log("[imprint page] doc", {
+    id: document.id,
+    firstBlockId: document.sections?.[0]?.blocks?.[0]?.id,
+    firstBlockText: document.sections?.[0]?.blocks?.[0]?.text,
+  });
+
+  const settings = await getOrCreateLegalSettings().catch((e) => {
+    console.error("[imprint] getOrCreateLegalSettings failed", e);
+    return fallbackLegalSettings();
+  });
 
   return (
     <main
