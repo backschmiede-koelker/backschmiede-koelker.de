@@ -1,3 +1,4 @@
+// lib/redis.ts
 import { createClient } from "redis";
 
 let client:
@@ -24,7 +25,9 @@ export async function getRedis() {
       reconnectStrategy: (retries) => Math.min(1000 * 2 ** retries, 10_000),
     },
   });
-  next.on("error", () => {});
+  next.on("error", (e) => {
+    if (process.env.NODE_ENV !== "production") console.error("[redis]", e);
+  });
   client = next;
 
   connecting = next

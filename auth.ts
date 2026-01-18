@@ -2,7 +2,35 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { getPrisma } from "@/lib/prisma"
+import {
+  isLoginLocked,
+  normalizeLoginKey,
+  recordLoginFailure,
+  resetLoginFailures,
+} from "@/lib/auth-rate-limit"
 import bcrypt from "bcryptjs"
+
+const DUMMY_HASH =
+  "$2a$10$CwTycUXWue0Thq9StjUM0uJ8Cev.0DIsxP1hP8B7F6KfG6Ki1Gd5K"
+
+async function safeIsLoginLocked(usernameKey: string) {
+  try {
+    return await isLoginLocked(usernameKey)
+  } catch {
+    return false
+  }
+}
+
+async function safeRecordLoginFailure(usernameKey: string) {
+  try { await recordLoginFailure(usernameKey) }
+  catch (e) { if (process.env.NODE_ENV !== "production") console.error("[auth-rate-limit] record fail", e) }
+}
+
+async function safeResetLoginFailures(usernameKey: string) {
+  try {
+    await resetLoginFailures(usernameKey)
+  } catch {}
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
@@ -19,13 +47,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(c) {
         const username = String(c?.username ?? "").trim()
         const password = String(c?.password ?? "")
-        if (!username || !password) return null
+        const usernameKey = normalizeLoginKey(username)
+
+        if (username) {
+          const locked = await safeIsLoginLocked(usernameKey)
+          if (locked) return null
+        }
+
+        if (!username || !password) {
+          if (username) await safeRecordLoginFailure(usernameKey)
+          return null
+        }
 
         const user = await getPrisma().user.findUnique({ where: { username } })
-        if (!user) return null
+        if (!user) {
+          await bcrypt.compare(password, DUMMY_HASH)
+          await safeRecordLoginFailure(usernameKey)
+          return null
+        }
 
         const ok = await bcrypt.compare(password, user.passwordHash)
-        if (!ok) return null
+        if (!ok) {
+          await safeRecordLoginFailure(usernameKey)
+          return null
+        }
+
+        await safeResetLoginFailures(usernameKey)
 
         return {
           id: String(user.id),

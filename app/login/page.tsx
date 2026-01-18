@@ -1,3 +1,4 @@
+// app/login/page.tsx
 import type { Metadata } from "next"
 import LoginForm from "../components/login-form"
 

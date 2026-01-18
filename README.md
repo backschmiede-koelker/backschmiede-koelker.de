@@ -166,10 +166,4 @@ merge changes into main -> github actions updates website
 
 ## How to change admin password:
 
-```bash
-# Set ADMIN_PASSWORD in .env.local
-docker compose `
->>   --env-file ".\.env.local" `
->>   -f ".\compose.local.yml" `
->>   run --rm backschmiede-koelker_local sh -lc "npx prisma db seed"
-```
+Set ADMIN_USERNAME and ADMIN_PASSWORD in .env and start
