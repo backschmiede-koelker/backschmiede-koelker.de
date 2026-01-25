@@ -5,8 +5,6 @@ Hier entsteht der frische Quellcode für [Backschmiede Kölker](https://backschm
 
 ---
 
-
-
 ## Getting Started
 
 
@@ -47,18 +45,17 @@ docker compose `
 # prisma generate for VS Code:
 npx dotenv -e .env.local -- prisma generate
 
+# delete .docker-npm.stamp and start command for new packages:
 docker compose `
   --env-file ".\.env.local" `
   -f ".\compose.local.yml" `
   run --rm backschmiede-koelker_local sh -lc "[ -f .docker-npm.stamp ] || (npm ci --prefer-offline --no-audit --loglevel=warn && npx prisma generate && touch .docker-npm.stamp); npx prisma generate; npx prisma migrate dev"
 
+# start website:
 docker compose --env-file ".\.env.local" -f ".\compose.local.yml" up
-
-# if you have added new packages with "npm" or sth, then you have to delete the .docker-npm.stamp file and restart the website
 
 # On Err "network not found":
 docker compose --env-file .\.env.local -f .\compose.local.yml up --force-recreate
-
 
 # Build inside container:
 docker compose --env-file ".\.env.local" -f compose.local.yml exec -e NODE_ENV=production backschmiede-koelker_local sh -lc 'npm run build'
@@ -110,59 +107,15 @@ docker compose `
 
 
 
-### Start prod -> cicd or use:
+### Start prod services with:
 ```bash
 docker compose --env-file .env.prod -f compose.yml up -d
 ```
 
+### Start prod website with cicd:
+Merge changes into main, GitHub Actions will update the site.
 
 
-
-
-
-
-# maybe obsolete:
-First, run the development server:
-
-```bash
-# (only works if you set "output and images" in next.config.ts)
-
-# first time:
-docker volume create pg_local_data
-docker run -d --name pg-local -p 5432:5432 -e POSTGRES_USER=backschmiede_koelker -e POSTGRES_PASSWORD=devpass -e POSTGRES_DB=backschmiede_koelker -v pg_local_data:/var/lib/postgresql/data postgres:16-alpine
-docker exec -it pg-local psql -U backschmiede_koelker -d backschmiede_koelker -c "CREATE SCHEMA IF NOT EXISTS backschmiede_koelker AUTHORIZATION backschmiede_koelker;"
-npx prisma migrate dev --name init
-
-# restart
-docker start pg-local
-npx prisma migrate dev
-docker compose -f docker-compose.cdn.local.yml up -d
-
-npm run dev
-
-# stop
-docker compose -f docker-compose.cdn.local.yml down
-docker stop pg-local
-```
-
-### Change IP to ur local IP (remeber to do it in .env aswell):
-Open [http://192.168.178.163:3000](http://192.168.178.163:3000) with your browser to see the result.
-
-## Deployment
-
-Start Local-Website:
-
-```bash
-npm install
-
-npm run build
-
-npm start
-```
-
-Update Prod-Website:
-
-merge changes into main -> github actions updates website
 
 ## How to change admin password:
 
