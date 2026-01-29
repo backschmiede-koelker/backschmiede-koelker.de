@@ -1,12 +1,13 @@
 // app/components/layout-wrapper.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
 import Header from './header';
 import Sidebar from './sidebar';
+import { isWinterSeason } from '../lib/seasonal';
 
 const Snowfall = dynamic(
   () => import('react-snowfall').then((m) => m.default || m),
@@ -15,7 +16,10 @@ const Snowfall = dynamic(
 
 export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const DEFAULT_SNOW_ENABLED = true;
+  
+  const snowSeason = useMemo(() => isWinterSeason(), []);
+  const DEFAULT_SNOW_ENABLED = snowSeason;
+
   const [snowEnabled, setSnowEnabled] = useState(DEFAULT_SNOW_ENABLED);
   const [snowflakeCount, setSnowflakeCount] = useState(160);
 
@@ -28,12 +32,23 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    if (!snowSeason) {
+      // optional: sauber halten
+      try {
+        window.localStorage.removeItem('bk_snow_enabled');
+      } catch {}
+      setSnowEnabled(false);
+      return;
+    }
+
     const stored = window.localStorage.getItem('bk_snow_enabled');
     if (stored === 'on') setSnowEnabled(true);
     if (stored === 'off') setSnowEnabled(false);
-  }, []);
+  }, [snowSeason]);
 
   const handleToggleSnow = () => {
+    if (!snowSeason) return;
     setSnowEnabled((prev) => {
       const next = !prev;
       try {
@@ -70,7 +85,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
   return (
     <div className="flex min-w-0">
-      {snowEnabled && (
+      {snowSeason && snowEnabled && (
         <div className="pointer-events-none fixed inset-0 z-40">
           <Snowfall
             snowflakeCount={snowflakeCount}
@@ -96,6 +111,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
           onCloseSidebar={() => setSidebarOpen(false)}
           isSnowing={snowEnabled}
           onToggleSnow={handleToggleSnow}
+          showSnowToggle={snowSeason}
         />
 
         <main className={isHome ? 'flex-1 min-w-0' : 'flex-1 p-6 min-w-0'}>

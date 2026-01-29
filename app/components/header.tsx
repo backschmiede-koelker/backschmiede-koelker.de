@@ -14,6 +14,7 @@ type HeaderProps = {
   onCloseSidebar: () => void;
   isSnowing: boolean;
   onToggleSnow: () => void;
+  showSnowToggle: boolean;
 };
 
 const COOLDOWN_MS = 500; // 0.5s
@@ -84,6 +85,7 @@ export default function Header({
   onCloseSidebar,
   isSnowing,
   onToggleSnow,
+  showSnowToggle,
 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [isCoolingDown, setIsCoolingDown] = useState(false);
@@ -181,20 +183,22 @@ export default function Header({
           </button>
 
           {/* ❄ Schnee-Toggle - direkt neben Konfetti */}
-          <button
-            type="button"
-            onClick={onToggleSnow}
-            aria-pressed={isSnowing}
-            aria-label={isSnowing ? "Schnee ausschalten" : "Schnee einschalten"}
-            title={isSnowing ? "Schnee ausschalten" : "Schnee einschalten"}
-            className={snowBtn(isSnowing)}
-          >
-            {isSnowing ? (
-              <FaRegSnowflake className="text-[17px]" />
-            ) : (
-              <FaRegSnowflake className="text-[17px]" />
-            )}
-          </button>
+          {showSnowToggle && (
+            <button
+              type="button"
+              onClick={onToggleSnow}
+              aria-pressed={isSnowing}
+              aria-label={isSnowing ? "Schnee ausschalten" : "Schnee einschalten"}
+              title={isSnowing ? "Schnee ausschalten" : "Schnee einschalten"}
+              className={snowBtn(isSnowing)}
+            >
+              {isSnowing ? (
+                <FaRegSnowflake className="text-[17px]" />
+              ) : (
+                <FaRegSnowflake className="text-[17px]" />
+              )}
+            </button>
+          )}
 
           {/* Fester Platz für den Toggle verhindert jeglichen Shift */}
           <div className="h-10 w-10">
