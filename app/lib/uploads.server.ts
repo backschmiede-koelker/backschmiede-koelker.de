@@ -4,6 +4,7 @@ import "server-only";
 import { join } from "node:path";
 import { unlink } from "node:fs/promises";
 import { toStoredPath } from "./uploads";
+import { getPrisma } from "@/lib/prisma";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads";
 const SERVER_BASE = (process.env.NEXT_PUBLIC_BASE_ASSET_URL || "").replace(/\/+$/, "");
@@ -58,4 +59,28 @@ export async function safeUnlink(absPath: string | null) {
     if (err?.code === "ENOENT") return false;
     throw e;
   }
+}
+
+export async function countStoredPathReferences(stored?: string | null): Promise<number> {
+  const s = toStoredPath(stored);
+  if (!s) return 0;
+
+  const [products, news, offers, events] = await getPrisma().$transaction([
+    getPrisma().product.count({ where: { imageUrl: s } }),
+    getPrisma().news.count({ where: { imageUrl: s } }),
+    getPrisma().offer.count({ where: { imageUrl: s } }),
+    getPrisma().event.count({ where: { imageUrl: s } }),
+  ]);
+
+  return products + news + offers + events;
+}
+
+export async function deleteStoredPathIfUnused(stored?: string | null) {
+  const s = toStoredPath(stored);
+  if (!s) return false;
+
+  const refs = await countStoredPathReferences(s);
+  if (refs > 0) return false;
+
+  return safeUnlink(pathFromStoredPath(s));
 }

@@ -6,10 +6,12 @@ services:
     working_dir: /app
     command: >
       sh -lc "
-        [ -f .docker-npm.stamp ] || (
+        LOCK_HASH=$$(sha256sum package-lock.json | awk '{print $$1}');
+        STAMP_HASH=$$(cat .docker-npm.stamp 2>/dev/null || true);
+        [ \"$$LOCK_HASH\" = \"$$STAMP_HASH\" ] || (
           npm ci --prefer-offline --no-audit --loglevel=warn &&
           npx prisma generate &&
-          touch .docker-npm.stamp
+          printf '%s' \"$$LOCK_HASH\" > .docker-npm.stamp
         );
         npx prisma generate;
         npx prisma migrate dev;
