@@ -1,3 +1,4 @@
+# compose.yml
 services:
   backschmiede-koelker:
     image: ghcr.io/backschmiede-koelker/backschmiede-koelker.de:latest

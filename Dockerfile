@@ -1,3 +1,4 @@
+# Dockerfile
 # --- Build ---
 FROM node:24-bookworm-slim AS builder
 WORKDIR /app

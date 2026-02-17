@@ -1,9 +1,9 @@
 // app/components/product-grid.tsx
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import SelectBox from "./select-box";
-import { publicAssetUrl } from "@/app/lib/uploads";
 import { ALLERGEN_LABEL, type Allergen } from "@/app/lib/allergens";
 
 type Product = {
@@ -15,10 +15,20 @@ type Product = {
   imageUrl?: string | null;
   tags: string[];
   allergens: Allergen[];
+  createdAt: string;
   updatedAt: string;
 };
 
+type PagedResponse = {
+  items: Product[];
+  hasMore: boolean;
+  nextOffset: number;
+  availableTags?: string[];
+};
+
 type SortKey = "name_asc" | "newest";
+const PAGE_SIZE = 18;
+const OBSERVER_ROOT_MARGIN = "280px";
 
 const euro = (n: number) => new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(n);
 
@@ -26,6 +36,30 @@ function useDebounced<T>(value: T, delay = 250) {
   const [v, setV] = useState(value);
   useEffect(() => { const id = setTimeout(() => setV(value), delay); return () => clearTimeout(id); }, [value, delay]);
   return v;
+}
+
+function isSortKey(value: string | null): value is SortKey {
+  return value === "name_asc" || value === "newest";
+}
+
+function parseProductsResponse(json: unknown): PagedResponse {
+  if (Array.isArray(json)) {
+    const items = json as Product[];
+    return { items, hasMore: false, nextOffset: items.length };
+  }
+
+  if (!json || typeof json !== "object") {
+    return { items: [], hasMore: false, nextOffset: 0 };
+  }
+
+  const data = json as Partial<PagedResponse>;
+  const items = Array.isArray(data.items) ? data.items : [];
+  return {
+    items: items as Product[],
+    hasMore: !!data.hasMore,
+    nextOffset: Number.isFinite(Number(data.nextOffset)) ? Number(data.nextOffset) : items.length,
+    availableTags: Array.isArray(data.availableTags) ? data.availableTags : undefined,
+  };
 }
 
 function TagChip({ label, onRemove }: { label: string; onRemove: () => void }) {
@@ -41,75 +75,173 @@ function TagChip({ label, onRemove }: { label: string; onRemove: () => void }) {
 
 export default function ProductGrid() {
   const [items, setItems] = useState<Product[]>([]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [nextOffset, setNextOffset] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [autoLoadFailed, setAutoLoadFailed] = useState(false);
+  const [supportsObserver, setSupportsObserver] = useState(false);
 
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const initRef = useRef(false);
+  const requestSeqRef = useRef(0);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const [q, setQ] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sort, setSort] = useState<SortKey>("name_asc");
 
   useEffect(() => {
-    (async () => {
-      try {
-        setStatus("loading");
-        const res = await fetch("/api/products?active=true", { cache: "no-store" });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        setItems(Array.isArray(data) ? data : []);
-        setStatus("ok");
-      } catch (e) {
-        console.error(e);
-        setStatus("error");
-      }
-    })();
+    setSupportsObserver(typeof window !== "undefined" && "IntersectionObserver" in window);
   }, []);
+
+  const searchParamsString = searchParams?.toString() || "";
 
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
-    const sp = new URLSearchParams(searchParams?.toString());
+    const sp = new URLSearchParams(searchParamsString);
     setQ(sp.get("q") || "");
-    setSelectedTags(sp.get("tags")?.split(",").filter(Boolean) || []);
-    setSort(((sp.get("sort") as SortKey) || "name_asc"));
-  }, [searchParams]);
+    setSelectedTags(
+      Array.from(
+        new Set(
+          (sp.get("tags") || "")
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter(Boolean),
+        ),
+      ),
+    );
+    setSort(isSortKey(sp.get("sort")) ? (sp.get("sort") as SortKey) : "name_asc");
+  }, [searchParamsString]);
 
   useEffect(() => {
+    if (!initRef.current) return;
     const sp = new URLSearchParams();
     if (q) sp.set("q", q);
     if (selectedTags.length) sp.set("tags", selectedTags.join(","));
     if (sort !== "name_asc") sp.set("sort", sort);
     const qs = sp.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname);
-  }, [q, selectedTags, sort, pathname, router]);
+    if (qs === searchParamsString) return;
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [q, selectedTags, sort, pathname, router, searchParamsString]);
 
-  const tagFacet = useMemo(() => {
+  const loadedTagFacet = useMemo(() => {
     const m = new Map<string, number>();
     for (const p of items) for (const t of p.tags || []) m.set(t, (m.get(t) || 0) + 1);
     return Array.from(m.entries()).sort((a, b) => a[0].localeCompare(b[0], "de"));
   }, [items]);
 
-  const qDeb = useDebounced(q);
+  const tagFacet = useMemo(() => {
+    if (availableTags.length > 0) {
+      return availableTags.map((tag) => [tag, 0] as const);
+    }
+    return loadedTagFacet;
+  }, [availableTags, loadedTagFacet]);
 
-  const filtered = useMemo(() => {
-    const ql = qDeb.trim().toLowerCase();
-    return items
-      .filter((p) => {
-        const inQuery = !ql || p.name.toLowerCase().includes(ql) || p.tags.some((t) => t.toLowerCase().includes(ql));
-        const inTags = selectedTags.length === 0 || p.tags.some((t) => selectedTags.includes(t));
-        return inQuery && inTags;
-      })
-      .sort((a, b) => {
-        if (sort === "name_asc") return a.name.localeCompare(b.name, "de");
-        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  const qDeb = useDebounced(q, 300);
+
+  const fetchPage = useCallback(async (opts: { offset: number; reset: boolean }) => {
+    const queryText = qDeb.trim();
+    const params = new URLSearchParams();
+    params.set("active", "true");
+    params.set("limit", String(PAGE_SIZE));
+    params.set("offset", String(opts.offset));
+    params.set("sort", sort);
+    if (queryText) params.set("query", queryText);
+    if (selectedTags.length > 0) params.set("tags", selectedTags.join(","));
+    if (opts.reset) params.set("includeTagFacet", "1");
+
+    const requestSeq = ++requestSeqRef.current;
+    if (opts.reset) {
+      setStatus("loading");
+      setLoadMoreError(null);
+      setAutoLoadFailed(false);
+    } else {
+      setLoadingMore(true);
+      setLoadMoreError(null);
+    }
+
+    try {
+      const res = await fetch(`/api/products?${params.toString()}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = (await res.json()) as unknown;
+      const parsed = parseProductsResponse(json);
+      if (requestSeq !== requestSeqRef.current) return;
+
+      setItems((prev) => {
+        const merged = opts.reset ? parsed.items : [...prev, ...parsed.items];
+        const seen = new Set<string>();
+        return merged.filter((item) => {
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return true;
+        });
       });
-  }, [items, qDeb, selectedTags, sort]);
+      if (opts.reset && parsed.availableTags) {
+        setAvailableTags(parsed.availableTags);
+      }
+      setHasMore(parsed.hasMore);
+      setNextOffset(parsed.nextOffset);
+      setStatus("ok");
+    } catch (error) {
+      console.error(error);
+      if (requestSeq !== requestSeqRef.current) return;
+
+      if (opts.reset) {
+        setItems([]);
+        setAvailableTags([]);
+        setHasMore(false);
+        setNextOffset(0);
+        setStatus("error");
+      } else {
+        setAutoLoadFailed(true);
+        setLoadMoreError("Mehr Produkte konnten nicht automatisch geladen werden.");
+      }
+    } finally {
+      if (requestSeq === requestSeqRef.current) {
+        setLoadingMore(false);
+      }
+    }
+  }, [qDeb, selectedTags, sort]);
+
+  useEffect(() => {
+    if (!initRef.current) return;
+    setItems([]);
+    setHasMore(false);
+    setNextOffset(0);
+    void fetchPage({ offset: 0, reset: true });
+  }, [fetchPage]);
+
+  const loadMore = useCallback(async () => {
+    if (status !== "ok" || loadingMore || !hasMore) return;
+    await fetchPage({ offset: nextOffset, reset: false });
+  }, [status, loadingMore, hasMore, fetchPage, nextOffset]);
+
+  useEffect(() => {
+    if (!supportsObserver || autoLoadFailed || status !== "ok" || !hasMore) return;
+    const target = sentinelRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          void loadMore();
+        }
+      },
+      { rootMargin: OBSERVER_ROOT_MARGIN },
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [supportsObserver, autoLoadFailed, status, hasMore, loadMore]);
 
   function addTagFromSelect(tag: string) {
-    if (!tag) return;
+    if (!tag || tag === "(Keine weiteren Tags)") return;
     setSelectedTags((prev) => (prev.includes(tag) ? prev : [...prev, tag]));
   }
 
@@ -124,6 +256,12 @@ export default function ProductGrid() {
   }
 
   const tagOptions = tagFacet.map(([t]) => t).filter((t) => !selectedTags.includes(t));
+  const statusText = useMemo(() => {
+    if (status === "loading") return "Lade...";
+    if (status === "error") return "Fehler beim Laden.";
+    if (items.length === 0) return "Keine Produkte gefunden.";
+    return hasMore ? `${items.length} Produkte geladen` : `${items.length} Produkte`;
+  }, [status, items.length, hasMore]);
 
   return (
     <div className="space-y-5">
@@ -186,33 +324,27 @@ export default function ProductGrid() {
       </div>
 
       <div className="text-sm text-zinc-600 dark:text-zinc-300">
-        {{
-          loading: "Lade…",
-          error: "Fehler beim Laden.",
-          ok:
-            items.length === 0
-              ? "Keine Produkte gefunden."
-              : (filtered.length === 0
-                  ? "Keine Treffer für deine Suche/Filter."
-                  : `${filtered.length} von ${items.length} Produkten`)
-        }[status]}
+        {statusText}
+        {loadMoreError && <span className="ml-2 text-red-600 dark:text-red-400">{loadMoreError}</span>}
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((p) => {
-          const img = publicAssetUrl(p.imageUrl);
+        {items.map((p) => {
+          const img = p.imageUrl;
           return (
             <div
               key={p.id}
               className="group overflow-hidden rounded-xl border bg-white ring-1 ring-zinc-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md hover:ring-amber-200 dark:border-zinc-700 dark:bg-zinc-900 dark:ring-zinc-700 dark:transition dark:hover:bg-zinc-800/80 dark:hover:ring-amber-400/30"
             >
-              <div className="h-44 w-full bg-zinc-100 dark:bg-zinc-800 grid place-items-center overflow-hidden">
+              <div className="relative h-44 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800 grid place-items-center">
                 {img ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={img}
                     alt={p.name}
-                    className="h-44 w-full object-cover transition group-hover:scale-[1.02]"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    quality={70}
+                    className="object-cover transition group-hover:scale-[1.02]"
                   />
                 ) : (
                   <div className="flex flex-col items-center gap-2 px-3 text-center">
@@ -254,6 +386,23 @@ export default function ProductGrid() {
           );
         })}
       </div>
+
+      {hasMore && supportsObserver && !autoLoadFailed && (
+        <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" />
+      )}
+
+      {hasMore && (!supportsObserver || autoLoadFailed) && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => { void loadMore(); }}
+            disabled={loadingMore}
+            className="rounded-md border px-4 py-2 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-60"
+          >
+            {loadingMore ? "Lade..." : "Mehr laden"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
