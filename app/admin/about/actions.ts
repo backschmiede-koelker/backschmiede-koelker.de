@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { getPrisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { toStoredPath } from "@/app/lib/uploads";
+import { deleteStoredPathIfUnused } from "@/app/lib/uploads.server";
 import type { AboutSectionDTO, AboutPersonDTO } from "./types";
 
 type SessionLike = { user?: { role?: string | null } | null } | null | undefined;
@@ -15,6 +16,14 @@ function mustBeAdmin(session: SessionLike) {
 async function adminGuard() {
   const session = (await auth()) as SessionLike;
   mustBeAdmin(session);
+}
+
+async function deletePreviousIfChanged(prev?: string | null, next?: string | null) {
+  const prevStored = toStoredPath(prev);
+  const nextStored = toStoredPath(next);
+  if (prevStored && prevStored !== nextStored) {
+    await deleteStoredPathIfUnused(prevStored);
+  }
 }
 
 export type SectionType =
@@ -90,6 +99,12 @@ export async function updateHero(input: {
 }): Promise<AboutSectionDTO> {
   await adminGuard();
 
+  const prev = await getPrisma().aboutSection.findUnique({
+    where: { id: input.id },
+    select: { imageUrl: true },
+  });
+  if (!prev) throw new Error("Section nicht gefunden");
+
   const updated = await getPrisma().aboutSection.update({
     where: { id: input.id },
     data: {
@@ -102,6 +117,8 @@ export async function updateHero(input: {
     },
     include: { stats: true, values: true, timeline: true, faqs: true, gallery: true },
   });
+
+  await deletePreviousIfChanged(prev.imageUrl, updated.imageUrl);
 
   return updated as AboutSectionDTO;
 }
@@ -156,7 +173,7 @@ export async function updateSection(input: {
 
   const existing = await getPrisma().aboutSection.findUnique({
     where: { id: input.id },
-    select: { type: true },
+    select: { type: true, imageUrl: true },
   });
   if (!existing) throw new Error("Section nicht gefunden");
 
@@ -193,6 +210,8 @@ export async function updateSection(input: {
     },
   });
 
+  await deletePreviousIfChanged(existing.imageUrl, updated.imageUrl);
+
   return updated as AboutSectionDTO;
 }
 
@@ -201,7 +220,7 @@ export async function deleteSection(id: string) {
 
   const sec = await getPrisma().aboutSection.findUnique({
     where: { id },
-    select: { type: true },
+    select: { type: true, imageUrl: true },
   });
   if (!sec) return { ok: true };
 
@@ -210,6 +229,7 @@ export async function deleteSection(id: string) {
   }
 
   await getPrisma().aboutSection.delete({ where: { id } });
+  await deleteStoredPathIfUnused(sec.imageUrl);
   return { ok: true };
 }
 
@@ -271,12 +291,33 @@ export async function createGallery(input: { sectionId: string; imageUrl: string
 }
 export async function updateGallery(input: { id: string; imageUrl: string; alt: string | null; sortOrder: number }) {
   await adminGuard();
+  const prev = await getPrisma().aboutGalleryItem.findUnique({
+    where: { id: input.id },
+    select: { imageUrl: true },
+  });
+  if (!prev) throw new Error("Galerie-Eintrag nicht gefunden");
+
   const stored = toStoredPath(input.imageUrl);
   if (!stored) throw new Error("Bild fehlt");
-  await getPrisma().aboutGalleryItem.update({ where: { id: input.id }, data: { imageUrl: stored, alt: input.alt?.trim() || null, sortOrder: input.sortOrder ?? 0 } });
+  const updated = await getPrisma().aboutGalleryItem.update({
+    where: { id: input.id },
+    data: { imageUrl: stored, alt: input.alt?.trim() || null, sortOrder: input.sortOrder ?? 0 },
+  });
+  await deletePreviousIfChanged(prev.imageUrl, updated.imageUrl);
   return { ok: true };
 }
-export async function deleteGallery(id: string) { await adminGuard(); await getPrisma().aboutGalleryItem.delete({ where: { id } }); return { ok: true }; }
+export async function deleteGallery(id: string) {
+  await adminGuard();
+  const prev = await getPrisma().aboutGalleryItem.findUnique({
+    where: { id },
+    select: { imageUrl: true },
+  });
+  if (!prev) return { ok: true };
+
+  await getPrisma().aboutGalleryItem.delete({ where: { id } });
+  await deleteStoredPathIfUnused(prev.imageUrl);
+  return { ok: true };
+}
 
 /* ---------------- PEOPLE: isShownInHero fliegt raus ---------------- */
 type PersonKind = AboutPersonDTO["kind"];
@@ -335,6 +376,11 @@ export async function updatePerson(input: {
   await adminGuard();
 
   const kind = (input.kind as PersonKind) || "TEAM_MEMBER";
+  const prev = await getPrisma().aboutPerson.findUnique({
+    where: { id: input.id },
+    select: { avatarUrl: true },
+  });
+  if (!prev) throw new Error("Person nicht gefunden");
 
   const updated = await getPrisma().aboutPerson.update({
     where: { id: input.id },
@@ -354,12 +400,21 @@ export async function updatePerson(input: {
     },
   });
 
+  await deletePreviousIfChanged(prev.avatarUrl, updated.avatarUrl);
+
   return updated as AboutPersonDTO;
 }
 
 export async function deletePerson(id: string) {
   await adminGuard();
+  const prev = await getPrisma().aboutPerson.findUnique({
+    where: { id },
+    select: { avatarUrl: true },
+  });
+  if (!prev) return { ok: true };
+
   await getPrisma().aboutPerson.delete({ where: { id } });
+  await deleteStoredPathIfUnused(prev.avatarUrl);
   return { ok: true };
 }
 

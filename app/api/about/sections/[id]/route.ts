@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
+import { deleteStoredPathIfUnused } from "@/app/lib/uploads.server";
 import { requireAdminOr401 } from "../../_auth";
 
 type SectionType =
@@ -41,6 +42,12 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   if (denied) return denied;
 
   const { id } = await ctx.params;
+  const prev = await getPrisma().aboutSection.findUnique({
+    where: { id },
+    select: { imageUrl: true },
+  });
+  if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const b = (await req.json()) as Partial<{
     type: string;
     slug: string;
@@ -72,6 +79,9 @@ export async function PUT(req: Request, ctx: { params: Promise<{ id: string }> }
   if (typeof b.sortOrder === "number" && Number.isFinite(b.sortOrder)) data.sortOrder = b.sortOrder;
 
   const updated = await getPrisma().aboutSection.update({ where: { id }, data });
+  if (prev.imageUrl && prev.imageUrl !== updated.imageUrl) {
+    await deleteStoredPathIfUnused(prev.imageUrl);
+  }
   return NextResponse.json(updated);
 }
 
@@ -80,9 +90,15 @@ export async function DELETE(_: Request, ctx: { params: Promise<{ id: string }> 
   if (denied) return denied;
 
   const { id } = await ctx.params;
+  const prev = await getPrisma().aboutSection.findUnique({
+    where: { id },
+    select: { imageUrl: true },
+  });
+  if (!prev) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   try {
     await getPrisma().aboutSection.delete({ where: { id } });
+    await deleteStoredPathIfUnused(prev.imageUrl);
     return NextResponse.json({ ok: true });
   } catch (e: unknown) {
     if (typeof e === "object" && e && "code" in e && (e as { code?: string }).code === "P2025") {
