@@ -56,7 +56,10 @@ export default auth((req: ReqWithAuth) => {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|images|fonts).*)",
+    // `/api/upload` bleibt ausserhalb der NextAuth-Middleware, da multipart-Requests
+    // dort unter Next.js 15 sonst einen gelockten/disturbed Body bekommen koennen.
+    // Route ist noch durch withAdminGuard gesichert.
+    "/((?!api/upload|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|images|fonts).*)",
   ],
   runtime: "nodejs",
 };
