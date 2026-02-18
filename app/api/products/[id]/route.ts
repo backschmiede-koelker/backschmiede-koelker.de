@@ -4,7 +4,7 @@ import { getPrisma } from "@/lib/prisma";
 import { withAdminGuard } from "@/lib/auth-guards";
 import { Allergen } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
-import { pathFromStoredPath, safeUnlink, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
+import { deleteStoredPathIfUnused, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
 function slugify(s: string) {
   return s
@@ -16,14 +16,7 @@ function slugify(s: string) {
 }
 
 async function deleteAssetIfUnused(stored?: string | null) {
-  const s = toStoredPath(stored);
-  if (!s) return;
-  const [p, n, o] = await getPrisma().$transaction([
-    getPrisma().product.count({ where: { imageUrl: s } }),
-    getPrisma().news.count({ where: { imageUrl: s } }),
-    getPrisma().offer.count({ where: { imageUrl: s } }),
-  ]);
-  if (p + n + o === 0) await safeUnlink(pathFromStoredPath(s));
+  await deleteStoredPathIfUnused(stored);
 }
 
 export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {

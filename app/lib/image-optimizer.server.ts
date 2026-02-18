@@ -2,11 +2,27 @@
 import "server-only";
 import crypto from "node:crypto";
 import { mkdir } from "node:fs/promises";
-import sharp from "sharp";
 
 export const GRID_IMAGE_MAX_WIDTH = 800;
 export const WEBP_QUALITY = 75;
 export const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+
+export type ImageOptimizationErrorCode =
+  | "invalid-image"
+  | "optimizer-unavailable"
+  | "optimization-failed";
+
+export class ImageOptimizationError extends Error {
+  readonly code: ImageOptimizationErrorCode;
+  readonly cause?: unknown;
+
+  constructor(code: ImageOptimizationErrorCode, message: string, cause?: unknown) {
+    super(message);
+    this.name = "ImageOptimizationError";
+    this.code = code;
+    this.cause = cause;
+  }
+}
 
 export function fileSlug(input: string) {
   return input
@@ -48,9 +64,41 @@ export async function optimizeToWebp(
   input: Buffer,
   opts: { width: number; quality: number },
 ) {
-  return sharp(input, { limitInputPixels: 50_000_000 })
-    .rotate()
-    .resize({ width: opts.width, fit: "inside", withoutEnlargement: true })
-    .webp({ quality: opts.quality, effort: 4 })
-    .toBuffer();
+  let sharpFn: typeof import("sharp");
+  try {
+    const sharpImport = await import("sharp");
+    sharpFn = (
+      "default" in sharpImport
+        ? (sharpImport.default as unknown as typeof import("sharp"))
+        : (sharpImport as unknown as typeof import("sharp"))
+    );
+  } catch (error) {
+    throw new ImageOptimizationError(
+      "optimizer-unavailable",
+      "Bild-Optimierung ist auf dem Server nicht verfuegbar.",
+      error,
+    );
+  }
+
+  try {
+    return await sharpFn(input, { limitInputPixels: 50_000_000 })
+      .rotate()
+      .resize({ width: opts.width, fit: "inside", withoutEnlargement: true })
+      .webp({ quality: opts.quality, effort: 4 })
+      .toBuffer();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (/unsupported image|input (buffer|file)|invalid image|corrupt/i.test(message)) {
+      throw new ImageOptimizationError(
+        "invalid-image",
+        "Datei ist kein gueltiges oder unterstuetztes Bildformat.",
+        error,
+      );
+    }
+    throw new ImageOptimizationError(
+      "optimization-failed",
+      "Bild konnte nicht optimiert werden.",
+      error,
+    );
+  }
 }

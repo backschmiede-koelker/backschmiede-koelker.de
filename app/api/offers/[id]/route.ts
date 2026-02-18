@@ -4,8 +4,7 @@ import { getPrisma } from "@/lib/prisma";
 import { Prisma, OfferKind, Weekday, Location } from "@/generated/prisma/client";
 import { toStoredPath } from "@/app/lib/uploads";
 import {
-  pathFromStoredPath,
-  safeUnlink,
+  deleteStoredPathIfUnused,
   toAbsoluteAssetUrlServer,
 } from "@/app/lib/uploads.server";
 
@@ -115,14 +114,7 @@ function toDTO(item: OfferWithDetails) {
 }
 
 async function deleteAssetIfUnused(stored?: string | null) {
-  const s = toStoredPath(stored);
-  if (!s) return;
-  const [p, n, o] = await getPrisma().$transaction([
-    getPrisma().product.count({ where: { imageUrl: s } }),
-    getPrisma().news.count({ where: { imageUrl: s } }),
-    getPrisma().offer.count({ where: { imageUrl: s } }),
-  ]);
-  if (p + n + o === 0) await safeUnlink(pathFromStoredPath(s));
+  await deleteStoredPathIfUnused(stored);
 }
 
 /** GET /api/offers/:id */

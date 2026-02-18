@@ -2,17 +2,10 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { toStoredPath } from "@/app/lib/uploads";
-import { pathFromStoredPath, safeUnlink, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
+import { deleteStoredPathIfUnused, toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 
 async function deleteAssetIfUnused(stored?: string | null) {
-  const s = toStoredPath(stored);
-  if (!s) return;
-  const [p, n, o] = await getPrisma().$transaction([
-    getPrisma().product.count({ where: { imageUrl: s } }),
-    getPrisma().news.count({ where: { imageUrl: s } }),
-    getPrisma().offer.count({ where: { imageUrl: s } }),
-  ]);
-  if (p + n + o === 0) await safeUnlink(pathFromStoredPath(s));
+  await deleteStoredPathIfUnused(stored);
 }
 
 export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) {

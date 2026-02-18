@@ -96,7 +96,10 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
       fd.append("folder", folder);
       fd.append("nameBase", file.name.replace(/\.[^.]+$/, ""));
       const res = await fetch("/api/upload", { method: "POST", body: fd });
-      if (!res.ok) throw new Error("Upload failed");
+      if (!res.ok) {
+        const err = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(err.error || "Upload fehlgeschlagen.");
+      }
       const { url } = (await res.json()) as { url: string }; // **DB-Speicherwert**: "folder/file.ext"
 
       // Optionale Alt-Datei abräumen (fail-silent)
@@ -114,6 +117,11 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
 
       // 3) Parent mit **DB-Speicherwert** updaten
       onChange(url);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Upload fehlgeschlagen.";
+      console.error("Image upload failed:", error);
+      alert(message);
+      setPreviewOverride(null);
     } finally {
       setUploading(false);
     }

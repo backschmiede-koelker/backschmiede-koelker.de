@@ -65,14 +65,23 @@ export async function countStoredPathReferences(stored?: string | null): Promise
   const s = toStoredPath(stored);
   if (!s) return 0;
 
-  const [products, news, offers, events] = await getPrisma().$transaction([
+  const [products, news, offers, events, aboutSections, aboutGallery, aboutPeople, siteSettings] =
+    await getPrisma().$transaction([
     getPrisma().product.count({ where: { imageUrl: s } }),
     getPrisma().news.count({ where: { imageUrl: s } }),
     getPrisma().offer.count({ where: { imageUrl: s } }),
     getPrisma().event.count({ where: { imageUrl: s } }),
-  ]);
+    getPrisma().aboutSection.count({ where: { imageUrl: s } }),
+    getPrisma().aboutGalleryItem.count({ where: { imageUrl: s } }),
+    getPrisma().aboutPerson.count({ where: { avatarUrl: s } }),
+    getPrisma().siteSettings.count({
+      where: {
+        OR: [{ heroImageMettingen: s }, { heroImageRecke: s }],
+      },
+    }),
+    ]);
 
-  return products + news + offers + events;
+  return products + news + offers + events + aboutSections + aboutGallery + aboutPeople + siteSettings;
 }
 
 export async function deleteStoredPathIfUnused(stored?: string | null) {
