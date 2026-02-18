@@ -373,6 +373,7 @@ export default function AdminSiteView({
                 <ImageUploader
                   folder="site"
                   imageUrl={settings.heroImageMettingen}
+                  allowDelete={false}
                   onChange={(url) => updateSetting("heroImageMettingen", url)}
                 />
               </div>
@@ -386,6 +387,7 @@ export default function AdminSiteView({
                 <ImageUploader
                   folder="site"
                   imageUrl={settings.heroImageRecke}
+                  allowDelete={false}
                   onChange={(url) => updateSetting("heroImageRecke", url)}
                 />
               </div>

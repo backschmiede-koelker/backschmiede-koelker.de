@@ -9,6 +9,8 @@ type Props = {
   imageUrl: string;
   /** Erwartet **DB-Speicherwert** ("folder/file") oder "" zum Löschen */
   onChange: (url: string) => void;
+  /** Steuert, ob der "Bild entfernen"-Button angezeigt wird. */
+  allowDelete?: boolean;
 };
 
 /** Liefert die bevorzugte CDN-Basis (Env) oder errät sie aus der aktuellen Domain (→ cdn.<host>) */
@@ -45,7 +47,7 @@ function absoluteCdnUrl(input?: string | null): string | null {
   return viaHelper || null;
 }
 
-export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
+export default function ImageUploader({ folder, imageUrl, onChange, allowDelete = true }: Props) {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -202,14 +204,16 @@ export default function ImageUploader({ folder, imageUrl, onChange }: Props) {
               >
                 Link kopieren
               </button>
-              <button
-                type="button"
-                onClick={removeCurrentImage}
-                className="text-xs underline text-red-600 disabled:opacity-60 text-left sm:text-left"
-                disabled={deleting}
-              >
-                {deleting ? "Löscht…" : "Bild entfernen"}
-              </button>
+              {allowDelete ? (
+                <button
+                  type="button"
+                  onClick={removeCurrentImage}
+                  className="text-xs underline text-red-600 disabled:opacity-60 text-left sm:text-left"
+                  disabled={deleting}
+                >
+                  {deleting ? "Löscht…" : "Bild entfernen"}
+                </button>
+              ) : null}
             </div>
           </div>
         </div>

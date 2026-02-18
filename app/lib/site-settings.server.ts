@@ -1,6 +1,8 @@
 import "server-only";
 
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { toStoredPath } from "@/app/lib/uploads";
+import { deleteStoredPathIfUnused } from "@/app/lib/uploads.server";
 
 export type SiteSettingsDTO = {
   id: string;
@@ -63,6 +65,14 @@ function cleanRequired(value: string, label: string) {
 function cleanOptional(value: string | null | undefined) {
   const trimmed = (value ?? "").trim();
   return trimmed ? trimmed : null;
+}
+
+async function deletePreviousIfChanged(prev?: string | null, next?: string | null) {
+  const prevStored = toStoredPath(prev);
+  const nextStored = toStoredPath(next);
+  if (prevStored && prevStored !== nextStored) {
+    await deleteStoredPathIfUnused(prevStored);
+  }
 }
 
 export async function getOrCreateSiteSettings(): Promise<SiteSettingsDTO> {
@@ -132,6 +142,11 @@ export async function getOrCreateSiteSettings(): Promise<SiteSettingsDTO> {
 export async function updateSiteSettings(input: SiteSettingsInput): Promise<SiteSettingsDTO> {
   await getOrCreateSiteSettings();
   const prisma = getPrisma();
+  const previous = await prisma.siteSettings.findUnique({
+    where: { id: "singleton" },
+    select: { heroImageMettingen: true, heroImageRecke: true },
+  });
+  if (!previous) throw new Error("Site-Settings konnten nicht geladen werden.");
 
   const updated = await prisma.siteSettings.update({
     where: { id: "singleton" },
@@ -157,6 +172,11 @@ export async function updateSiteSettings(input: SiteSettingsInput): Promise<Site
       footerPhoneMettingen: cleanRequired(input.footerPhoneMettingen, "Telefon Mettingen"),
     },
   });
+
+  await Promise.all([
+    deletePreviousIfChanged(previous.heroImageMettingen, updated.heroImageMettingen),
+    deletePreviousIfChanged(previous.heroImageRecke, updated.heroImageRecke),
+  ]);
 
   return {
     id: updated.id,
