@@ -64,19 +64,23 @@ export async function safeUnlink(absPath: string | null) {
 export async function countStoredPathReferences(stored?: string | null): Promise<number> {
   const s = toStoredPath(stored);
   if (!s) return 0;
+  const candidates = assetUrlCandidates(s);
 
   const [products, news, offers, events, aboutSections, aboutGallery, aboutPeople, siteSettings] =
     await getPrisma().$transaction([
-    getPrisma().product.count({ where: { imageUrl: s } }),
-    getPrisma().news.count({ where: { imageUrl: s } }),
-    getPrisma().offer.count({ where: { imageUrl: s } }),
-    getPrisma().event.count({ where: { imageUrl: s } }),
-    getPrisma().aboutSection.count({ where: { imageUrl: s } }),
-    getPrisma().aboutGalleryItem.count({ where: { imageUrl: s } }),
-    getPrisma().aboutPerson.count({ where: { avatarUrl: s } }),
+    getPrisma().product.count({ where: { imageUrl: { in: candidates } } }),
+    getPrisma().news.count({ where: { imageUrl: { in: candidates } } }),
+    getPrisma().offer.count({ where: { imageUrl: { in: candidates } } }),
+    getPrisma().event.count({ where: { imageUrl: { in: candidates } } }),
+    getPrisma().aboutSection.count({ where: { imageUrl: { in: candidates } } }),
+    getPrisma().aboutGalleryItem.count({ where: { imageUrl: { in: candidates } } }),
+    getPrisma().aboutPerson.count({ where: { avatarUrl: { in: candidates } } }),
     getPrisma().siteSettings.count({
       where: {
-        OR: [{ heroImageMettingen: s }, { heroImageRecke: s }],
+        OR: [
+          { heroImageMettingen: { in: candidates } },
+          { heroImageRecke: { in: candidates } },
+        ],
       },
     }),
     ]);
