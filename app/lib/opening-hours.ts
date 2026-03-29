@@ -9,6 +9,17 @@ export type WeekdayKey =
   | "SUNDAY";
 
 export type TimeInterval = { start: string; end: string };
+export type PublicHoursEntry = {
+  weekday: WeekdayKey;
+  weekdayLabel: string;
+  date: string;
+  dateLabel: string;
+  isToday: boolean;
+  isException: boolean;
+  defaultText: string;
+  overrideText: string | null;
+  note: string | null;
+};
 
 export const WEEKDAY_ORDER: WeekdayKey[] = [
   "MONDAY",
@@ -94,4 +105,37 @@ export function weekdayIndexMondayInTimeZone(timeZone: string = DEFAULT_TIME_ZON
   const wd = new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short" }).format(new Date());
   const map: Record<string, number> = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
   return map[wd] ?? ((new Date().getDay() + 6) % 7);
+}
+
+function shortGermanDate(date: Date, timeZone: string = DEFAULT_TIME_ZONE): string {
+  return new Intl.DateTimeFormat("de-DE", {
+    timeZone,
+    day: "2-digit",
+    month: "2-digit",
+  }).format(date);
+}
+
+function parseYmdToUtcDate(ymd: string): Date {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(Date.UTC(y, (m || 1) - 1, d || 1));
+}
+
+export function rollingWeekFromToday(timeZone: string = DEFAULT_TIME_ZONE) {
+  const today = todayYmdInTimeZone(timeZone);
+  const todayIndex = weekdayIndexMondayInTimeZone(timeZone);
+  const anchorDate = parseYmdToUtcDate(today);
+
+  return Array.from({ length: 7 }, (_, offset) => {
+    const weekday = WEEKDAY_ORDER[(todayIndex + offset) % WEEKDAY_ORDER.length];
+    const date = new Date(anchorDate);
+    date.setUTCDate(anchorDate.getUTCDate() + offset);
+
+    return {
+      weekday,
+      weekdayLabel: WEEKDAY_LABELS[weekday],
+      date: dateToYmd(date),
+      dateLabel: shortGermanDate(date, timeZone),
+      isToday: offset === 0,
+    };
+  });
 }

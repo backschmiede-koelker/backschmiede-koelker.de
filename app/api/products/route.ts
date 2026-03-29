@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { withAdminGuard } from "@/lib/auth-guards";
 import { Prisma, Allergen } from "@/generated/prisma/client";
+import { auth } from "@/auth";
 import { toStoredPath } from "@/app/lib/uploads";
 import { toAbsoluteAssetUrlServer } from "@/app/lib/uploads.server";
 import { toTitleCaseWord } from "@/app/lib/tags";
+import { getProductPricesVisible } from "@/app/lib/site-settings.server";
 
 const DEFAULT_PAGE_LIMIT = 18;
 const MAX_PAGE_LIMIT = 50;
@@ -45,8 +47,28 @@ function selectProductForList() {
   } satisfies Prisma.ProductSelect;
 }
 
-function mapProductsWithAbsoluteUrl<T extends { imageUrl: string | null }>(products: T[]) {
-  return products.map((item) => ({ ...item, imageUrl: toAbsoluteAssetUrlServer(item.imageUrl) }));
+function mapProductsForResponse(
+  products: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    priceCents: number;
+    unit: string;
+    imageUrl: string | null;
+    tags: string[];
+    allergens: Allergen[];
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }>,
+  options?: { hidePrices?: boolean },
+) {
+  const hidePrices = !!options?.hidePrices;
+  return products.map((item) => ({
+    ...item,
+    priceCents: hidePrices ? null : item.priceCents,
+    imageUrl: toAbsoluteAssetUrlServer(item.imageUrl),
+  }));
 }
 
 function buildSortOrder(sort: SortKey): Prisma.ProductOrderByWithRelationInput[] {
@@ -83,8 +105,14 @@ function buildWhere({
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
+  const session = await auth().catch(() => null);
+  const isAdmin = session?.user?.role === "ADMIN";
+  const productPricesVisible = await getProductPricesVisible().catch(() => true);
 
-  const onlyActive = parseBoolParam(searchParams.get("active")) || parseBoolParam(searchParams.get("isActive"));
+  const requestedOnlyActive =
+    parseBoolParam(searchParams.get("active")) ||
+    parseBoolParam(searchParams.get("isActive"));
+  const onlyActive = requestedOnlyActive || !isAdmin;
   const query = (searchParams.get("query") || "").trim();
   const tags = parseTagsParam(searchParams.get("tags"));
   const sortParam = searchParams.get("sort");
@@ -106,6 +134,7 @@ export async function GET(req: Request) {
     ? Math.min(Math.max(limitRaw, 1), MAX_PAGE_LIMIT)
     : DEFAULT_PAGE_LIMIT;
   const offset = Number.isFinite(offsetRaw) && offsetRaw > 0 ? offsetRaw : 0;
+  const hidePrices = onlyActive && !productPricesVisible;
 
   const where = buildWhere({ onlyActive, query, tags });
   const legacyMode = !hasLimitParam && !hasOffsetParam && !hasSortParam && tags.length === 0;
@@ -117,7 +146,9 @@ export async function GET(req: Request) {
       select: selectProductForList(),
     });
 
-    const mapped = mapProductsWithAbsoluteUrl(products);
+    const mapped = mapProductsForResponse(products, {
+      hidePrices,
+    });
     return query ? NextResponse.json({ items: mapped }) : NextResponse.json(mapped);
   }
 
@@ -131,7 +162,9 @@ export async function GET(req: Request) {
 
   const hasMore = products.length > limit;
   const pageItems = hasMore ? products.slice(0, limit) : products;
-  const mapped = mapProductsWithAbsoluteUrl(pageItems);
+  const mapped = mapProductsForResponse(pageItems, {
+    hidePrices,
+  });
 
   let availableTags: string[] | undefined;
   if (includeTagFacet) {

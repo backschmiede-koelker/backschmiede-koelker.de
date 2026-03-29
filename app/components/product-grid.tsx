@@ -10,7 +10,7 @@ type Product = {
   id: string;
   name: string;
   slug: string;
-  priceCents: number;
+  priceCents: number | null;
   unit: string;
   imageUrl?: string | null;
   tags: string[];
@@ -375,9 +375,11 @@ export default function ProductGrid() {
                     ))}
                   </div>
                 )}
-                <p className="mt-2 font-medium">
-                  {euro(p.priceCents / 100)}{p.unit && <span className="text-sm opacity-70"> / {p.unit}</span>}
-                </p>
+                {typeof p.priceCents === "number" ? (
+                  <p className="mt-2 font-medium">
+                    {euro(p.priceCents / 100)}{p.unit && <span className="text-sm opacity-70"> / {p.unit}</span>}
+                  </p>
+                ) : null}
                 <p className="mt-1 text-[11px] text-zinc-400">
                   Aktualisiert {new Intl.DateTimeFormat("de-DE").format(new Date(p.updatedAt))}
                 </p>

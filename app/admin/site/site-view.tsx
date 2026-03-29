@@ -562,12 +562,29 @@ export default function AdminSiteView({
           <div className="rounded-xl border border-zinc-200/70 dark:border-zinc-800/80 bg-white/60 dark:bg-zinc-900/50 p-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <div className="font-medium">Ausnahmen</div>
+                <div className="font-medium">Ausnahmen für {locationLabel(activeLocation)}</div>
                 <div className="text-xs text-zinc-500">
                   Sonderöffnungszeiten oder Schließtage.
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex rounded-xl border border-zinc-200/70 dark:border-zinc-700/80 bg-white/60 dark:bg-zinc-900/60 p-1">
+                  {LOCATION_OPTIONS.map((loc) => (
+                    <button
+                      key={`exceptions-${loc}`}
+                      type="button"
+                      onClick={() => setActiveLocation(loc)}
+                      className={[
+                        "px-3 py-1.5 text-sm rounded-lg transition",
+                        activeLocation === loc
+                          ? "bg-emerald-600 text-white"
+                          : "text-zinc-700 dark:text-zinc-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/30",
+                      ].join(" ")}
+                    >
+                      {locationLabel(loc)}
+                    </button>
+                  ))}
+                </div>
                 <input
                   type="date"
                   className="rounded-md border px-2 py-1 bg-white dark:bg-zinc-800"
@@ -713,7 +730,7 @@ export default function AdminSiteView({
                   )}
 
                   <div className="mt-3">
-                    <FieldLabel hint="Optional, nur intern sichtbar.">
+                    <FieldLabel hint="Optional, wird auf der öffentlichen Seite bei der Ausnahme angezeigt.">
                       Notiz
                     </FieldLabel>
                     <input

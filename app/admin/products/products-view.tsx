@@ -7,6 +7,7 @@ import NewProductForm from "../../components/new-product-form";
 import ProductCard from "../../components/product-card";
 import AdminPageHeader from "../components/admin-page-header";
 import { SHOW_PRODUCT_IMAGE_MIGRATION_BUTTON } from "@/app/lib/flags";
+import { saveGlobalProductPriceVisibility } from "./actions";
 
 type MigrationResult = {
   total: number;
@@ -17,7 +18,11 @@ type MigrationResult = {
   errors: Array<{ id: string; reason: string }>;
 };
 
-export default function AdminProductsView() {
+export default function AdminProductsView({
+  initialProductPricesVisible,
+}: {
+  initialProductPricesVisible: boolean;
+}) {
   const { items, loading, reload, remove } = useProducts();
 
   const [q, setQ] = useState("");
@@ -25,6 +30,11 @@ export default function AdminProductsView() {
   const [migrationRunning, setMigrationRunning] = useState(false);
   const [migrationResult, setMigrationResult] = useState<MigrationResult | null>(null);
   const [migrationError, setMigrationError] = useState<string | null>(null);
+  const [publicPricesVisible, setPublicPricesVisible] =
+    useState(initialProductPricesVisible);
+  const [priceVisibilitySaving, setPriceVisibilitySaving] = useState(false);
+  const [priceVisibilityError, setPriceVisibilityError] = useState<string | null>(null);
+  const [priceVisibilitySuccess, setPriceVisibilitySuccess] = useState<string | null>(null);
 
   const allUnits = useMemo(() => {
     const s = new Set<string>(["pro Stück", "100 g", "1 kg", "Stück"]);
@@ -51,6 +61,35 @@ export default function AdminProductsView() {
 
   function toggleFilterTag(tag: string) {
     setFilterTags((s) => (s.includes(tag) ? s.filter((x) => x !== tag) : [...s, tag]));
+  }
+
+  async function savePriceVisibility() {
+    if (priceVisibilitySaving) return;
+    setPriceVisibilitySaving(true);
+    setPriceVisibilityError(null);
+    setPriceVisibilitySuccess(null);
+    try {
+      const res = await saveGlobalProductPriceVisibility({
+        visible: publicPricesVisible,
+      });
+      if (!res.ok) {
+        setPriceVisibilityError(res.error || "Schalter konnte nicht gespeichert werden.");
+        return;
+      }
+      const visible = !!res.visible;
+      setPublicPricesVisible(visible);
+      setPriceVisibilitySuccess(
+        visible
+          ? "Preise werden öffentlich angezeigt."
+          : "Preise sind auf der öffentlichen Produktseite ausgeblendet.",
+      );
+    } catch (error) {
+      setPriceVisibilityError(
+        error instanceof Error ? error.message : "Schalter konnte nicht gespeichert werden.",
+      );
+    } finally {
+      setPriceVisibilitySaving(false);
+    }
   }
 
   async function runImageMigration() {
@@ -95,6 +134,47 @@ export default function AdminProductsView() {
         title="Produkte"
         subtitle="Artikel, Preise, Einheiten & Bilder verwalten"
       />
+
+      <section className="mb-6 rounded-2xl border bg-white/90 p-4 ring-1 ring-black/5 shadow-sm dark:bg-zinc-900/80 dark:ring-white/10">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-base font-semibold">Öffentliche Preise</h2>
+            <p className="text-sm text-zinc-600 dark:text-zinc-300">
+              Dieser globale Schalter steuert, ob auf der öffentlichen Produktseite Preise für alle Produkte angezeigt werden.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <button
+              type="button"
+              onClick={() => setPublicPricesVisible((value) => !value)}
+              className={[
+                "rounded-md px-3 py-2 text-sm ring-1 transition",
+                publicPricesVisible
+                  ? "text-amber-700 ring-amber-200 hover:bg-amber-50 dark:text-amber-300 dark:ring-amber-800/60 dark:hover:bg-amber-900/20"
+                  : "text-zinc-600 ring-zinc-300 hover:bg-zinc-100 dark:text-zinc-300 dark:ring-zinc-700 dark:hover:bg-zinc-800",
+              ].join(" ")}
+            >
+              {publicPricesVisible ? "Preise öffentlich sichtbar" : "Preise öffentlich verborgen"}
+            </button>
+            <button
+              type="button"
+              onClick={savePriceVisibility}
+              disabled={priceVisibilitySaving}
+              className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+            >
+              {priceVisibilitySaving ? "Speichere..." : "Speichern"}
+            </button>
+          </div>
+        </div>
+
+        {priceVisibilityError ? (
+          <p className="mt-3 text-sm text-red-600 dark:text-red-400">{priceVisibilityError}</p>
+        ) : null}
+
+        {priceVisibilitySuccess ? (
+          <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-300">{priceVisibilitySuccess}</p>
+        ) : null}
+      </section>
 
       {SHOW_PRODUCT_IMAGE_MIGRATION_BUTTON && (
         <section className="mb-6 rounded-2xl border bg-white/90 p-4 ring-1 ring-black/5 shadow-sm dark:bg-zinc-900/80 dark:ring-white/10">
