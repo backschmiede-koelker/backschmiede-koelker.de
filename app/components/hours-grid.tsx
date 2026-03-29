@@ -2,37 +2,10 @@
 "use client";
 import * as React from "react";
 import GoogleMapsAttribution from "./google-maps-attribution";
+import type { PublicHoursEntry } from "../lib/opening-hours";
 
-type Place = { title: string; lines: string[]; source?: string };
+type Place = { title: string; entries: PublicHoursEntry[]; source?: string };
 type Props = { left: Place; right: Place };
-
-// Muss zu app/components/hours.tsx passen
-const EX_PREFIX = "__EX__";
-const EX_SEP = "__SEP__";
-
-function splitLine(line: string): { day: string; times: string } {
-  const idx = line.indexOf(":");
-  if (idx === -1) return { day: line.trim(), times: "" };
-  return { day: line.slice(0, idx).trim(), times: line.slice(idx + 1).trim() };
-}
-
-function parseTimes(raw: string): {
-  isException: boolean;
-  base: string; // Standard
-  override: string; // Ausnahme (oder leer)
-} {
-  const s = (raw || "").trim();
-  if (!s.includes(EX_PREFIX)) return { isException: false, base: s, override: "" };
-
-  // Erwartet: "__EX__<base>__SEP__<override>"
-  const after = s.split(EX_PREFIX).slice(1).join(EX_PREFIX); // robust falls vorn Text steht
-  const [base, override] = after.split(EX_SEP);
-  return {
-    isException: true,
-    base: (base || "").trim(),
-    override: (override || "").trim(),
-  };
-}
 
 function multilineTimes(raw: string): string {
   if (!raw) return "";
@@ -43,24 +16,15 @@ function multilineTimes(raw: string): string {
     .join("\n");
 }
 
-// JS-Sonntag=0, Montag=1 -> wir wollen 0=Montag, ..., 6=Sonntag
-function todayIndexDE(): number {
-  const js = new Date().getDay();
-  return (js + 6) % 7;
-}
-
 function isClosedText(s: string): boolean {
   return /geschlossen/i.test((s || "").trim());
 }
 
-function TodayBadge({ line }: { line?: string }) {
-  const rawTimes = line ? splitLine(line).times || "—" : "—";
-  const { isException, base, override } = parseTimes(rawTimes);
-
-  const show = isException ? (override || "—") : (base || "—");
+function TodayBadge({ entry }: { entry?: PublicHoursEntry }) {
+  const show = entry?.isException ? (entry.overrideText || "—") : (entry?.defaultText || "—");
   const closed = show === "—" || show === "" || isClosedText(show);
 
-  const cls = isException
+  const cls = entry?.isException
     ? closed
       ? "bg-red-600/15 text-red-800 ring-1 ring-red-600/25 dark:text-red-200 dark:ring-red-700/40"
       : "bg-amber-600/15 text-amber-900 ring-1 ring-amber-600/25 dark:text-amber-200 dark:ring-amber-700/40"
@@ -76,7 +40,7 @@ function TodayBadge({ line }: { line?: string }) {
       ].join(" ")}
       title="Heutige Öffnungszeiten"
     >
-      Heute: {closed ? "geschlossen" : show.replace(/\s*Uhr$/, "")}
+      Heute{entry?.dateLabel ? ` · ${entry.dateLabel}` : ""}: {closed ? "geschlossen" : show.replace(/\s*Uhr$/, "")}
     </span>
   );
 }
@@ -187,13 +151,11 @@ function usePairEqualHeight(
 }
 
 function WeekTable({
-  lines,
+  entries,
   liRefs,
-  todayIndex,
 }: {
-  lines: string[];
+  entries: PublicHoursEntry[];
   liRefs: React.MutableRefObject<(HTMLLIElement | null)[]>;
-  todayIndex: number | null;
 }) {
   const setRowRef = (idx: number) => (el: HTMLLIElement | null) => {
     liRefs.current[idx] = el;
@@ -201,10 +163,10 @@ function WeekTable({
 
   return (
     <ul className="divide-y divide-zinc-200/70 dark:divide-white/10 w-full">
-      {lines.map((line, i) => {
-        const { day, times: rawTimes } = splitLine(line);
-        const { isException, base, override } = parseTimes(rawTimes);
-        const isToday = todayIndex === i;
+      {entries.map((entry, i) => {
+        const isException = entry.isException;
+        const isToday = entry.isToday;
+        const override = entry.overrideText || "";
 
         const overlayBg = isException
           ? "bg-amber-50/70 dark:bg-amber-900/20"
@@ -227,7 +189,7 @@ function WeekTable({
           : "text-zinc-700 dark:text-zinc-300";
 
         return (
-          <li ref={setRowRef(i)} key={`${i}-${day}`} className="py-1 relative">
+          <li ref={setRowRef(i)} key={`${entry.date}-${entry.weekday}`} className="py-1 relative">
             {isToday && (
               <span aria-hidden className={["absolute inset-0 rounded-lg", overlayBg].join(" ")} />
             )}
@@ -240,22 +202,30 @@ function WeekTable({
               ].join(" ")}
             >
               <div className="px-2 py-1">
-                <span className={dayCls}>{day}</span>
+                <div className="flex flex-col">
+                  <span className={dayCls}>{entry.weekdayLabel}</span>
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">{entry.dateLabel}</span>
+                </div>
               </div>
 
               <div className="px-2 py-1 min-w-0">
                 {!isException ? (
                   <span className={normalCls} style={{ whiteSpace: "pre-line", wordBreak: "break-word" }}>
-                    {multilineTimes(base) || "—"}
+                    {multilineTimes(entry.defaultText) || "—"}
                   </span>
                 ) : (
                   <div className="flex flex-col gap-0.5">
                     <span className={baseCls} style={{ whiteSpace: "pre-line", wordBreak: "break-word" }}>
-                      {multilineTimes(base) || "—"}
+                      {multilineTimes(entry.defaultText) || "—"}
                     </span>
                     <span className={overrideCls} style={{ whiteSpace: "pre-line", wordBreak: "break-word" }}>
-                      {multilineTimes(override) || "—"}
+                      {multilineTimes(entry.overrideText || "") || "—"}
                     </span>
+                    {entry.note ? (
+                      <span className="text-xs text-amber-900/90 dark:text-amber-100/90" style={{ wordBreak: "break-word" }}>
+                        Hinweis: {entry.note}
+                      </span>
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -269,23 +239,18 @@ function WeekTable({
 
 function PlaceCard({
   title,
-  lines,
+  entries,
   source,
   liRefs,
   headerRef,
-  todayIndex,
 }: {
   title: string;
-  lines: string[];
+  entries: PublicHoursEntry[];
   source?: string;
   liRefs: React.MutableRefObject<(HTMLLIElement | null)[]>;
   headerRef: React.MutableRefObject<HTMLDivElement | null>;
-  todayIndex: number | null;
 }) {
-  const todayLine =
-    todayIndex != null && todayIndex >= 0 && todayIndex < lines.length
-      ? lines[todayIndex]
-      : undefined;
+  const todayEntry = entries.find((entry) => entry.isToday);
 
   return (
     <div className="relative w-full overflow-hidden rounded-2xl p-5 sm:p-6 bg-white/90 ring-1 ring-black/5 shadow-sm dark:bg-zinc-900/70 dark:ring-white/10">
@@ -296,10 +261,10 @@ function PlaceCard({
       <div className="relative z-10">
         <div ref={headerRef} className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
-          <TodayBadge line={todayLine} />
+          <TodayBadge entry={todayEntry} />
         </div>
 
-        <WeekTable lines={lines} liRefs={liRefs} todayIndex={todayIndex} />
+        <WeekTable entries={entries} liRefs={liRefs} />
 
         {source && (
           <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
@@ -321,28 +286,21 @@ export default function HoursGrid({ left, right }: Props) {
   const rightHeaderRef = React.useRef<HTMLDivElement | null>(null);
   usePairEqualHeight(leftHeaderRef, rightHeaderRef);
 
-  const [todayIndex, setTodayIndex] = React.useState<number | null>(null);
-  React.useEffect(() => {
-    setTodayIndex(todayIndexDE());
-  }, []);
-
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <PlaceCard
         title={left.title}
-        lines={left.lines}
+        entries={left.entries}
         source={left.source}
         liRefs={leftRefs}
         headerRef={leftHeaderRef}
-        todayIndex={todayIndex}
       />
       <PlaceCard
         title={right.title}
-        lines={right.lines}
+        entries={right.entries}
         source={right.source}
         liRefs={rightRefs}
         headerRef={rightHeaderRef}
-        todayIndex={todayIndex}
       />
     </div>
   );

@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 
 import AdminProductsView from "./products-view";
+import { getProductPricesVisible } from "@/app/lib/site-settings.server";
 
 export const metadata: Metadata = {
   title: "Admin - Produkte | Backschmiede Kölker",
@@ -15,6 +16,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function AdminProductsPage() {
-  return <AdminProductsView />;
+export default async function AdminProductsPage() {
+  const initialProductPricesVisible = await getProductPricesVisible().catch(() => true);
+
+  return <AdminProductsView initialProductPricesVisible={initialProductPricesVisible} />;
 }

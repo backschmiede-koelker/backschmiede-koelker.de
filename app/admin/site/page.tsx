@@ -50,6 +50,7 @@ export default async function AdminSitePage() {
     footerAddressMettingen: settings.footerAddressMettingen,
     footerPhoneRecke: settings.footerPhoneRecke,
     footerPhoneMettingen: settings.footerPhoneMettingen,
+    productPricesVisible: settings.productPricesVisible,
   };
 
   const initialWeeklyHours: HoursPayload = {

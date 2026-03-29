@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense } from "react";
-import { FaWheatAwn, FaLeaf, FaHeart } from "react-icons/fa6";
+import { FaAward, FaLeaf, FaHeart } from "react-icons/fa6";
 
 import HeroScrollCta from "./components/hero-scroll-cta";
 import Hours from "./components/hours";
@@ -125,7 +125,7 @@ export default async function Page() {
 
               <ul className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm lg:justify-start">
                 <li className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 dark:border-emerald-300/10 bg-white/60 dark:bg-white/10 px-3 py-1.5 text-zinc-800 dark:text-zinc-200">
-                  <FaWheatAwn aria-hidden className="text-[14px]" />
+                  <FaAward aria-hidden className="text-[14px]" />
                   {heroTags[0]}
                 </li>
                 <li className="inline-flex items-center gap-2 rounded-full border border-emerald-800/10 dark:border-emerald-300/10 bg-white/60 dark:bg-white/10 px-3 py-1.5 text-zinc-800 dark:text-zinc-200">

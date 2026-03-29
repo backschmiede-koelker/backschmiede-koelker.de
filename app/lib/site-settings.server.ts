@@ -25,6 +25,7 @@ export type SiteSettingsDTO = {
   footerAddressMettingen: string;
   footerPhoneRecke: string;
   footerPhoneMettingen: string;
+  productPricesVisible: boolean;
 };
 
 export type SiteSettingsInput = Omit<SiteSettingsDTO, "id">;
@@ -52,6 +53,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsInput = {
   footerAddressMettingen: "Landrat-Schultz-Straße 1\n49497 Mettingen",
   footerPhoneRecke: "+49 1575 5353999",
   footerPhoneMettingen: "+49 5452 919611",
+  productPricesVisible: true,
 };
 
 function cleanRequired(value: string, label: string) {
@@ -105,6 +107,7 @@ export async function getOrCreateSiteSettings(): Promise<SiteSettingsDTO> {
       footerAddressMettingen: existing.footerAddressMettingen,
       footerPhoneRecke: existing.footerPhoneRecke,
       footerPhoneMettingen: existing.footerPhoneMettingen,
+      productPricesVisible: existing.productPricesVisible,
     };
   }
 
@@ -136,6 +139,7 @@ export async function getOrCreateSiteSettings(): Promise<SiteSettingsDTO> {
     footerAddressMettingen: created.footerAddressMettingen,
     footerPhoneRecke: created.footerPhoneRecke,
     footerPhoneMettingen: created.footerPhoneMettingen,
+    productPricesVisible: created.productPricesVisible,
   };
 }
 
@@ -170,6 +174,7 @@ export async function updateSiteSettings(input: SiteSettingsInput): Promise<Site
       footerAddressMettingen: cleanRequired(input.footerAddressMettingen, "Adresse Mettingen"),
       footerPhoneRecke: cleanRequired(input.footerPhoneRecke, "Telefon Recke"),
       footerPhoneMettingen: cleanRequired(input.footerPhoneMettingen, "Telefon Mettingen"),
+      productPricesVisible: !!input.productPricesVisible,
     },
   });
 
@@ -199,5 +204,26 @@ export async function updateSiteSettings(input: SiteSettingsInput): Promise<Site
     footerAddressMettingen: updated.footerAddressMettingen,
     footerPhoneRecke: updated.footerPhoneRecke,
     footerPhoneMettingen: updated.footerPhoneMettingen,
+    productPricesVisible: updated.productPricesVisible,
   };
+}
+
+export async function getProductPricesVisible(): Promise<boolean> {
+  const settings = await getOrCreateSiteSettings();
+  return !!settings.productPricesVisible;
+}
+
+export async function updateProductPricesVisible(visible: boolean): Promise<boolean> {
+  await getOrCreateSiteSettings();
+  const updated = await getPrisma().siteSettings.update({
+    where: { id: "singleton" },
+    data: {
+      productPricesVisible: !!visible,
+    },
+    select: {
+      productPricesVisible: true,
+    },
+  });
+
+  return !!updated.productPricesVisible;
 }

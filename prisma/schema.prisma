@@ -545,6 +545,7 @@ model SiteSettings {
   footerAddressMettingen String
   footerPhoneRecke     String
   footerPhoneMettingen String
+  productPricesVisible Boolean  @default(true)
   updatedAt            DateTime @updatedAt
 
   @@schema("backschmiede_koelker")

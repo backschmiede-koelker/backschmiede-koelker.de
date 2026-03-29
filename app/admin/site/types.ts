@@ -22,6 +22,7 @@ export type SiteSettingsForm = {
   footerAddressMettingen: string;
   footerPhoneRecke: string;
   footerPhoneMettingen: string;
+  productPricesVisible: boolean;
 };
 
 export type WeeklyHoursForm = {
