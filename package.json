@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:localhost": "node scripts/next-dev-localhost.cjs",
     "build": "next build",
     "build:no-db": "cross-env SKIP_DB_DURING_BUILD=1 next build",
     "start": "next start",
