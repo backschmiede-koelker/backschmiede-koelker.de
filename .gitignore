@@ -53,5 +53,7 @@ generated/*
 
 uploads/*
 !uploads/*/.gitkeep
+uploads_localhost/*
+!uploads_localhost/*/.gitkeep
 
 .docker-npm.stamp

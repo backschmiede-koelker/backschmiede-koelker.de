@@ -1,0 +1,106 @@
+services:
+  postgres_localhost:
+    container_name: postgres_localhost
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    env_file:
+      - .env.localhost
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+    volumes:
+      - backschmiede-koelker_localhost_postgres:/var/lib/postgresql/data
+    networks:
+      - localhost_net
+    logging:
+      driver: "local"
+      options:
+        max-size: "1m"
+        max-file: "2"
+
+  redis_localhost:
+    container_name: redis_localhost
+    image: redis:7-bookworm
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    volumes:
+      - backschmiede-koelker_localhost_redis:/data
+    networks:
+      - localhost_net
+    logging:
+      driver: "local"
+      options:
+        max-size: "1m"
+        max-file: "2"
+
+  backschmiede-koelker_localhost:
+    container_name: backschmiede-koelker_localhost
+    image: node:20-bookworm
+    working_dir: /app
+    command: >
+      sh -lc "
+        LOCK_HASH=$$(sha256sum package-lock.json | awk '{print $$1}');
+        STAMP_HASH=$$(cat .docker-npm.stamp 2>/dev/null || true);
+        NEEDS_INSTALL=0;
+        [ -x node_modules/.bin/next ] || NEEDS_INSTALL=1;
+        [ \"$$LOCK_HASH\" = \"$$STAMP_HASH\" ] || NEEDS_INSTALL=1;
+        [ \"$$NEEDS_INSTALL\" = \"0\" ] || (
+          npm ci --prefer-offline --no-audit --loglevel=warn &&
+          npx prisma generate &&
+          printf '%s' \"$$LOCK_HASH\" > .docker-npm.stamp
+        );
+        npx prisma generate;
+        npx prisma migrate deploy;
+        npx prisma db seed;
+        npm run dev:localhost
+      "
+    restart: unless-stopped
+    env_file:
+      - .env.localhost
+    environment:
+      NODE_OPTIONS: "--require=/app/scripts/patch-next-localhost-env.cjs"
+      __NEXT_PROCESSED_ENV: "true"
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "500"
+      WATCHPACK_POLLING: "true"
+      WATCHPACK_POLLING_INTERVAL: "500"
+    depends_on:
+      postgres_localhost:
+        condition: service_healthy
+      redis_localhost:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+      - ./uploads:/uploads
+      - ./uploads_localhost:/uploads_localhost
+      - backschmiede-koelker_localhost_node_modules:/app/node_modules
+    networks:
+      - localhost_net
+    logging:
+      driver: "local"
+      options:
+        max-size: "1m"
+        max-file: "2"
+
+volumes:
+  backschmiede-koelker_localhost_node_modules:
+  backschmiede-koelker_localhost_postgres:
+  backschmiede-koelker_localhost_redis:
+
+networks:
+  localhost_net:

@@ -13,20 +13,19 @@ type Props = {
   allowDelete?: boolean;
 };
 
-/** Liefert die bevorzugte CDN-Basis (Env) oder errät sie aus der aktuellen Domain (→ cdn.<host>) */
+/** Liefert die bevorzugte Asset-Basis aus der Env. */
 function assetBaseClient(): string | null {
   const env = (process.env.NEXT_PUBLIC_BASE_ASSET_URL || "").replace(/\/+$/, "");
   if (env) return env;
-  if (typeof window !== "undefined") {
-    const { protocol, hostname } = window.location;
-    // Wenn wir bereits auf dem CDN sind, nutze es; sonst 'cdn.' davorhängen
-    const cdnHost = hostname.startsWith("cdn.") ? hostname : `cdn.${hostname.replace(/^cdn\./, "")}`;
-    return `${protocol}//${cdnHost}`;
-  }
   return null;
 }
 
-/** Erzwingt eine absolut auflösbare CDN-URL aus DB-Wert / beliebiger Eingabe. */
+function toAbsoluteCurrentOrigin(path: string) {
+  if (typeof window === "undefined") return path;
+  return new URL(path, window.location.origin).toString();
+}
+
+/** Leitet eine anzeigbare Asset-URL aus DB-Wert / beliebiger Eingabe ab. */
 function absoluteCdnUrl(input?: string | null): string | null {
   if (!input) return null;
 
@@ -38,12 +37,14 @@ function absoluteCdnUrl(input?: string | null): string | null {
   const viaHelper = publicAssetUrl(direct);
   if (viaHelper && /^https?:\/\//i.test(viaHelper)) return viaHelper;
 
-  // 3) Fallback: CDN-Basis erraten + DB-Speicherwert rekonstruieren
+  // 3) Mit expliziter Asset-Basis (CDN) absolute URL bauen
   const base = assetBaseClient();
   const stored = toStoredPath(direct);
   if (base && stored) return `${base}/${stored}`;
 
-  // 4) Letzter Fallback: ggf. App-Relativpfad (funktioniert, wenn die App /uploads bedient)
+  // 4) Ohne CDN-Env auf die App selbst zurückfallen (/uploads/...)
+  if (viaHelper?.startsWith("/")) return toAbsoluteCurrentOrigin(viaHelper);
+
   return viaHelper || null;
 }
 

@@ -7,6 +7,42 @@ Hier entsteht der frische Quellcode für [Backschmiede Kölker](https://backschm
 
 ## Getting Started
 
+### Start localhost (self-contained):
+
+Starte direkt lokal mit localhost!
+
+1. EINMALIG: Neue lokale Env-Datei anlegen und Variablen setzen:
+```bash
+Copy-Item .\.env.localhost.example .\.env.localhost
+```
+2. Self-contained Stack starten:
+```bash
+docker compose `
+  --env-file ".\.env.localhost" `
+  -f ".\compose.localhost.yml" `
+  up
+```
+3. Website öffnen:
+```bash
+http://localhost:3000
+```
+
+Hinweise:
+- Für die localhost-Variante sollte `UPLOAD_DIR` in `.env.localhost` auf `/uploads_localhost` zeigen.
+- `compose.localhost.yml` mountet dafür den Repo-Ordner `./uploads_localhost` in den Container.
+- Die öffentliche URL bleibt im localhost-Fall trotzdem `/uploads/...`; `UPLOAD_DIR` steuert nur den Speicherort auf dem Dateisystem.
+
+
+### Stop localhost (self-contained):
+
+```bash
+docker compose `
+  --env-file ".\.env.localhost" `
+  -f ".\compose.localhost.yml" `
+  down
+```
+
+
 
 ### Start local:
 

@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       ...(isDev ? [{ protocol: "http" as const, hostname: "cdn.backschmiede-koelker.lan", pathname: "/**" }] : []),
     ],
   },
-  ...(isDev ? { allowedDevOrigins: ["backschmiede-koelker.lan", "cdn.backschmiede-koelker.lan"] } : {}),
+  ...(isDev ? { allowedDevOrigins: ["127.0.0.1", "backschmiede-koelker.lan", "cdn.backschmiede-koelker.lan"] } : {}),
 };
 
 export default nextConfig;
